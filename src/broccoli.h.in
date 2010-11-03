@@ -289,7 +289,7 @@ struct bro_ev_meta
   const uchar *ev_end;     /* of currently processed event. */
 };
 
-@BRO_PCAP_SUPPORT@
+#cmakedefine BRO_PCAP_SUPPORT
 #ifdef BRO_PCAP_SUPPORT
 #include <pcap.h>
 
