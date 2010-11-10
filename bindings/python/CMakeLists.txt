@@ -31,6 +31,7 @@ endif ()
 find_package(Broccoli REQUIRED)
 find_package(SWIG REQUIRED)
 find_package(PythonLibs REQUIRED)
+find_package(PythonInterp REQUIRED)
 include_directories(BEFORE ${Broccoli_INCLUDE_DIR}
                            ${PYTHON_INCLUDE_DIR}
 )
@@ -46,7 +47,15 @@ swig_link_libraries(broccoli_intern ${Broccoli_LIBRARY} ${PYTHON_LIBRARIES})
 ########################################################################
 ## Install Files
 
-install(FILES broccoli.py DESTINATION ${CMAKE_INSTALL_PREFIX})
+# create the byte-compiled module for installation
+configure_file(broccoli.py ${CMAKE_CURRENT_BINARY_DIR}/broccoli.py COPYONLY)
+set(compileArg "import py_compile; py_compile.compile('broccoli.py')")
+install(CODE
+    "execute_process(COMMAND ${PYTHON_EXECUTABLE} -c \"${compileArg}\"
+                     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})"
+)
+install(FILES broccoli.py ${CMAKE_CURRENT_BINARY_DIR}/broccoli.pyc
+        DESTINATION ${CMAKE_INSTALL_PREFIX})
 install(TARGETS ${SWIG_MODULE_broccoli_intern_REAL_NAME}
         DESTINATION ${CMAKE_INSTALL_PREFIX})
 
