@@ -46,8 +46,9 @@ swig_link_libraries(broccoli_intern ${Broccoli_LIBRARY} ${PYTHON_LIBRARIES})
 ########################################################################
 ## Install Files
 
-install(FILES broccoli.py DESTINATION lib/broctl)
-install(TARGETS ${SWIG_MODULE_broccoli_intern_REAL_NAME} DESTINATION lib/broctl)
+install(FILES broccoli.py DESTINATION ${CMAKE_INSTALL_PREFIX})
+install(TARGETS ${SWIG_MODULE_broccoli_intern_REAL_NAME}
+        DESTINATION ${CMAKE_INSTALL_PREFIX})
 
 ########################################################################
 ## Build Summary
