@@ -77,6 +77,11 @@ target_link_libraries(broccoli ${OpenSSL_LIBRARIES}
 )
 
 set_target_properties(broccoli PROPERTIES VERSION 3.0.0 SOVERSION 3)
+if (APPLE)
+    # Mac OS X needs the directory portion of the install_name shared lib field
+    set_target_properties(broccoli PROPERTIES
+                          INSTALL_NAME_DIR ${CMAKE_INSTALL_PREFIX}/lib)
+endif ()
 
 install(TARGETS broccoli DESTINATION lib)
 
