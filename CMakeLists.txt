@@ -129,7 +129,6 @@ install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/broccoli-config DESTINATION bin)
 add_subdirectory(src)
 add_subdirectory(test)
 #add_subdirectory(docs)
-#add_subdirectory(bindings)
 
 ########################################################################
 ## Build Summary
