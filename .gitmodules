@@ -1,0 +1,3 @@
+[submodule "bindings/broccoli-python"]
+	path = bindings/broccoli-python
+	url = git://git.icir.org/broccoli-python

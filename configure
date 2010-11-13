@@ -29,6 +29,8 @@ Usage: $0 [OPTION]... [VAR=VALUE]...
                            mutually exclusive with --enable-shared
     --disable-packets      Do not support tx/rx of pcap packets
     --with-configfile=FILE use config file at location <FILE>
+    --python-install-dir   the desired installation directory for
+                           broccoli python bindings (if present)
 
   Required Packages in Non-Standard Locations:
     --with-openssl=PATH    path to OpenSSL install root
@@ -62,6 +64,7 @@ append_cache_entry () {
 builddir=build
 CMakeCacheEntries=""
 append_cache_entry CMAKE_INSTALL_PREFIX PATH     /usr/local
+append_cache_entry PY_MOD_INSTALL_DIR   PATH     /usr/local/lib/python
 append_cache_entry ENABLE_DEBUG         BOOL     false
 append_cache_entry ENABLE_RELEASE       BOOL     false
 append_cache_entry BUILD_SHARED_LIBS    BOOL     true
@@ -84,6 +87,7 @@ while [ $# -ne 0 ]; do
             ;;
         --prefix=*)
             append_cache_entry CMAKE_INSTALL_PREFIX PATH   $optarg
+            append_cache_entry PY_MOD_INSTALL_DIR   PATH   $optarg/lib/python
             ;;
         --enable-debug)
             append_cache_entry ENABLE_DEBUG         BOOL   true
@@ -102,6 +106,9 @@ while [ $# -ne 0 ]; do
             ;;
         --with-configfile=*)
             append_cache_entry BRO_SYSCONF_FILE FILEPATH $optarg
+            ;;
+        --python-install-dir=*)
+            append_cache_entry PY_MOD_INSTALL_DIR PATH $optarg
             ;;
         --with-openssl=*)
             append_cache_entry OpenSSL_ROOT_DIR PATH $optarg

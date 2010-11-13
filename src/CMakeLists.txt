@@ -86,3 +86,11 @@ endif ()
 install(TARGETS broccoli DESTINATION lib)
 
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/broccoli.h DESTINATION include)
+
+# Set as a convenience for projects that depend on broccoli, but want the
+# option of building it from source
+set(Broccoli_INCLUDE_DIR ${CMAKE_CURRENT_BINARY_DIR}
+    CACHE STRING "Broccoli header directory" FORCE)
+
+set(Broccoli_LIBRARY broccoli
+    CACHE STRING "Broccoli library" FORCE)

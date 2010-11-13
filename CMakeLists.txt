@@ -130,6 +130,12 @@ add_subdirectory(src)
 add_subdirectory(test)
 #add_subdirectory(docs)
 
+if (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/bindings/broccoli-python/CMakeLists.txt)
+    add_subdirectory(bindings/broccoli-python)
+else ()
+    message(STATUS "Not building broccoli bindings")
+endif ()
+
 ########################################################################
 ## Build Summary
 
