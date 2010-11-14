@@ -19,6 +19,9 @@ Usage: $0 [OPTION]... [VAR=VALUE]...
 
   Installation Directories:
     --prefix=PREFIX        installation directory [/usr/local]
+    --python-install-dir   the desired installation directory for
+                           broccoli python bindings (if present)
+                           [PREFIX/lib/python]
 
   Optional Features:
     --enable-debug         compile with debugging symbols
@@ -29,8 +32,6 @@ Usage: $0 [OPTION]... [VAR=VALUE]...
                            mutually exclusive with --enable-shared
     --disable-packets      Do not support tx/rx of pcap packets
     --with-configfile=FILE use config file at location <FILE>
-    --python-install-dir   the desired installation directory for
-                           broccoli python bindings (if present)
 
   Required Packages in Non-Standard Locations:
     --with-openssl=PATH    path to OpenSSL install root
