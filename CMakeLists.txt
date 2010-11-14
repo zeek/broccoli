@@ -114,7 +114,7 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/broccoli-config.in
                ${CMAKE_CURRENT_BINARY_DIR}/broccoli-config
                @ONLY)
 
-include_directories(${CMAKE_CURRENT_BINARY_DIR})
+include_directories(BEFORE ${CMAKE_CURRENT_BINARY_DIR})
 add_definitions(-DHAVE_CONFIG_H)
 
 ########################################################################
