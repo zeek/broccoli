@@ -75,6 +75,7 @@ find_package(FLEX REQUIRED)
 find_package(BISON REQUIRED)
 find_package(PCAP)
 
+set(BRO_PCAP_SUPPORT true)
 if (NOT PCAP_INCLUDE_DIR)
     set(BRO_PCAP_SUPPORT false)
 endif ()
