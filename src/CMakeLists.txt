@@ -1,9 +1,10 @@
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/broccoli.h.in
                ${CMAKE_CURRENT_BINARY_DIR}/broccoli.h)
 
+include_directories(BEFORE ${CMAKE_CURRENT_BINARY_DIR})
+
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}
-                    ${CMAKE_CURRENT_BINARY_DIR}
-                    ${CMAKE_SOURCE_DIR}/compat)
+                    ${PROJECT_SOURCE_DIR}/compat)
 
 ########################################################################
 ## libbroccoli target
