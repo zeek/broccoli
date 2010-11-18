@@ -19,12 +19,10 @@ project(Broccoli)
 
 file(STRINGS "${CMAKE_CURRENT_SOURCE_DIR}/VERSION" VERSION LIMIT_COUNT 1)
 
-if (ENABLE_DEBUG AND ENABLE_RELEASE)
-    set(CMAKE_BUILD_TYPE RelWithDebInfo)
-elseif (ENABLE_DEBUG AND NOT ENABLE_RELEASE)
+if (ENABLE_DEBUG)
     set(CMAKE_BUILD_TYPE Debug)
-elseif (NOT ENABLE_DEBUG AND ENABLE_RELEASE)
-    set(CMAKE_BUILD_TYPE Release)
+else ()
+    set(CMAKE_BUILD_TYPE RelWithDebInfo)
 endif ()
 
 # don't set extra compile flags again if already declared in this scope
@@ -158,7 +156,6 @@ message(
     "\n"
     "\nInstall prefix:    ${CMAKE_INSTALL_PREFIX}"
     "\nDebug mode:        ${ENABLE_DEBUG}"
-    "\nRelease mode:      ${ENABLE_RELEASE}"
     "\nShared libs:       ${BUILD_SHARED_LIBS}"
     "\n"
     "\nPacket support:    ${BRO_PCAP_SUPPORT}"
