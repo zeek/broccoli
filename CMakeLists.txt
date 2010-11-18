@@ -70,14 +70,23 @@ set(BUILDINFO "${hostname}, ${builddate}, Debugging support: ${ENABLE_DEBUG}")
 ########################################################################
 ## Dependency Configuration
 
-find_package(OpenSSL REQUIRED)
-find_package(FLEX REQUIRED)
-find_package(BISON REQUIRED)
+include(FindRequiredPackage)
+
+FindRequiredPackage(OpenSSL)
+FindRequiredPackage(FLEX)
+FindRequiredPackage(BISON)
 find_package(PCAP)
 
 set(BRO_PCAP_SUPPORT true)
 if (NOT PCAP_INCLUDE_DIR)
     set(BRO_PCAP_SUPPORT false)
+endif ()
+
+if (MISSING_PREREQS)
+    foreach (prereq ${MISSING_PREREQ_DESCS})
+        message(SEND_ERROR ${prereq})
+    endforeach ()
+    message(FATAL_ERROR "Configuration aborted due to missing prerequisites")
 endif ()
 
 ########################################################################
