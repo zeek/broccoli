@@ -19,6 +19,10 @@ project(Broccoli)
 
 file(STRINGS "${CMAKE_CURRENT_SOURCE_DIR}/VERSION" VERSION LIMIT_COUNT 1)
 
+set(SOVersion 3) # this must be incremented when broccoli interface changes
+set(SOVersionMinor 0)
+set(SOVersionRelease 0)
+
 if (ENABLE_DEBUG)
     set(CMAKE_BUILD_TYPE Debug)
 else ()
@@ -41,19 +45,21 @@ if (ENABLE_DEBUG)
     set(EXTRA_COMPILE_FLAGS "${EXTRA_COMPILE_FLAGS} -DBRO_DEBUG")
 endif ()
 
-# Figure out where the default broccoli.conf file will be installed
-# if the install prefix of /usr was given, change the install location
-# of the config file to be /etc instead of /usr/etc
-if (${CMAKE_INSTALL_PREFIX} STREQUAL /usr)
-    set(BRO_SYSCONF_DIR /etc)
+if (BRO_SYSCONF_FILE)
+    # BRO_SYSCONF_FILE already defined from the --with-configfile option
+    set(install_config_file false)
 else ()
-    set(BRO_SYSCONF_DIR ${CMAKE_INSTALL_PREFIX}/etc)
-endif ()
+    # Figure out where the default broccoli.conf file will be installed
+    # if the install prefix of /usr was given, change the install location
+    # of the config file to be /etc instead of /usr/etc
+    if (${CMAKE_INSTALL_PREFIX} STREQUAL /usr)
+        set(BRO_SYSCONF_DIR /etc)
+    else ()
+        set(BRO_SYSCONF_DIR ${CMAKE_INSTALL_PREFIX}/etc)
+    endif ()
 
-# if the --with-configfile was set, BRO_SYSCONF_FILE location is already
-# defined, else use the default location in the build
-if (NOT BRO_SYSCONF_FILE)
     set(BRO_SYSCONF_FILE ${BRO_SYSCONF_DIR}/broccoli.conf)
+    set(install_config_file true)
 endif ()
 
 site_name(hostname)
@@ -128,7 +134,28 @@ add_definitions(-DHAVE_CONFIG_H)
 ########################################################################
 ## Install Files
 
-install(FILES broccoli.conf DESTINATION ${BRO_SYSCONF_DIR})
+if (install_config_file)
+    # determine at `make install` time if the config file shouldn't be
+    # installed to prevent overwrite of an existing file
+    install(CODE "
+        if(EXISTS ${BRO_SYSCONF_FILE})
+            message(WARNING \"Skipping install of ${BRO_SYSCONF_FILE} \"
+                            \"to avoid overwrite of existing config file\")
+        else ()
+            # install() is not scriptable within install(), and
+            # configure_file() is the next best thing
+            configure_file(${CMAKE_CURRENT_SOURCE_DIR}/broccoli.conf
+                           ${BRO_SYSCONF_FILE}
+                           COPY_ONLY)
+            # since install() isn't used, an entry isn't created in the
+            # install manifest, but it's impossible to append to the
+            # default manifest, so an extra one is created and can
+            # be parsed by a custom uninstall target
+            file(WRITE ${CMAKE_BINARY_DIR}/install_manifest_extra_broccoli.txt
+                 ${BRO_SYSCONF_FILE})
+        endif ()
+    ")
+endif ()
 install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/broccoli-config DESTINATION bin)
 
 ########################################################################
@@ -158,6 +185,7 @@ message(
     "\nDebug mode:        ${ENABLE_DEBUG}"
     "\nShared libs:       ${BUILD_SHARED_LIBS}"
     "\n"
+    "\nConfig file:       ${BRO_SYSCONF_FILE}"
     "\nPacket support:    ${BRO_PCAP_SUPPORT}"
     "\n"
     "\nCC:                ${CMAKE_C_COMPILER}"
