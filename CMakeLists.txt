@@ -130,7 +130,7 @@ check_type_size(uint UINT)
 if (NOT UINT)
     set (TYPEDEF_UINT "typedef unsigned int uint")
 endif ()
-unset(CMAKE_EXTRA_INCLUDE_FILES)
+set(CMAKE_EXTRA_INCLUDE_FILES)
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/config.h.in
                ${CMAKE_CURRENT_BINARY_DIR}/config.h)
