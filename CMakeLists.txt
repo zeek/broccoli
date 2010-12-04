@@ -3,7 +3,7 @@ project(Broccoli)
 ########################################################################
 ## CMake Configuration
 
-cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
+cmake_minimum_required(VERSION 2.6 FATAL_ERROR)
 
 # Prohibit in-source builds.
 if ("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_BINARY_DIR}")
@@ -130,7 +130,7 @@ check_type_size(uint UINT)
 if (NOT UINT)
     set (TYPEDEF_UINT "typedef unsigned int uint")
 endif ()
-unset(CMAKE_EXTRA_INCLUDE_FILES)
+set(CMAKE_EXTRA_INCLUDE_FILES)
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/config.h.in
                ${CMAKE_CURRENT_BINARY_DIR}/config.h)
