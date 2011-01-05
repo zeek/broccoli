@@ -182,6 +182,12 @@ else ()
 endif ()
 
 ########################################################################
+## Packaging Setup
+
+include(ConfigurePackaging)
+ConfigurePackaging(${VERSION})
+
+########################################################################
 ## Build Summary
 
 if (CMAKE_BUILD_TYPE)
