@@ -149,11 +149,11 @@ if (install_config_file)
     # installed to prevent overwrite of an existing file
     install(CODE "
         if(EXISTS ${BRO_SYSCONF_FILE})
-            message(WARNING \"Skipping install of ${BRO_SYSCONF_FILE} \"
-                            \"to avoid overwrite of existing config file\")
+            message(STATUS \"Skipping: ${BRO_SYSCONF_FILE} (already exists)\")
         else ()
             # install() is not scriptable within install(), and
             # configure_file() is the next best thing
+            message(STATUS \"Installing: ${BRO_SYSCONF_FILE}\")
             configure_file(${CMAKE_CURRENT_SOURCE_DIR}/broccoli.conf
                            ${BRO_SYSCONF_FILE}
                            COPY_ONLY)
@@ -161,8 +161,15 @@ if (install_config_file)
             # install manifest, but it's impossible to append to the
             # default manifest, so an extra one is created and can
             # be parsed by a custom uninstall target
-            file(WRITE ${CMAKE_BINARY_DIR}/install_manifest_extra_broccoli.txt
-                 ${BRO_SYSCONF_FILE})
+            if ($ENV{USER} STREQUAL \$ENV{USER})
+                file(WRITE
+                     ${CMAKE_BINARY_DIR}/install_manifest_extra_broccoli.txt
+                     ${BRO_SYSCONF_FILE})
+            else ()
+                # avoid possible permission problems
+                message(STATUS
+                        \"Skipped writing extra broccoli install manifest\")
+            endif ()
         endif ()
     ")
 endif ()
