@@ -191,8 +191,13 @@ endif ()
 ########################################################################
 ## Packaging Setup
 
-include(ConfigurePackaging)
-ConfigurePackaging(${VERSION})
+# If this CMake project is a sub-project of another, we will not
+# configure the generic packaging because CPack will fail in the case
+# that the parent project has already configured packaging
+if ("${PROJECT_SOURCE_DIR}" STREQUAL "${CMAKE_SOURCE_DIR}")
+    include(ConfigurePackaging)
+    ConfigurePackaging(${VERSION})
+endif ()
 
 ########################################################################
 ## Build Summary
