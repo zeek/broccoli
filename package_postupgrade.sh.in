@@ -1,0 +1,18 @@
+#!/bin/sh
+
+# check whether it's safe to remove backup broccoli.conf files that the
+# package preinstall script made
+
+if [ -e /tmp/broccoli.conf.last ]; then
+    backup=`cat /tmp/broccoli.conf.last`
+
+    # if the installed version and the backup version don't differ
+    # then we can remove the backup version
+    diff @BRO_SYSCONF_FILE@ ${backup} > /dev/null 2>&1
+
+    if [ $? -eq 0 ]; then
+        rm ${backup}
+    fi
+
+    rm /tmp/broccoli.conf.last
+fi

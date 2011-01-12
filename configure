@@ -38,6 +38,15 @@ Usage: $0 [OPTION]... [VAR=VALUE]...
   Optional Packages in Non-Standard Locations:
     --with-pcap=PATH       path to libpcap install root
 
+  Packaging Options (for developers):
+    --enable-package       toggles special build logic for binary packaging
+    --ignore-dirs=PATHS    paths to ignore when creating source package
+                           (semicolon delimited and quoted when multiple)
+    --pkg-name-prefix=NAME use the given name as the package prefix instead
+                           of the default CMake project name
+    --osx-sysroot=PATH     path to the OS X SDK to compile against
+    --osx-min-version=VER  minimum OS X version (the deployment target)
+
   Influential Environment Variables (only on first invocation
   per build directory):
     CC                     C compiler command
@@ -65,6 +74,7 @@ append_cache_entry PY_MOD_INSTALL_DIR   PATH     /usr/local/lib/python
 append_cache_entry ENABLE_DEBUG         BOOL     false
 append_cache_entry BUILD_SHARED_LIBS    BOOL     true
 append_cache_entry BRO_PCAP_SUPPORT     BOOL     true
+append_cache_entry CPACK_SOURCE_IGNORE_FILES STRING
 
 # parse arguments
 while [ $# -ne 0 ]; do
@@ -108,6 +118,21 @@ while [ $# -ne 0 ]; do
             ;;
         --with-pcap=*)
             append_cache_entry PCAP_ROOT_DIR PATH $optarg
+            ;;
+        --enable-package)
+            append_cache_entry PACKAGING_MODE BOOL true
+            ;;
+        --ignore-dirs=*)
+            append_cache_entry CPACK_SOURCE_IGNORE_FILES STRING $optarg
+            ;;
+        --pkg-name-prefix=*)
+            append_cache_entry PACKAGE_NAME_PREFIX STRING $optarg
+            ;;
+        --osx-sysroot=*)
+            append_cache_entry CMAKE_OSX_SYSROOT PATH $optarg
+            ;;
+        --osx-min-version=*)
+            append_cache_entry CMAKE_OSX_DEPLOYMENT_TARGET STRING $optarg
             ;;
         *)
             echo "Invalid option '$1'.  Try $0 --help to see available options."
