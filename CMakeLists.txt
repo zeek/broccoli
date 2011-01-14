@@ -144,6 +144,9 @@ add_definitions(-DHAVE_CONFIG_H)
 ########################################################################
 ## Install Files
 
+set(INSTALLED_CONFIG_FILES "${INSTALLED_CONFIG_FILES} ${BRO_SYSCONF_FILE}"
+    CACHE STRING "" FORCE)
+
 if (PACKAGING_MODE)
     # if packaging mode is enabled, we always install the distribution's
     # version of broccoli.conf
@@ -194,31 +197,6 @@ endif ()
 
 ########################################################################
 ## Packaging Setup
-
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/package_preinstall.sh.in
-               ${CMAKE_CURRENT_BINARY_DIR}/package_preinstall.sh
-               @ONLY)
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/package_postupgrade.sh.in
-               ${CMAKE_CURRENT_BINARY_DIR}/package_postupgrade.sh
-               @ONLY)
-
-# These variables have to be set in the cache in case a super-project
-# is actually taking care of the CPack configuration setup
-set(CPACK_PREFLIGHT_SCRIPT ${CMAKE_CURRENT_BINARY_DIR}/package_preinstall.sh
-    CACHE STRING "Mac package pre-install script" FORCE)
-set(CPACK_POSTUPGRADE_SCRIPT ${CMAKE_CURRENT_BINARY_DIR}/package_postupgrade.sh
-    CACHE STRING "Mac package post-upgrade script" FORCE)
-
-# A better way to prevent an RPM from not overwriting config files is
-# with the %config(noreplace) .spec attribute, but CPack does not have any
-# good hooks into using that yet, so we re-use the pre/post install scripts
-# See also: http://public.kitware.com/Bug/view.php?id=10294
-set(CPACK_RPM_PRE_INSTALL_SCRIPT_FILE
-    ${CMAKE_CURRENT_BINARY_DIR}/package_preinstall.sh
-    CACHE STRING "RPM package pre-install script" FORCE)
-set(CPACK_RPM_POST_INSTALL_SCRIPT_FILE
-    ${CMAKE_CURRENT_BINARY_DIR}/package_postupgrade.sh
-    CACHE STRING "RPM package post-install script" FORCE)
 
 # If this CMake project is a sub-project of another, we will not
 # configure the generic packaging because CPack will fail in the case
