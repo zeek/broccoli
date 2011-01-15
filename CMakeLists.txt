@@ -144,42 +144,12 @@ add_definitions(-DHAVE_CONFIG_H)
 ########################################################################
 ## Install Files
 
-set(INSTALLED_CONFIG_FILES "${INSTALLED_CONFIG_FILES} ${BRO_SYSCONF_FILE}"
-    CACHE STRING "" FORCE)
-
-if (PACKAGING_MODE)
-    # if packaging mode is enabled, we always install the distribution's
-    # version of broccoli.conf
-    install(FILES broccoli.conf DESTINATION etc)
-elseif (install_config_file)
-    # determine at `make install` time if the config file shouldn't be
-    # installed to prevent overwrite of an existing file
-    install(CODE "
-        if(EXISTS ${BRO_SYSCONF_FILE})
-            message(STATUS \"Skipping: ${BRO_SYSCONF_FILE} (already exists)\")
-        else ()
-            # install() is not scriptable within install(), and
-            # configure_file() is the next best thing
-            message(STATUS \"Installing: ${BRO_SYSCONF_FILE}\")
-            configure_file(${CMAKE_CURRENT_SOURCE_DIR}/broccoli.conf
-                           ${BRO_SYSCONF_FILE}
-                           COPY_ONLY)
-            # since install() isn't used, an entry isn't created in the
-            # install manifest, but it's impossible to append to the
-            # default manifest, so an extra one is created and can
-            # be parsed by a custom uninstall target
-            if ($ENV{USER} STREQUAL \$ENV{USER})
-                file(WRITE
-                     ${CMAKE_BINARY_DIR}/install_manifest_extra_broccoli.txt
-                     ${BRO_SYSCONF_FILE})
-            else ()
-                # avoid possible permission problems
-                message(STATUS
-                        \"Skipped writing extra broccoli install manifest\")
-            endif ()
-        endif ()
-    ")
+if (install_config_file)
+    install(FILES broccoli.conf DESTINATION ${BRO_SYSCONF_DIR})
+    set(INSTALLED_CONFIG_FILES "${INSTALLED_CONFIG_FILES} ${BRO_SYSCONF_FILE}"
+        CACHE STRING "" FORCE)
 endif ()
+
 install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/broccoli-config DESTINATION bin)
 
 ########################################################################
