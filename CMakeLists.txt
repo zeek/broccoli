@@ -144,16 +144,20 @@ add_definitions(-DHAVE_CONFIG_H)
 ########################################################################
 ## Install Files
 
-if (install_config_file)
+if (PACKAGING_MODE)
+    # if packaging mode is enabled, we always install the distribution's
+    # version of broccoli.conf
+    install(FILES broccoli.conf DESTINATION etc)
+elseif (install_config_file)
     # determine at `make install` time if the config file shouldn't be
     # installed to prevent overwrite of an existing file
     install(CODE "
         if(EXISTS ${BRO_SYSCONF_FILE})
-            message(WARNING \"Skipping install of ${BRO_SYSCONF_FILE} \"
-                            \"to avoid overwrite of existing config file\")
+            message(STATUS \"Skipping: ${BRO_SYSCONF_FILE} (already exists)\")
         else ()
             # install() is not scriptable within install(), and
             # configure_file() is the next best thing
+            message(STATUS \"Installing: ${BRO_SYSCONF_FILE}\")
             configure_file(${CMAKE_CURRENT_SOURCE_DIR}/broccoli.conf
                            ${BRO_SYSCONF_FILE}
                            COPY_ONLY)
@@ -161,8 +165,15 @@ if (install_config_file)
             # install manifest, but it's impossible to append to the
             # default manifest, so an extra one is created and can
             # be parsed by a custom uninstall target
-            file(WRITE ${CMAKE_BINARY_DIR}/install_manifest_extra_broccoli.txt
-                 ${BRO_SYSCONF_FILE})
+            if ($ENV{USER} STREQUAL \$ENV{USER})
+                file(WRITE
+                     ${CMAKE_BINARY_DIR}/install_manifest_extra_broccoli.txt
+                     ${BRO_SYSCONF_FILE})
+            else ()
+                # avoid possible permission problems
+                message(STATUS
+                        \"Skipped writing extra broccoli install manifest\")
+            endif ()
         endif ()
     ")
 endif ()
@@ -179,6 +190,42 @@ if (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/bindings/broccoli-python/CMakeLists.txt)
     add_subdirectory(bindings/broccoli-python)
 else ()
     message(STATUS "Not building broccoli bindings")
+endif ()
+
+########################################################################
+## Packaging Setup
+
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/package_preinstall.sh.in
+               ${CMAKE_CURRENT_BINARY_DIR}/package_preinstall.sh
+               @ONLY)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/package_postupgrade.sh.in
+               ${CMAKE_CURRENT_BINARY_DIR}/package_postupgrade.sh
+               @ONLY)
+
+# These variables have to be set in the cache in case a super-project
+# is actually taking care of the CPack configuration setup
+set(CPACK_PREFLIGHT_SCRIPT ${CMAKE_CURRENT_BINARY_DIR}/package_preinstall.sh
+    CACHE STRING "Mac package pre-install script" FORCE)
+set(CPACK_POSTUPGRADE_SCRIPT ${CMAKE_CURRENT_BINARY_DIR}/package_postupgrade.sh
+    CACHE STRING "Mac package post-upgrade script" FORCE)
+
+# A better way to prevent an RPM from not overwriting config files is
+# with the %config(noreplace) .spec attribute, but CPack does not have any
+# good hooks into using that yet, so we re-use the pre/post install scripts
+# See also: http://public.kitware.com/Bug/view.php?id=10294
+set(CPACK_RPM_PRE_INSTALL_SCRIPT_FILE
+    ${CMAKE_CURRENT_BINARY_DIR}/package_preinstall.sh
+    CACHE STRING "RPM package pre-install script" FORCE)
+set(CPACK_RPM_POST_INSTALL_SCRIPT_FILE
+    ${CMAKE_CURRENT_BINARY_DIR}/package_postupgrade.sh
+    CACHE STRING "RPM package post-install script" FORCE)
+
+# If this CMake project is a sub-project of another, we will not
+# configure the generic packaging because CPack will fail in the case
+# that the parent project has already configured packaging
+if ("${PROJECT_SOURCE_DIR}" STREQUAL "${CMAKE_SOURCE_DIR}")
+    include(ConfigurePackaging)
+    ConfigurePackaging(${VERSION})
 endif ()
 
 ########################################################################
@@ -206,3 +253,17 @@ message(
     "\n"
     "\n================================================================\n"
 )
+
+########################################################################
+## Show warning when installing user is different from the one that configured
+
+install(CODE "
+    if (NOT $ENV{USER} STREQUAL \$ENV{USER})
+        message(STATUS \"ATTENTION: Install is being performed by user \"
+                \"'\$ENV{USER}', but the build directory was configured by \"
+                \"user '$ENV{USER}'. This may result in a permissions error \"
+                \"when writing the install manifest, but you can ignore it \"
+                \"and consider the installation as successful if you don't \"
+                \"care about the install manifest.\")
+    endif ()
+")

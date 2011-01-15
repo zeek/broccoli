@@ -1,0 +1,17 @@
+#!/bin/sh
+
+# If a broccoli.conf exists in the default location, then a backup is made
+# so we don't accidentally overwrite a modified version
+
+if [ -e @BRO_SYSCONF_FILE@ ]; then
+    ver=1
+    while [ -e @BRO_SYSCONF_FILE@.${ver} ]; do
+        ver=$(( ver + 1 ))
+    done
+
+    cp @BRO_SYSCONF_FILE@ @BRO_SYSCONF_FILE@.${ver}
+
+    # the post upgrade script will check whether the installed broccoli.conf
+    # actually differs from existing version and delete unnecessary backups
+    echo @BRO_SYSCONF_FILE@.${ver} > /tmp/broccoli.conf.last
+fi
