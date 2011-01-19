@@ -84,6 +84,7 @@ set(BUILDINFO "${hostname}, ${builddate}, Debugging support: ${ENABLE_DEBUG}")
 ########################################################################
 ## Dependency Configuration
 
+include(MacDependencyPaths)
 include(FindRequiredPackage)
 
 FindRequiredPackage(OpenSSL)
