@@ -84,6 +84,7 @@ set(BUILDINFO "${hostname}, ${builddate}, Debugging support: ${ENABLE_DEBUG}")
 ########################################################################
 ## Dependency Configuration
 
+include(MacDependencyPaths)
 include(FindRequiredPackage)
 
 FindRequiredPackage(OpenSSL)
@@ -145,27 +146,11 @@ add_definitions(-DHAVE_CONFIG_H)
 ## Install Files
 
 if (install_config_file)
-    # determine at `make install` time if the config file shouldn't be
-    # installed to prevent overwrite of an existing file
-    install(CODE "
-        if(EXISTS ${BRO_SYSCONF_FILE})
-            message(WARNING \"Skipping install of ${BRO_SYSCONF_FILE} \"
-                            \"to avoid overwrite of existing config file\")
-        else ()
-            # install() is not scriptable within install(), and
-            # configure_file() is the next best thing
-            configure_file(${CMAKE_CURRENT_SOURCE_DIR}/broccoli.conf
-                           ${BRO_SYSCONF_FILE}
-                           COPY_ONLY)
-            # since install() isn't used, an entry isn't created in the
-            # install manifest, but it's impossible to append to the
-            # default manifest, so an extra one is created and can
-            # be parsed by a custom uninstall target
-            file(WRITE ${CMAKE_BINARY_DIR}/install_manifest_extra_broccoli.txt
-                 ${BRO_SYSCONF_FILE})
-        endif ()
-    ")
+    install(FILES broccoli.conf DESTINATION ${BRO_SYSCONF_DIR})
+    set(INSTALLED_CONFIG_FILES "${INSTALLED_CONFIG_FILES} ${BRO_SYSCONF_FILE}"
+        CACHE STRING "" FORCE)
 endif ()
+
 install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/broccoli-config DESTINATION bin)
 
 ########################################################################
@@ -179,6 +164,17 @@ if (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/bindings/broccoli-python/CMakeLists.txt)
     add_subdirectory(bindings/broccoli-python)
 else ()
     message(STATUS "Not building broccoli bindings")
+endif ()
+
+########################################################################
+## Packaging Setup
+
+# If this CMake project is a sub-project of another, we will not
+# configure the generic packaging because CPack will fail in the case
+# that the parent project has already configured packaging
+if ("${PROJECT_SOURCE_DIR}" STREQUAL "${CMAKE_SOURCE_DIR}")
+    include(ConfigurePackaging)
+    ConfigurePackaging(${VERSION})
 endif ()
 
 ########################################################################
@@ -206,3 +202,17 @@ message(
     "\n"
     "\n================================================================\n"
 )
+
+########################################################################
+## Show warning when installing user is different from the one that configured
+
+install(CODE "
+    if (NOT $ENV{USER} STREQUAL \$ENV{USER})
+        message(STATUS \"ATTENTION: Install is being performed by user \"
+                \"'\$ENV{USER}', but the build directory was configured by \"
+                \"user '$ENV{USER}'. This may result in a permissions error \"
+                \"when writing the install manifest, but you can ignore it \"
+                \"and consider the installation as successful if you don't \"
+                \"care about the install manifest.\")
+    endif ()
+")
