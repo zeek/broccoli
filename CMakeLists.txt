@@ -52,7 +52,7 @@ endif ()
 
 # Broccoli's debug preprocessor definition differs from other Bro projects
 if (ENABLE_DEBUG)
-    set(EXTRA_COMPILE_FLAGS "${EXTRA_COMPILE_FLAGS} -DBRO_DEBUG")
+    add_definitions(-DBRO_DEBUG)
 endif ()
 
 if (BRO_SYSCONF_FILE)
