@@ -3351,7 +3351,12 @@ CLASS="VARNAME"
 CLASS="VARNAME"
 >/broccoli/host_cert</CODE
 > keys, respectively, in the configuration file.
-	To quickly enable/disable a certificate configuration, the
+Optionally, you can store the private key in a seperate file
+specified by
+	<CODE
+CLASS="VARNAME"
+>/broccoli/host_key</CODE
+>	To quickly enable/disable a certificate configuration, the
 	<CODE
 CLASS="VARNAME"
 >/broccoli/use_ssl</CODE
@@ -3429,6 +3434,7 @@ CLASS="PROGRAMLISTING"
 >/broccoli/use_ssl	   yes
 /broccoli/ca_cert          &#60;path&#62;/ca_cert.pem
 /broccoli/host_cert        &#60;path&#62;/bro_cert.pem
+/broccoli/host_key         &#60;path&#62;/bro_cert.key
       </PRE
 ></TD
 ></TR
