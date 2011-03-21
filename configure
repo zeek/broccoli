@@ -33,6 +33,7 @@ Usage: $0 [OPTION]... [VAR=VALUE]...
                            mutually exclusive with --enable-shared
     --disable-packets      Do not support tx/rx of pcap packets
     --with-configfile=FILE use config file at location <FILE>
+                           instead of the default broccoli.conf
 
   Required Packages in Non-Standard Locations:
     --with-openssl=PATH    path to OpenSSL install root
@@ -47,6 +48,7 @@ Usage: $0 [OPTION]... [VAR=VALUE]...
     --with-swig=PATH       path to SWIG executable
 
   Packaging Options (for developers):
+    --binary-package       toggle special logic for binary packaging
     --ignore-dirs=PATHS    paths to ignore when creating source package
                            (semicolon delimited and quoted when multiple)
     --pkg-name-prefix=NAME use the given name as the package prefix instead
@@ -144,6 +146,9 @@ while [ $# -ne 0 ]; do
             ;;
         --with-swig=*)
             append_cache_entry SWIG_EXECUTABLE      PATH    $optarg
+            ;;
+        --binary-package)
+            append_cache_entry BINARY_PACKAGING_MODE BOOL true
             ;;
         --ignore-dirs=*)
             append_cache_entry CPACK_SOURCE_IGNORE_FILES STRING $optarg
