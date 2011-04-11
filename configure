@@ -31,6 +31,8 @@ Usage: $0 [OPTION]... [VAR=VALUE]...
                            mutually exclusive with --enable-static
     --enable-static        build static libraries [default=no]
                            mutually exclusive with --enable-shared
+                           (no effect on broccoli bindings)
+    --disable-python       don't try to build python bindings for broccoli
     --disable-packets      Do not support tx/rx of pcap packets
     --with-configfile=FILE use config file at location <FILE>
                            instead of the default broccoli.conf
@@ -112,6 +114,9 @@ while [ $# -ne 0 ]; do
             ;;
         --enable-static)
             append_cache_entry BUILD_SHARED_LIBS    BOOL   false
+            ;;
+        --disable-python)
+            append_cache_entry DISABLE_PYTHON_BINDINGS     BOOL   true
             ;;
         --disable-packets)
             append_cache_entry BRO_PCAP_SUPPORT     BOOL   false
