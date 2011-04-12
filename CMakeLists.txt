@@ -82,6 +82,15 @@ else ()
 endif ()
 set(BUILDINFO "${hostname}, ${builddate}, Debugging support: ${ENABLE_DEBUG}")
 
+# if no static/shared library preference is given, default to building both
+if (NOT DEFINED ENABLE_SHARED)
+    set(ENABLE_SHARED true)
+endif ()
+
+if (NOT DEFINED ENABLE_STATIC)
+    set(ENABLE_STATIC true)
+endif ()
+
 ########################################################################
 ## Dependency Configuration
 
@@ -191,7 +200,8 @@ message(
     "\n"
     "\nInstall prefix:    ${CMAKE_INSTALL_PREFIX}"
     "\nDebug mode:        ${ENABLE_DEBUG}"
-    "\nShared libs:       ${BUILD_SHARED_LIBS}"
+    "\nShared libs:       ${ENABLE_SHARED}"
+    "\nStatic libs:       ${ENABLE_STATIC}"
     "\n"
     "\nConfig file:       ${BRO_SYSCONF_FILE}"
     "\nPacket support:    ${BRO_PCAP_SUPPORT}"

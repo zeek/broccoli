@@ -71,23 +71,31 @@ set(broccoli_SRCS
     bro_val.c
 )
 
-add_library(broccoli ${broccoli_SRCS})
-
-target_link_libraries(broccoli ${OpenSSL_LIBRARIES}
-                               ${BRO_LIBADD}
-)
-
-set_target_properties(broccoli PROPERTIES
+if (ENABLE_SHARED)
+    add_library(broccoli SHARED ${broccoli_SRCS})
+    set_target_properties(broccoli PROPERTIES
                       VERSION ${SOVersion}.${SOVersionMinor}.${SOVersionRelease}
                       SOVERSION ${SOVersion})
-
-if (APPLE)
-    # Mac OS X needs the directory portion of the install_name shared lib field
-    set_target_properties(broccoli PROPERTIES
-                          INSTALL_NAME_DIR ${CMAKE_INSTALL_PREFIX}/lib)
+    if (APPLE)
+        # Mac OS X needs the directory portion of the install_name
+        # shared lib field
+        set_target_properties(broccoli PROPERTIES
+                              INSTALL_NAME_DIR ${CMAKE_INSTALL_PREFIX}/lib)
+    endif ()
+    target_link_libraries(broccoli ${OpenSSL_LIBRARIES} ${BRO_LIBADD})
+    install(TARGETS broccoli DESTINATION lib)
 endif ()
 
-install(TARGETS broccoli DESTINATION lib)
+if (ENABLE_STATIC)
+    add_library(broccoliStatic STATIC ${broccoli_SRCS})
+    if (UNIX)
+        # the output name of the static library shouldn't conflict with the
+        # shared library because they use different extensions (.a versus .so)
+        set_target_properties(broccoliStatic PROPERTIES OUTPUT_NAME broccoli)
+    endif ()
+    target_link_libraries(broccoliStatic ${OpenSSL_LIBRARIES} ${BRO_LIBADD})
+    install(TARGETS broccoliStatic DESTINATION lib)
+endif ()
 
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/broccoli.h DESTINATION include)
 
@@ -96,5 +104,10 @@ install(FILES ${CMAKE_CURRENT_BINARY_DIR}/broccoli.h DESTINATION include)
 set(Broccoli_INCLUDE_DIR ${CMAKE_CURRENT_BINARY_DIR}
     CACHE STRING "Broccoli header directory" FORCE)
 
-set(Broccoli_LIBRARY broccoli
-    CACHE STRING "Broccoli library" FORCE)
+if (ENABLE_SHARED)
+    set(Broccoli_LIBRARY broccoli
+        CACHE STRING "Broccoli library" FORCE)
+elseif (ENABLE_STATIC)
+    set(Broccoli_LIBRARY broccoliStatic
+        CACHE STRING "Broccoli library" FORCE)
+endif ()
