@@ -50,9 +50,13 @@ double   __bro_util_timeval_to_double(const struct timeval *tv);
 #ifdef WORDS_BIGENDIAN
 #define  __bro_util_ntohd(x) x
 #define  __bro_util_htond(x) x
+#define  __bro_util_ntohll(x) x
+#define  __bro_util_htonll(x) x
 #else
 double   __bro_util_htond(double d);
 double   __bro_util_ntohd(double d);
+uint64   __bro_util_htonll(uint64 i);
+uint64   __bro_util_ntohll(uint64 i);
 #endif
 
 #endif

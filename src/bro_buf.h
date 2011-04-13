@@ -113,6 +113,7 @@ int      __bro_buf_read_char(BroBuf *buf, char *val);
 int      __bro_buf_read_string(BroBuf *buf, BroString *val);
 int      __bro_buf_read_double(BroBuf *buf, double *d);
 int      __bro_buf_read_int(BroBuf *buf, uint32 *i);
+int      __bro_buf_read_int64(BroBuf *buf, uint64 *i);
 int      __bro_buf_read_short(BroBuf *buf, uint16 *i);
 
 int      __bro_buf_write_data(BroBuf *buf, const void *data, int size);
@@ -120,6 +121,7 @@ int      __bro_buf_write_char(BroBuf *buf, char val);
 int      __bro_buf_write_string(BroBuf *buf, BroString *val);
 int      __bro_buf_write_double(BroBuf *buf, double d);
 int      __bro_buf_write_int(BroBuf *buf, uint32 i);
+int      __bro_buf_write_int64(BroBuf *buf, uint64 i);
 int      __bro_buf_write_short(BroBuf *buf, uint16 i);
 
 #endif
