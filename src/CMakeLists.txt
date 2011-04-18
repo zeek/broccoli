@@ -22,6 +22,8 @@ add_flex_bison_dependency(Bro_Lexer Bro_Parser)
 
 set(broccoli_SRCS
     ${PACKET_FILES}
+    ${FLEX_Bro_Lexer_INPUT}
+    ${BISON_Bro_Parser_INPUT}
     ${FLEX_Bro_Lexer_OUTPUTS}
     ${BISON_Bro_Parser_OUTPUTS}
     broccoli.h
