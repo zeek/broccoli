@@ -27,11 +27,9 @@ Usage: $0 [OPTION]... [VAR=VALUE]...
 
   Optional Features:
     --enable-debug         compile in debugging mode
-    --enable-shared        build shared libraries [default=yes]
-                           mutually exclusive with --enable-static
-    --enable-static        build static libraries [default=no]
-                           mutually exclusive with --enable-shared
+    --disable-shared       don't build shared libraries [default=no]
                            (no effect on broccoli bindings)
+    --disable-static       don't build static libraries [default=no]
     --disable-python       don't try to build python bindings for broccoli
     --disable-packets      Do not support tx/rx of pcap packets
     --with-configfile=FILE use config file at location <FILE>
@@ -83,7 +81,6 @@ CMakeCacheEntries=""
 append_cache_entry CMAKE_INSTALL_PREFIX PATH     /usr/local
 append_cache_entry PY_MOD_INSTALL_DIR   PATH     /usr/local/lib/python
 append_cache_entry ENABLE_DEBUG         BOOL     false
-append_cache_entry BUILD_SHARED_LIBS    BOOL     true
 append_cache_entry BRO_PCAP_SUPPORT     BOOL     true
 append_cache_entry CPACK_SOURCE_IGNORE_FILES STRING
 
@@ -109,11 +106,11 @@ while [ $# -ne 0 ]; do
         --enable-debug)
             append_cache_entry ENABLE_DEBUG         BOOL   true
             ;;
-        --enable-shared)
-            append_cache_entry BUILD_SHARED_LIBS    BOOL   true
+        --disable-shared)
+            append_cache_entry ENABLE_SHARED        BOOL   false
             ;;
-        --enable-static)
-            append_cache_entry BUILD_SHARED_LIBS    BOOL   false
+        --disable-static)
+            append_cache_entry ENABLE_STATIC        BOOL   false
             ;;
         --disable-python)
             append_cache_entry DISABLE_PYTHON_BINDINGS     BOOL   true
