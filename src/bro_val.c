@@ -219,7 +219,7 @@ __bro_val_assign(BroVal *val, const void *data)
     case BRO_TYPE_COUNT:
     case BRO_TYPE_COUNTER:
     case BRO_TYPE_ENUM:
-      val->val_int = *((int *) data);
+      val->val_int64 = *((uint64 *) data);
       break;
 
     case BRO_TYPE_DOUBLE:
@@ -467,7 +467,8 @@ __bro_val_read(BroVal *val, BroConn *bc)
       /* Hack for ports */
       if (val->val_type->tag == BRO_TYPE_PORT)
 	{
-	  if (! __bro_buf_read_int(bc->rx_buf, &tmp))
+      uint64 tmp;
+	  if (! __bro_buf_read_int64(bc->rx_buf, &tmp))
 	    D_RETURN_(FALSE);
 	  
 	  if ( (tmp & 0xf0000) == 0x10000 )
@@ -481,7 +482,7 @@ __bro_val_read(BroVal *val, BroConn *bc)
 	}
       else
 	{
-	  if (! __bro_buf_read_int(bc->rx_buf, &val->val_int))
+	  if (! __bro_buf_read_int64(bc->rx_buf, &val->val_int64))
 	    D_RETURN_(FALSE);
 	}
       break;
@@ -637,7 +638,7 @@ __bro_val_write(BroVal *val, BroConn *bc)
       /* Hack for ports */
       if (val->val_type->tag == BRO_TYPE_PORT)
 	{
-	  int tmp = val->val_port.port_num;
+	  uint64 tmp = val->val_port.port_num;
 	  
 	  if (val->val_port.port_proto == IPPROTO_TCP)
 	    tmp |= 0x10000;
@@ -646,12 +647,12 @@ __bro_val_write(BroVal *val, BroConn *bc)
       else if (val->val_port.port_proto == IPPROTO_ICMP)
 	    tmp |= 0x30000;
 
-	  if (! __bro_buf_write_int(bc->tx_buf, tmp))
+	  if (! __bro_buf_write_int64(bc->tx_buf, tmp))
 	    D_RETURN_(FALSE);
 	}
       else
 	{
-	  if (! __bro_buf_write_int(bc->tx_buf, val->val_int))
+	  if (! __bro_buf_write_int64(bc->tx_buf, val->val_int64))
 	    D_RETURN_(FALSE);
 	}
       break;
@@ -725,12 +726,14 @@ __bro_val_clone(BroVal *dst, BroVal *src)
     {
     case BRO_INTTYPE_INT:
     case BRO_INTTYPE_UNSIGNED:
-    case BRO_INTTYPE_IPADDR:
       /* Hack for ports */
       if (src->val_type->tag == BRO_TYPE_PORT)
-	dst->val_port = src->val_port;
+        dst->val_port = src->val_port;
       else
-	dst->val_int = src->val_int;
+        dst->val_int64 = src->val_int64;
+      break;
+    case BRO_INTTYPE_IPADDR:
+	  dst->val_int = src->val_int;
       break;
       
     case BRO_INTTYPE_DOUBLE:
@@ -773,6 +776,8 @@ __bro_val_hash(BroVal *val)
     {
     case BRO_INTTYPE_INT:
     case BRO_INTTYPE_UNSIGNED:
+      result ^= val->val_int64;
+      break;
     case BRO_INTTYPE_IPADDR:
       result ^= val->val_int;
       break;
@@ -818,6 +823,9 @@ __bro_val_cmp(BroVal *val1, BroVal *val2)
     {
     case BRO_INTTYPE_INT:
     case BRO_INTTYPE_UNSIGNED:
+      if (val1->val_int64 != val2->val_int64)
+	D_RETURN_(FALSE);
+      break;
     case BRO_INTTYPE_IPADDR:
       if (val1->val_int != val2->val_int)
 	D_RETURN_(FALSE);
@@ -873,6 +881,7 @@ __bro_val_get(BroVal *val)
     case BRO_TYPE_ENUM:
     case BRO_TYPE_COUNT:
     case BRO_TYPE_COUNTER:
+      return &val->val_int64;
     case BRO_TYPE_IPADDR:
     case BRO_TYPE_NET:
       return &val->val_int;

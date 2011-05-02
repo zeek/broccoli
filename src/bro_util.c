@@ -128,4 +128,27 @@ __bro_util_ntohd(double d)
 {
   return __bro_util_htond(d);
 }
+
+uint64
+__bro_util_htonll(uint64 i)
+{
+  uchar c;
+  union {
+    uint64 i;
+    uchar c[8];
+  } x;
+
+  x.i = i;
+  c = x.c[0]; x.c[0] = x.c[7]; x.c[7] = c;
+  c = x.c[1]; x.c[1] = x.c[6]; x.c[6] = c;
+  c = x.c[2]; x.c[2] = x.c[5]; x.c[5] = c;
+  c = x.c[3]; x.c[3] = x.c[4]; x.c[4] = c;
+  return x.i;
+}
+
+uint64
+__bro_util_ntohll(uint64 i)
+{
+  return __bro_util_htonll(i);
+}
 #endif

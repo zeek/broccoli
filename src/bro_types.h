@@ -36,10 +36,10 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <bro_openssl.h>
 
 /* Protocol version */
-#define BRO_PROTOCOL_VERSION       0x06
+#define BRO_PROTOCOL_VERSION       0x07
 
 /* Data format version */
-#define BRO_DATA_FORMAT_VERSION    18
+#define BRO_DATA_FORMAT_VERSION    19
 
 /* The maximum number of messages we queue before we start
  * dropping messages. Might be worth moving this to the

@@ -118,6 +118,7 @@ extern int bro_debug_messages;
 /* ---------------------------- Typedefs ----------------------------- */
 
 @TYPEDEF_UINT@
+typedef unsigned long long uint64;
 typedef unsigned int   uint32;
 typedef unsigned short uint16;
 typedef unsigned char  uchar;
@@ -255,7 +256,7 @@ typedef struct bro_string {
  * whether they are TCP or UDP.
  */
 typedef struct bro_port {
-  uint16       port_num;   /* port number in host byte order */
+  uint64       port_num;   /* port number in host byte order */
   int          port_proto; /* IPPROTO_xxx */
 } BroPort;
 
