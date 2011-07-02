@@ -480,6 +480,19 @@ __bro_buf_read_int(BroBuf *buf, uint32 *i)
 
 
 int
+__bro_buf_read_int64(BroBuf *buf, uint64 *i)
+{
+  if (! __bro_buf_ptr_read(buf, i, sizeof(uint64)))
+    return FALSE;
+  
+  *i = __bro_util_ntohll(*i);
+  D(("Read int: %llu/0x%016llx\n", *i, *i));
+
+  return TRUE;
+}
+
+
+int
 __bro_buf_read_short(BroBuf *buf, uint16 *i)
 {
   if (! __bro_buf_ptr_read(buf, i, sizeof(uint16)))
@@ -566,6 +579,23 @@ __bro_buf_write_int(BroBuf *buf, uint32 i)
   i_tmp = htonl(i);
   result = __bro_buf_write_data(buf, &i_tmp, sizeof(uint32));
   D(("Wrote int: %i/0x%08x\n", i, i));
+
+  return result;
+}
+
+
+int
+__bro_buf_write_int64(BroBuf *buf, uint64 i)
+{
+  int result;
+  uint64 i_tmp;
+
+  if (! buf)
+    return FALSE;
+
+  i_tmp = __bro_util_htonll(i);
+  result = __bro_buf_write_data(buf, &i_tmp, sizeof(uint64));
+  D(("Wrote int64: %llu/0x%016llx\n", i, i));
 
   return result;
 }

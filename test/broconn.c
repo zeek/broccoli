@@ -154,7 +154,7 @@ conn_generic(BroConn *bc, BroRecord *conn)
     }
 
   ip.s_addr = *addr;
-  printf("%s/%u [%u/%u] -> ", inet_ntoa(ip), port->port_num, *size, *state);
+  printf("%s/%llu [%u/%u] -> ", inet_ntoa(ip), port->port_num, *size, *state);
   type = BRO_TYPE_IPADDR;
 
   if (! (addr = bro_record_get_named_val(id, "resp_h", &type)))
@@ -186,7 +186,7 @@ conn_generic(BroConn *bc, BroRecord *conn)
     }
 
   ip.s_addr = *addr;
-  printf("%s/%u [%u/%u], ", inet_ntoa(ip), port->port_num, *size, *state);
+  printf("%s/%llu [%u/%u], ", inet_ntoa(ip), port->port_num, *size, *state);
   type = BRO_TYPE_TIME;
 
   if (! (start_time = bro_record_get_named_val(conn, "start_time", &type)))

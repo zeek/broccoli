@@ -1,5 +1,15 @@
-Broccoli Changelog
-========================================================================
+1.6 | 2011-05-05 20:32:42 -0700
+
+  * Moving ChangeLog to CHANGES for consistency. (Robin Sommer)
+
+  * Fixing write/read functionality for Bro's values that are now
+    64-bit. (Jon Siwek)
+
+  * Converting build process to CMake (Jon Siwek).
+
+  * Import of Bro's aux/broccoli subdir from SVN r7107 (Jon Siwek)
+
+===== Old Subversion ChangeLog starts here.
 
 Wed Mar  2 15:38:02 PST 2011             Christian <christian@whoop.org>
 

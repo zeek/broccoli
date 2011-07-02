@@ -59,21 +59,18 @@ if (ENABLE_DEBUG)
     add_definitions(-DBRO_DEBUG)
 endif ()
 
-if (BRO_SYSCONF_FILE)
-    # BRO_SYSCONF_FILE already defined from the --with-configfile option
-    set(install_config_file false)
+# Figure out where the default broccoli.conf file will be installed
+# if the install prefix of /usr was given, change the install location
+# of the config file to be /etc instead of /usr/etc
+if (${CMAKE_INSTALL_PREFIX} STREQUAL /usr)
+    set(BRO_SYSCONF_DIR /etc)
 else ()
-    # Figure out where the default broccoli.conf file will be installed
-    # if the install prefix of /usr was given, change the install location
-    # of the config file to be /etc instead of /usr/etc
-    if (${CMAKE_INSTALL_PREFIX} STREQUAL /usr)
-        set(BRO_SYSCONF_DIR /etc)
-    else ()
-        set(BRO_SYSCONF_DIR ${CMAKE_INSTALL_PREFIX}/etc)
-    endif ()
+    set(BRO_SYSCONF_DIR ${CMAKE_INSTALL_PREFIX}/etc)
+endif ()
 
+if (NOT BRO_SYSCONF_FILE)
+    # BRO_SYSCONF_FILE not already defined from the --with-configfile option
     set(BRO_SYSCONF_FILE ${BRO_SYSCONF_DIR}/broccoli.conf)
-    set(install_config_file true)
 endif ()
 
 site_name(hostname)
@@ -84,6 +81,15 @@ else ()
     set(builddate "build date not available")
 endif ()
 set(BUILDINFO "${hostname}, ${builddate}, Debugging support: ${ENABLE_DEBUG}")
+
+# if no static/shared library preference is given, default to building both
+if (NOT DEFINED ENABLE_SHARED)
+    set(ENABLE_SHARED true)
+endif ()
+
+if (NOT DEFINED ENABLE_STATIC)
+    set(ENABLE_STATIC true)
+endif ()
 
 ########################################################################
 ## Dependency Configuration
@@ -149,11 +155,12 @@ add_definitions(-DHAVE_CONFIG_H)
 ########################################################################
 ## Install Files
 
-if (install_config_file)
-    install(FILES broccoli.conf DESTINATION ${BRO_SYSCONF_DIR})
-    set(INSTALLED_CONFIG_FILES "${INSTALLED_CONFIG_FILES} ${BRO_SYSCONF_FILE}"
-        CACHE STRING "" FORCE)
-endif ()
+include(InstallPackageConfigFile)
+
+InstallPackageConfigFile(
+    ${CMAKE_CURRENT_SOURCE_DIR}/broccoli.conf
+    ${BRO_SYSCONF_DIR}
+    broccoli.conf)
 
 install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/broccoli-config DESTINATION bin)
 
@@ -164,7 +171,8 @@ add_subdirectory(src)
 add_subdirectory(test)
 #add_subdirectory(docs)
 
-if (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/bindings/broccoli-python/CMakeLists.txt)
+if (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/bindings/broccoli-python/CMakeLists.txt
+    AND NOT DISABLE_PYTHON_BINDINGS)
     add_subdirectory(bindings/broccoli-python)
 else ()
     message(STATUS "Not building broccoli bindings")
@@ -193,7 +201,8 @@ message(
     "\n"
     "\nInstall prefix:    ${CMAKE_INSTALL_PREFIX}"
     "\nDebug mode:        ${ENABLE_DEBUG}"
-    "\nShared libs:       ${BUILD_SHARED_LIBS}"
+    "\nShared libs:       ${ENABLE_SHARED}"
+    "\nStatic libs:       ${ENABLE_STATIC}"
     "\n"
     "\nConfig file:       ${BRO_SYSCONF_FILE}"
     "\nPacket support:    ${BRO_PCAP_SUPPORT}"

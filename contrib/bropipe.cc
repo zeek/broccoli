@@ -17,6 +17,7 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <fcntl.h>
 #include <string.h>
 #include "broccoli.h"
@@ -515,14 +516,16 @@ int main(int argc, char **argv)
 					  
 				else if ( tkn_type == "int" )
 					{
-					int bint;
-					bint = atoi(tkn_data.c_str());
+					long long bint;
+					char* end_s;
+					bint = strtoll(tkn_data.c_str(), &end_s, 0);
 					bro_event_add_val(ev, BRO_TYPE_INT, NULL, &bint);
 					}
 				else if ( tkn_type == "count" )
 					{
-					uint32 buint;
-					buint = atoi(tkn_data.c_str());
+					uint64_t buint;
+					char* end_s;
+					buint = strtoull(tkn_data.c_str(), &end_s, 0);
 					bro_event_add_val(ev, BRO_TYPE_COUNT, NULL, &buint);
 					}
 				else if ( tkn_type == "double" )

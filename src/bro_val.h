@@ -56,6 +56,7 @@ struct bro_val
   union {
     char                       char_val;
     uint32                     int_val;
+    uint64                     int64_val;
     double                     double_val;
     BroPort                    port_val;
     BroString                  str_val;
@@ -64,6 +65,7 @@ struct bro_val
 
 #define val_char               val.char_val
 #define val_int                val.int_val
+#define val_int64              val.int64_val
 #define val_double             val.double_val
 #define val_port               val.port_val
 #define val_str                val.str_val
