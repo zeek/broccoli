@@ -1,8 +1,8 @@
 # Depending on whether you want to use encryption or not,
 # include "listen-clear" or "listen-ssl":
 #
-# @load communication/listen-ssl
-@load communication/listen-clear
+# @load frameworks/communication/listen-ssl
+@load frameworks/communication/listen-clear
 
 global ping_log = open_log_file("ping");
 
