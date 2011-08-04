@@ -1,4 +1,3 @@
-// $Id: bropipe.cc 6940 2009-11-14 00:38:53Z robin $
 // bropipe.cc: pipe version of generic client
 // 02/04/05
 //
