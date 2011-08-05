@@ -36,7 +36,6 @@ Installation
 To build and install into /usr/local:
 
     > ./configure
-    > cd build
     > make
     > make install
 
