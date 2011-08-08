@@ -1,3 +1,11 @@
+
+1.6-13 | 2011-08-08 16:18:24 -0700
+
+  * Update broping.c test to use 64-bit int width for Bro counts (Jon Siwek)
+
+  * Install example config files dynamically when the distribution
+    version differs from existing version on disk. (Jon Siwek)
+
 1.6-6 | 2011-07-19 17:54:57 -0700
 
   * Update broccoli tests scripts to use new Bro policy organization
@@ -57,8 +65,8 @@ Mon Jun 29 15:20:58 PDT 2009             Christian <christian@whoop.org>
 - Fix for buffered data remaining in transmit buffer when calling
   for_event_queue_flush().
 
-- Added bro_conn_get_connstats() which reports statistical information 
-  about a connection in a new dedicated structure BroConnStats. For now 
+- Added bro_conn_get_connstats() which reports statistical information
+  about a connection in a new dedicated structure BroConnStats. For now
   this is only the amount of data buffered in the rx/tx buffers.
 
 ------------------------------------------------------------------------
@@ -87,10 +95,10 @@ Mon Jun 29 15:10:59 PDT 2009             Christian <christian@whoop.org>
   have called bro_init() previously.
 
 - Broccoli now supports the callback functions OpenSSL requires for
-  thread-safe operation.  Implement those callbacks as required by your 
+  thread-safe operation.  Implement those callbacks as required by your
   threading library, hook them into a BroCtx structure previously
-  initialized using bro_ctx_init(), and pass the structure to  
-  bro_init().  This will hook the callbacks into OpenSSL for you. 
+  initialized using bro_ctx_init(), and pass the structure to
+  bro_init().  This will hook the callbacks into OpenSSL for you.
 
   O'Reilly's book "Network Security with OpenSSL" provides an example
   of how to implement the callbacks.
@@ -165,9 +173,9 @@ Sat Oct  4 15:05:07 CEST 2008            Christian <christian@whoop.org>
 - Added bro_record_get_nth_name() to the API (Seth Hall).
 - make install no longer worked for documentation, apparently as part
   of Bro's make install cleanup. This isn't quite right since gtk-doc
-  documentation is normally installed in a well-known place and 
-  Broccoli will normally need to be installed via "make install", but 
-  for now I'm leaving it uninstalled and instead provide a specific 
+  documentation is normally installed in a well-known place and
+  Broccoli will normally need to be installed via "make install", but
+  for now I'm leaving it uninstalled and instead provide a specific
   "install-docs" target for people who want documentation installed.
 - Documentation updated where missing, and rebuilt.
 - Copyright years updated.
@@ -176,7 +184,7 @@ Sat Oct  4 15:05:07 CEST 2008            Christian <christian@whoop.org>
 
 Mon Sep 22 21:34:13 CEST 2008            Christian <christian@whoop.org>
 
-- Updated broping.bro (and broping-record.bro, slightly) to explicitly 
+- Updated broping.bro (and broping-record.bro, slightly) to explicitly
   declare the used event types ahead of their use.
 
 ------------------------------------------------------------------------
@@ -196,7 +204,7 @@ Mon Sep  8 11:30:35 CEST 2008            Christian <christian@whoop.org>
 Wed Jul 16 01:47:16 PDT 2008             Christian <christian@whoop.org>
 
 - Python bindings for Broccoli are now provided in the bindings/python
-  subdirectory (Robin Sommer).  They are not built automatically. See 
+  subdirectory (Robin Sommer).  They are not built automatically. See
   the instructions in bindings/python/README for details.
 - Minor documentation setup tweaks.
 
@@ -224,7 +232,7 @@ Thu Sep 13 13:56:58 PDT 2007             Christian <christian@whoop.org>
 
 - autogen.sh now uses --force when running libtoolize, which at least
   in some setups seems to be necessary to avoid bizarre build issues.
-  (In the particular case encountered, these looked like run-together 
+  (In the particular case encountered, these looked like run-together
   ar and runlib invocations). Thanks to Po-Ching Lin for helping nail
   this down.
 
@@ -260,7 +268,7 @@ Tue Sep  4 12:36:53 PDT 2007             Christian <christian@whoop.org>
   NOTE: This introduces an API incompatibility. If you were previously
         using the compact callback API, you will need to update your
         code! I bumped up the library version info to 2:0:0 to signal
-        this.  
+        this.
 
 - Fixed a bug in the implementation of BRO_CFLAG_YIELD and some SGML-
   violating documentation of same.
@@ -274,7 +282,7 @@ Thu Aug 16 15:24:51 CEST 2007            Christian <christian@whoop.org>
 ------------------------------------------------------------------------
 
 Sat Aug 11 04:59:35 PDT 2007                      Robin <robin@icir.org>
-	
+
 - New flag for Broccoli's connections: with BRO_CFLAG_YIELD,
   bro_conn_process_input() processes at most one event at a time and then
   returns (Robin Sommer).
@@ -282,7 +290,7 @@ Sat Aug 11 04:59:35 PDT 2007                      Robin <robin@icir.org>
 - The new Broccoli function bro_conn_new_socket() creates a connection
   from an existing socket, which can then be used with listen()/accept()
   to have Broccoli listen for incoming connections (Robin Sommer).
-	
+
 ------------------------------------------------------------------------
 
 Fri Jul  6 18:18:05 PDT 2007             Christian <christian@whoop.org>
@@ -395,7 +403,7 @@ Tue May  2 13:25:31 BST 2006             Christian <christian@whoop.org>
 
 - Added generated HTML documentation to CVS, so it is guaranteed to be
   included in tarballs generated via dist/distcheck, regardless of
-  whether GtkDoc support exists on the build system or not. 
+  whether GtkDoc support exists on the build system or not.
 
 ------------------------------------------------------------------------
 
@@ -659,7 +667,7 @@ repeatedly for establishing connections.
 
 Sorry for the inconvenience but I really think this is a lot nicer than
 the old API. The examples and documentation have been updated accor-
-dingly.	
+dingly.
 
 ------------------------------------------------------------------------
 
@@ -1437,7 +1445,7 @@ use of ca-create and ca-issue.
 
 Thu Dec 23 14:33:56 GMT 2004             Christian <christian@whoop.org>
 
-- Added sections support for configuration files. Sections can be 
+- Added sections support for configuration files. Sections can be
 declared at arbitrary points in the config file, using the same syntax
 as in OpenSSL config files. There can be a global section at the
 beginning of the file, before the first declared sections. Sections are
@@ -1460,7 +1468,7 @@ hopefully keep the build more portable.
 - Use of LFLAGS and YFLAGS moved to AM_LFLAGS and AM_YFLAGS, given the
 warnings issued when using automake 1.9.
 
-- First shot at fixing the buffer flushing issues I see when using 
+- First shot at fixing the buffer flushing issues I see when using
 encrypted connections.
 
 ------------------------------------------------------------------------
@@ -1471,7 +1479,7 @@ Fri Dec 10 16:31:26 GMT 2004             Christian <christian@whoop.org>
 - Added OpenSSL as requirement to spec file.
 - Changed broping policies to always use the same port
 - Updated broccoli.conf: added keys for the CA's and the host's cert.
-	
+
 ------------------------------------------------------------------------
 
 Thu Dec  9 14:59:24 GMT 2004             Christian <christian@whoop.org>
@@ -1559,8 +1567,8 @@ More work on documentation, much is outdated now.
 ------------------------------------------------------------------------
 
 Sat Dec  4 02:05:30 GMT 2004             Christian <christian@whoop.org>
- 
+
 - Started a ChangeLog. No detailed ChangeLog information was kept
 previous to this commit.
- 
+
 ------------------------------------------------------------------------

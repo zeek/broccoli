@@ -32,6 +32,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <time.h>
 #include <errno.h>
 #include <string.h>
+#include <inttypes.h>
 
 #include <broccoli.h>
 
@@ -45,7 +46,7 @@ char *host_str;
 char *port_str;
 
 int count = -1;
-int seq;
+uint64 seq;
 
 static void
 usage(void)
@@ -64,11 +65,11 @@ usage(void)
 
 
 static void
-bro_pong(BroConn *conn, void *data, double *src_time, double *dst_time, uint32 *seq)
+bro_pong(BroConn *conn, void *data, double *src_time, double *dst_time, uint64 *seq)
 {
   double now = bro_util_current_time();
 
-  printf("pong event from %s: seq=%i, time=%f/%f s\n",
+  printf("pong event from %s: seq=%"PRIu64", time=%f/%f s\n",
 	 host_str, *seq, *dst_time - *src_time,
 	 now - *src_time);
 
@@ -81,7 +82,7 @@ bro_pong_record(BroConn *conn, void *data, BroRecord *rec)
 {
   double now = bro_util_current_time();
   double *src_time, *dst_time;
-  uint32 *seq;
+  uint64 *seq;
   int type = BRO_TYPE_COUNT;
 
   if (! (seq = bro_record_get_nth_val(rec, 0, &type)))
@@ -106,7 +107,7 @@ bro_pong_record(BroConn *conn, void *data, BroRecord *rec)
       return;
     }
 
-  printf("pong event from %s: seq=%i, time=%f/%f s\n",
+  printf("pong event from %s: seq=%"PRIu64", time=%f/%f s\n",
 	 host_str, *seq, *dst_time - *src_time,
 	 now - *src_time);
   
@@ -119,7 +120,7 @@ bro_pong_compact(BroConn *conn, void *data, BroEvMeta *meta)
 {
   double *src_time;
   double *dst_time;
-  uint32 *seq;
+  uint64 *seq;
   
   /* Sanity-check arguments: */
 
@@ -160,7 +161,7 @@ bro_pong_compact(BroConn *conn, void *data, BroEvMeta *meta)
 
   src_time = (double *) meta->ev_args[0].arg_data;
   dst_time = (double *) meta->ev_args[1].arg_data;
-  seq = (uint32 *) meta->ev_args[2].arg_data;
+  seq = (uint64 *) meta->ev_args[2].arg_data;
   
   bro_pong(conn, data, src_time, dst_time, seq);
 }
