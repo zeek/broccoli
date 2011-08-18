@@ -69,7 +69,6 @@ static BroObjFactoryEntry obj_factories[] = {
   { SER_PORT_VAL,         (BroSObjectNew) __bro_val_new },
   { SER_ADDR_VAL,         (BroSObjectNew) __bro_val_new },
   { SER_SUBNET_VAL,       (BroSObjectNew) __bro_val_new },
-  { SER_NET_VAL,          (BroSObjectNew) __bro_val_new },
   { SER_STRING_VAL,       (BroSObjectNew) __bro_val_new },
   { SER_ENUM_VAL,         (BroSObjectNew) __bro_val_new },
   { SER_LIST_VAL,         (BroSObjectNew) __bro_list_val_new },

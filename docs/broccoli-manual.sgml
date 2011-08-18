@@ -760,10 +760,6 @@ if (! (ev = bro_event_new("report_conns"))) {
   <entry><constant>BRO_TYPE_IPADDR</constant></entry>
   <entry><function>uint32</function>, in network byte order</entry>
 </row><row>
-  <entry>IPv4 network</entry>
-  <entry><constant>BRO_TYPE_NET</constant></entry>
-  <entry><function>uint32</function>, in network byte order</entry>
-</row><row>
   <entry>IPv4 subnet</entry>
   <entry><constant>BRO_TYPE_SUBNET</constant></entry>
   <entry><function>BroSubnet</function>, with the sn_net member in network byte order</entry>

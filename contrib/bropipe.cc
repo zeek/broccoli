@@ -173,9 +173,9 @@ void showtypes(void)
 	{
 	cout << "Legitimate event types are:\n"
 		"	string, urlstring, int, count, double, bool, time, \n"
-		"	interval, port, addr, net, subnet\n\n"
+		"	interval, port, addr, subnet\n\n"
 		"	examples: string=foo, port=23/tcp, addr=10.10.10.10, \n"
-		"	net=10.10.10.0, subnet=10.0.0.0/8\n"
+		"	subnet=10.0.0.0/8\n"
 		"	urlstring is a url encoded string type - use this when\n"
 		"	whitespace can be found in the strings\n";
 	exit(0);
@@ -588,14 +588,6 @@ int main(int argc, char **argv)
 					//badd=htonl((uint32)inet_addr(tkn_data.c_str()));
  
 					bro_event_add_val(ev, BRO_TYPE_IPADDR, NULL, &badd);
-					}
-				else if ( tkn_type == "net" )
-					{
-					uint32 bnet;
-					// bnet=htonl((uint32)inet_addr(tkn_data.c_str()));
-					bnet=(uint32)inet_addr(tkn_data.c_str());
- 
-					bro_event_add_val(ev, BRO_TYPE_NET, NULL, &bnet);
 					}
 				else if ( tkn_type == "subnet" )
 					{
