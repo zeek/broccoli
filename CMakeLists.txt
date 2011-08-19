@@ -39,6 +39,8 @@ set(SOVersionRelease 0)
 
 if (ENABLE_DEBUG)
     set(CMAKE_BUILD_TYPE Debug)
+    # Broccoli's debug preprocessor definition differs from other Bro projects
+    add_definitions(-DBRO_DEBUG)
 else ()
     set(CMAKE_BUILD_TYPE RelWithDebInfo)
 endif ()
@@ -48,15 +50,15 @@ endif ()
 if (NOT EXTRA_COMPILE_FLAGS)
     set(EXTRA_COMPILE_FLAGS "-Wall -Wno-unused")
 
+    if (ENABLE_DEBUG)
+        # manual add of -g works around its omission in FreeBSD's CMake port
+        set(EXTRA_COMPILE_FLAGS "${EXTRA_COMPILE_FLAGS} -g -DDEBUG")
+    endif ()
+
     # Compiler flags may already exist in CMake cache (e.g. when specifying
     # CFLAGS environment variable before running cmake for the the first time)
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${EXTRA_COMPILE_FLAGS}")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${EXTRA_COMPILE_FLAGS}")
-endif ()
-
-# Broccoli's debug preprocessor definition differs from other Bro projects
-if (ENABLE_DEBUG)
-    add_definitions(-DBRO_DEBUG)
 endif ()
 
 # Figure out where the default broccoli.conf file will be installed

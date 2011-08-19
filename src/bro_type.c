@@ -151,7 +151,6 @@ __bro_type_new_of_type(int type_tag, const char *type_name)
       break;
       
     case BRO_TYPE_IPADDR:
-    case BRO_TYPE_NET:
       internal_tag = BRO_INTTYPE_IPADDR;
       break;
       
