@@ -131,7 +131,6 @@ __bro_val_new_of_type(int type, const char *type_name)
     case BRO_TYPE_TIMER:
     case BRO_TYPE_PORT:
     case BRO_TYPE_IPADDR:
-    case BRO_TYPE_NET:
     case BRO_TYPE_SUBNET:
     case BRO_TYPE_ENUM:
       if (! (val = __bro_val_new()))
@@ -252,7 +251,6 @@ __bro_val_assign(BroVal *val, const void *data)
       break;
       
     case BRO_TYPE_IPADDR:
-    case BRO_TYPE_NET:
       val->val_int = *((uint32 *) data);
       break;
       
@@ -602,10 +600,6 @@ __bro_val_write(BroVal *val, BroConn *bc)
       obj->type_id = SER_ADDR_VAL;
       break;
       
-    case BRO_TYPE_NET:
-      obj->type_id = SER_NET_VAL;
-      break;
-      
     case BRO_TYPE_SUBNET:
       obj->type_id = SER_SUBNET_VAL;
       break;
@@ -883,7 +877,6 @@ __bro_val_get(BroVal *val)
     case BRO_TYPE_COUNTER:
       return &val->val_int64;
     case BRO_TYPE_IPADDR:
-    case BRO_TYPE_NET:
       return &val->val_int;
       
     case BRO_TYPE_PORT:
