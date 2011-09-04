@@ -1,4 +1,15 @@
 
+1.6-26 | 2011-09-04 09:26:47 -0700
+
+  * FindPCAP now links against thread library when necessary (e.g.
+    PF_RING's libpcap). (Jon Siwek)
+
+  * Install binaries with an RPATH. (Jon Siwek)
+
+  * Remove the 'net' type from Broccoli. Addresses #535. (Jon Siwek)
+
+  * Workaround for FreeBSD CMake port missing debug flags. (Jon Siwek)
+
 1.6-13 | 2011-08-08 16:18:24 -0700
 
   * Update broping.c test to use 64-bit int width for Bro counts (Jon Siwek)
