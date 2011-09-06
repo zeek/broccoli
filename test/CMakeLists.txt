@@ -1,4 +1,4 @@
-include_directories(${CMAKE_CURRENT_BINARY_DIR}/../src)
+include_directories(BEFORE ${CMAKE_CURRENT_BINARY_DIR}/../src)
 
 add_executable(broping broping.c)
 target_link_libraries(broping ${Broccoli_LIBRARY})
