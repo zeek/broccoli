@@ -10,11 +10,17 @@ BUILD=build
 all: configured
 	( cd $(BUILD) && make )
 
+doc: configured
+	( cd $(BUILD) && make doc )
+
 install: configured
 	( cd $(BUILD) && make install )
 
-clean: configured
+clean: configured docclean
 	( cd $(BUILD) && make clean )
+
+docclean: configured
+	( cd $(BUILD) && make docclean )
 
 dist: configured
 	( cd $(BUILD) && make package_source )

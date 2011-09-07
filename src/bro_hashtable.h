@@ -45,9 +45,9 @@ typedef void (*BroHTFreeFunc)(void *data);
 
 /**
  * BroHTCallback - The signature of functions used with __bro_ht_foreach()
- * @key: key of current hash table item
- * @data: value part of current hash table item.
- * @user_data: arbitrary user data passed through from __bro_ht_foreach().
+ * @param key key of current hash table item
+ * @param data value part of current hash table item.
+ * @param user_data arbitrary user data passed through from __bro_ht_foreach().
  *
  * Returning %FALSE signals abortion of the loop.
  */
@@ -55,23 +55,23 @@ typedef int (*BroHTCallback)(void *key, void *data, void *user_data);
 
 /**
  * __bro_ht_new - creates new hashtable.
- * @hash_func: hashing function to use, see BroHTHashFunc.
- * @cmp_func: element comparison function to use, see BroHTCmpFunc.
- * @key_free_func: callback for erasing key of an item, if desirable.
- * @val_free_func: callback for erasing data item itself, if desirable.
- * @use_age_list: whether to maintain an age list (%TRUE) or not (%FALSE).
+ * @param hash_func hashing function to use, see BroHTHashFunc.
+ * @param cmp_func element comparison function to use, see BroHTCmpFunc.
+ * @param key_free_func callback for erasing key of an item, if desirable.
+ * @param val_free_func callback for erasing data item itself, if desirable.
+ * @param use_age_list whether to maintain an age list (%TRUE) or not (%FALSE).
  *
- * The function creates and returns a new hashtable. @key_free_func and
- * @val_free_func can be used to clean up contained elements automatically
+ * The function creates and returns a new hashtable. @p key_free_func and
+ * @p val_free_func can be used to clean up contained elements automatically
  * as they are removed from the table. If you don't want this feature,
  * pass %NULL -- you can still iterate over all items in the table using
  * __bro_ht_foreach().
  *
  * The table can optionally maintain an age list (see
  * __bro_ht_get_oldest() and __bro_ht_evict_oldest()), pass %TRUE to
- * @use_age_list if desired.
+ * @p use_age_list if desired.
  *
- * Returns: new table, or %NULL when out of memory.
+ * @returns new table, or %NULL when out of memory.
  */
 BroHT    *__bro_ht_new(BroHTHashFunc hash_func,
 		       BroHTCmpFunc cmp_func,
@@ -89,7 +89,7 @@ int       __bro_ht_get_size(BroHT *ht);
 void      __bro_ht_foreach(BroHT *ht, BroHTCallback cb, void *user_data);
 
 /* Returns pointers to key and value of oldest item in the table,
- * if age list is maintained. Otherwise sets both @key and @data
+ * if age list is maintained. Otherwise sets both @p key and @p data
  * to %NULL.
  */
 void      __bro_ht_get_oldest(BroHT *ht, void **key, void **data);
