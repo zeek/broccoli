@@ -179,7 +179,7 @@ install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/broccoli-config DESTINATION bin)
 
 add_subdirectory(src)
 add_subdirectory(test)
-#add_subdirectory(docs)
+add_subdirectory(doc)
 
 if (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/bindings/broccoli-python/CMakeLists.txt
     AND NOT DISABLE_PYTHON_BINDINGS)

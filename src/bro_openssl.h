@@ -45,9 +45,9 @@ int       __bro_openssl_read(BroConn *bc, uchar *buf, uint buf_size);
 
 /**
  * __bro_openssl_write - writes a chunk of data to the connection.
- * @bc: Bro connection handle.
- * @buf: buffer of data to write.
- * @buf_size: size of buffer pointed to by @buf.
+ * @param bc Bro connection handle.
+ * @param buf buffer of data to write.
+ * @param buf_size size of buffer pointed to by @p buf.
  *
  * Returns: value < 0 on error, 1 if all data was written, 0
  * otherwise (*no* data being written).

@@ -55,7 +55,7 @@ int     __bro_sem_detach(BroSem *sem);
 
 /**
  * __bro_sem_decr - decreases semaphore.
- * @sem: semaphore.
+ * @param sem semaphore.
  *
  * The function decreases the value of the semaphore by one, returning
  * if the initial value was greater than 0, and blocking otherwise.
@@ -67,7 +67,7 @@ int     __bro_sem_decr(BroSem *sem);
 
 /**
  * __bro_sem_trydecr - decreases semaphore, but never blocks
- * @sem: semaphore.
+ * @param sem semaphore.
  *
  * The function decreases the value of the semaphore by one, returning
  * if the initial value was greater than 0. If the semaphore is
@@ -80,7 +80,7 @@ int     __bro_sem_trydecr(BroSem *sem);
 
 /**
  * __bro_sem_incr - increases semaphore.
- * @sem: semaphore.
+ * @param sem: semaphore.
  *
  * The function increases the value of the semaphore by 1.
  *
@@ -91,11 +91,11 @@ int     __bro_sem_incr(BroSem *sem);
 
 /**
  * __bro_sem_get - returns current value of sempahore.
- * @sem: semaphore.
- * @result: result pointer.
+ * @param sem semaphore.
+ * @param result result pointer.
  *
  * The function returns the current value of the semaphore through
- * the @result pointer.
+ * the @p result pointer.
  *
  * Returns: %TRUE on success, %FALSE otherwise.
  */

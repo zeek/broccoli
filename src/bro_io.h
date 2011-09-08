@@ -36,19 +36,19 @@ BroMsg * __bro_io_msg_new(char type, uint32 peer_id);
 
 /**
  * __bro_io_msg_free -- releases message plus any data hooked into it.
- * @msg: msg to free.
+ * @param msg msg to free.
  */
 void     __bro_io_msg_free(BroMsg *msg);
 
 /**
  * __bro_io_msg_set_cont -- sets the content of a message.
- * @msg: message to set content of.
- * @type: type of the message, a BRO_MSG_CONT_xxx constant.
- * @content: the content itself.
+ * @param msg message to set content of.
+ * @param type type of the message, a BRO_MSG_CONT_xxx constant.
+ * @param content the content itself.
  *
- * The function sets @msg's content, of given @type, to @content.
+ * The function sets @p msg's content, of given @p type, to @p content.
  * Note that __bro_io_msg_free will release the data pointed to
- * by @content, depending on @type!
+ * by @p content, depending on @p type!
  */
 void     __bro_io_msg_set_cont(BroMsg *msg, int type, void *content);
 
@@ -57,69 +57,69 @@ void     __bro_io_msg_queue_dump(BroConn *bc, const char *message);
 
 /**
  * __bro_io_raw_queue -- enqueues raw data.
- * @bc: connection handle.
- * @type: type of the message, a BRO_MSG_xxx value.
- * @data: raw bytes of data
- * @data_len: length of @data.
+ * @param bc connection handle.
+ * @param type type of the message, a BRO_MSG_xxx value.
+ * @param data raw bytes of data
+ * @param data_len length of @p data.
  *
  * The function enqueues a message containing raw data for a
- * message of type @type.
+ * message of type @p type.
  *
- * Returns: %FALSE on error, %TRUE otherwise.
+ * @returns %FALSE on error, %TRUE otherwise.
  */
 int      __bro_io_raw_queue(BroConn *bc, int type,
 			    uchar *data, int data_len);
 
 /**
  * __bro_io_rawbuf_queue -- enqueues raw buffer data.
- * @bc: connection handle.
- * @type: type of the message, a BRO_MSG_xxx value.
- * @buf: buffer with payload to be enqueued.
+ * @param bc connection handle.
+ * @param type type of the message, a BRO_MSG_xxx value.
+ * @param buf buffer with payload to be enqueued.
  *
  * The function enqueues a message containing raw buffer data for a
- * message of type @type.
+ * message of type @p type.
  *
- * NOTE: @buf's ownership is taken over by the function. You do not
+ * NOTE: @p buf's ownership is taken over by the function. You do not
  * need to clean it up, and should not expect the pointer to it to
  * remain valid.
  *
- * Returns: %FALSE on error, %TRUE otherwise.
+ * @returns %FALSE on error, %TRUE otherwise.
  */
 int      __bro_io_rawbuf_queue(BroConn *bc, int type, BroBuf *buf);
 
 /**
  * __bro_io_event_queue -- enqueues an event.
- * @bc: connection handle.
- * @ev: event handle.
+ * @param bc connection handle.
+ * @param ev event handle.
  *
  * The function enqueues an event for later transmission.
  *
- * Returns: %FALSE on error, %TRUE otherwise.
+ * @returns %FALSE on error, %TRUE otherwise.
  */
 int      __bro_io_event_queue(BroConn *bc, BroEvent *ev);
 
 /**
  * __bro_io_request_queue -- enqueues a request.
- * @bc: connection handle.
- * @req: request handle.
+ * @param bc connection handle.
+ * @param req request handle.
  *
  * The function enqueues an request for later transmission.
  *
- * Returns: %FALSE on error, %TRUE otherwise.
+ * @returns %FALSE on error, %TRUE otherwise.
  */
 int      __bro_io_request_queue(BroConn *bc, BroRequest *req);
 
+#ifdef BRO_PCAP_SUPPORT
 /**
  * __bro_io_packet_queue - enqueues a pcap packet.
- * @bc: connection handle.
- * @packet: pcap packet.
+ * @param bc connection handle.
+ * @param packet pcap packet.
  *
  * The function enqueues a pcap packet wrapped via bro_packet_new()
  * for later transmission.
  *
- * Returns: %FALSE on error, %TRUE otherwise.
+ * @returns %FALSE on error, %TRUE otherwise.
  */
-#ifdef BRO_PCAP_SUPPORT
 int      __bro_io_packet_queue(BroConn *bc, BroPacket *packet);
 #endif
 
@@ -130,7 +130,7 @@ void     __bro_io_writer_loop(BroConn *bc);
 
 /**
  * __bro_io_loop -- performs I/O in the handler process.
- * @bc: connection handle.
+ * @param bc connection handle.
  *
  * This function is the implementation of the I/O handler processes.
  * It sits in a blocking loop and depending on the request sent to it via
