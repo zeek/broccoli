@@ -1,3 +1,7 @@
+/*! @mainpage Broccoli: The Bro Client Communications Library
+ * See broccoli.h for the main API reference.
+ */
+
 /*
        B R O C C O L I  --  The Bro Client Communications Library
 
@@ -70,6 +74,8 @@ extern int bro_debug_messages;
  * to the values of the TypeTag enum in Bro's Type.h. Use
  * these values with bro_event_add_val(), bro_record_add_val(),
  * bro_record_get_nth_val() and bro_record_get_named_val().
+ */
+/**
  *
  * BRO_TYPE_UNKNOWN is not used in the data exchange,
  * see bro_record_get_{nth,named}_val() for its use.
@@ -106,12 +112,12 @@ extern int bro_debug_messages;
  * and bro_conn_new_str(). See manual for details.
  */
 #define BRO_CFLAG_NONE                      0
-#define BRO_CFLAG_RECONNECT           (1 << 0) /* Attempt transparent reconnects */
-#define BRO_CFLAG_ALWAYS_QUEUE        (1 << 1) /* Queue events sent while disconnected */
-#define BRO_CFLAG_SHAREABLE           (1 << 2) /* DO NOT USE -- no longer supported */
-#define BRO_CFLAG_DONTCACHE           (1 << 3) /* Ask peer not to use I/O cache (default) */
-#define BRO_CFLAG_YIELD               (1 << 4) /* Process just one event at a time */
-#define BRO_CFLAG_CACHE               (1 << 5) /* Ask per to use I/O cache */
+#define BRO_CFLAG_RECONNECT           (1 << 0) /**< Attempt transparent reconnects */
+#define BRO_CFLAG_ALWAYS_QUEUE        (1 << 1) /**< Queue events sent while disconnected */
+#define BRO_CFLAG_SHAREABLE           (1 << 2) /**< DO NOT USE -- no longer supported */
+#define BRO_CFLAG_DONTCACHE           (1 << 3) /**< Ask peer not to use I/O cache (default) */
+#define BRO_CFLAG_YIELD               (1 << 4) /**< Process just one event at a time */
+#define BRO_CFLAG_CACHE               (1 << 5) /**< Ask per to use I/O cache */
 
 
 /* ---------------------------- Typedefs ----------------------------- */
@@ -229,7 +235,7 @@ typedef void (*OpenSSL_dynlock_free_func) (struct CRYPTO_dynlock_value *mutex,
 /* ---------------------------- Structures --------------------------- */
 
 
-/* Initialization context for the Broccoli library. */
+/** Initialization context for the Broccoli library. */
 typedef struct bro_ctx {
   OpenSSL_lock_func lock_func;
   OpenSSL_thread_id_func id_func;
@@ -238,62 +244,62 @@ typedef struct bro_ctx {
   OpenSSL_dynlock_free_func dl_free_func;
 } BroCtx;
 
-/* Statistical properties of a given connection. */
+/** Statistical properties of a given connection. */
 typedef struct bro_conn_stats {
-  int tx_buflen; // Number of bytes to process in output buffer.
-  int rx_buflen; // Number of bytes to process in input buffer.
+  int tx_buflen; ///< Number of bytes to process in output buffer.
+  int rx_buflen; ///< Number of bytes to process in input buffer.
 } BroConnStats;
 
-/* BroStrings are used to access string parameters in received events.
+/** BroStrings are used to access string parameters in received events.
  */
 typedef struct bro_string {
   uint32       str_len;
   uchar       *str_val;
 } BroString;
 
-/* Ports in Broccoli do not only consist of a number but also indicate
+/** Ports in Broccoli do not only consist of a number but also indicate
  * whether they are TCP or UDP.
  */
 typedef struct bro_port {
-  uint64       port_num;   /* port number in host byte order */
-  int          port_proto; /* IPPROTO_xxx */
+  uint64       port_num;   /**< port number in host byte order */
+  int          port_proto; /**< IPPROTO_xxx */
 } BroPort;
 
-/* Subnets are a 4-byte address with a prefix width in bits.
+/** Subnets are a 4-byte address with a prefix width in bits.
  */
 typedef struct bro_subnet
 {
-  uint32       sn_net;     /* IP address in network byte order */
-  uint32       sn_width;   /* Length of prefix to consider. */
+  uint32       sn_net;     /**< IP address in network byte order */
+  uint32       sn_width;   /**< Length of prefix to consider. */
 } BroSubnet;
 
-/* Encapsulation of arguments passed to an event callback,
+/** Encapsulation of arguments passed to an event callback,
  * for the compact style of argument passing.
  */
 typedef struct bro_ev_arg
 {
-  void        *arg_data;   /* Pointer to the actual event argument */
-  int          arg_type;   /* A BRO_TYPE_xxx constant */
+  void        *arg_data;   /** Pointer to the actual event argument */
+  int          arg_type;   /**< A BRO_TYPE_xxx constant */
 } BroEvArg;
 
-/* Metadata for an event, passed to callbacks of the BroCompactEventFunc
+/** Metadata for an event, passed to callbacks of the BroCompactEventFunc
  * prototype.
  */
 struct bro_ev_meta
 {
-  const char  *ev_name;    /* The name of the event */
-  double       ev_ts;      /* Timestamp of event, taken from BroEvent itself */
-  int          ev_numargs; /* How many arguments are passed */
-  BroEvArg    *ev_args;    /* Array of BroEvArgs, one for each argument */
-  const uchar *ev_start;   /* Start and end pointers to serialized version */
-  const uchar *ev_end;     /* of currently processed event. */
+  const char  *ev_name;   /**< The name of the event */
+  double       ev_ts;     /**< Timestamp of event, taken from BroEvent itself */
+  int          ev_numargs;/**< How many arguments are passed */
+  BroEvArg    *ev_args;   /**< Array of BroEvArgs, one for each argument */
+  const uchar *ev_start;  /**< Start and end pointers to serialized version */
+  const uchar *ev_end;    /**< of currently processed event. */
 };
 
 #cmakedefine BRO_PCAP_SUPPORT
 #ifdef BRO_PCAP_SUPPORT
 #include <pcap.h>
 
-/* Broccoli can send and receive pcap-captured packets, wrapped into
+/** Broccoli can send and receive pcap-captured packets, wrapped into
  * the following structure:
  */
 struct bro_packet
