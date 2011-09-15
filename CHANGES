@@ -1,4 +1,13 @@
 
+1.6-35 | 2011-09-15 16:48:01 -0700
+
+  * Adding Ruby bindings for Broccoli. (Seth Hall)
+
+  * Broccoli API docs are now generated via Doxygen. Addresses #563.
+    (Jon Siwek)
+
+  * Converting manual to reST-format. (Don Appleman and Jon Siwek)
+
 1.6-26 | 2011-09-04 09:26:47 -0700
 
   * FindPCAP now links against thread library when necessary (e.g.

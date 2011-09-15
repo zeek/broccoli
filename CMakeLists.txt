@@ -185,7 +185,14 @@ if (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/bindings/broccoli-python/CMakeLists.txt
     AND NOT DISABLE_PYTHON_BINDINGS)
     add_subdirectory(bindings/broccoli-python)
 else ()
-    message(STATUS "Not building broccoli bindings")
+    message(STATUS "Not building broccoli-python bindings")
+endif ()
+
+if (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/bindings/broccoli-ruby/CMakeLists.txt
+    AND NOT DISABLE_RUBY_BINDINGS)
+    add_subdirectory(bindings/broccoli-ruby)
+else ()
+    message(STATUS "Not building broccoli-ruby bindings")
 endif ()
 
 ########################################################################

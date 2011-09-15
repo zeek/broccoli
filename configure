@@ -31,6 +31,7 @@ Usage: $0 [OPTION]... [VAR=VALUE]...
                            (no effect on broccoli bindings)
     --disable-static       don't build static libraries [default=no]
     --disable-python       don't try to build python bindings for broccoli
+    --disable-ruby         don't try to build ruby bindings for broccoli
     --disable-packets      Do not support tx/rx of pcap packets
     --with-configfile=FILE use config file at location <FILE>
                            instead of the default broccoli.conf
@@ -45,6 +46,9 @@ Usage: $0 [OPTION]... [VAR=VALUE]...
     --with-python=PATH     path to Python interpreter
     --with-python-lib=PATH path to libpython
     --with-python-inc=PATH path to Python headers
+    --with-ruby=PATH       path to Python interpreter
+    --with-ruby-lib=PATH   path to libpython
+    --with-ruby-inc=PATH   path to Python headers
     --with-swig=PATH       path to SWIG executable
 
   Packaging Options (for developers):
@@ -115,6 +119,9 @@ while [ $# -ne 0 ]; do
         --disable-python)
             append_cache_entry DISABLE_PYTHON_BINDINGS     BOOL   true
             ;;
+        --disable-ruby)
+            append_cache_entry DISABLE_RUBY_BINDINGS     BOOL   true
+            ;;
         --disable-packets)
             append_cache_entry BRO_PCAP_SUPPORT     BOOL   false
             ;;
@@ -145,6 +152,16 @@ while [ $# -ne 0 ]; do
         --with-python-inc=*)
             append_cache_entry PYTHON_INCLUDE_DIR   PATH    $optarg
             append_cache_entry PYTHON_INCLUDE_PATH  PATH    $optarg
+            ;;
+        --with-ruby=*)
+            append_cache_entry RUBY_EXECUTABLE    PATH    $optarg
+            ;;
+        --with-ruby-lib=*)
+            append_cache_entry RUBY_LIBRARY       PATH    $optarg
+            ;;
+        --with-ruby-inc=*)
+            append_cache_entry RUBY_INCLUDE_DIR   PATH    $optarg
+            append_cache_entry RUBY_INCLUDE_PATH  PATH    $optarg
             ;;
         --with-swig=*)
             append_cache_entry SWIG_EXECUTABLE      PATH    $optarg
