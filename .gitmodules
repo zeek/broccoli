@@ -4,3 +4,6 @@
 [submodule "bindings/broccoli-ruby"]
 	path = bindings/broccoli-ruby
 	url = git://git.bro-ids.org/broccoli-ruby
+[submodule "cmake"]
+	path = cmake
+	url = git://git.bro-ids.org/cmake
