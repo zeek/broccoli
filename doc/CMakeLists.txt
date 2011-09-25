@@ -9,14 +9,12 @@ add_custom_target(broccolidoc
 add_custom_target(broccolidocclean
                   COMMAND rm -rf ${CMAKE_CURRENT_BINARY_DIR}/html)
 
-if (TARGET doc)
-    add_dependencies(doc broccolidoc)
-else ()
-    add_custom_target(doc DEPENDS broccolidoc)
+if (NOT TARGET doc)
+    add_custom_target(doc)
 endif ()
+add_dependencies(doc broccolidoc)
 
-if (TARGET docclean)
-    add_dependencies(docclean broccolidocclean)
-else ()
-    add_custom_target(docclean DEPENDS broccolidocclean)
+if (NOT TARGET docclean)
+    add_custom_target(docclean)
 endif ()
+add_dependencies(docclean broccolidocclean)
