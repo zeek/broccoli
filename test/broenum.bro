@@ -1,23 +1,15 @@
-# Depending on whether you want to use encryption or not,
-# include "listen-clear" or "listen-ssl":
-#
-# @load frameworks/communication/listen-ssl
-@load frameworks/communication/listen-clear
+@load frameworks/communication/listen
 
 # Let's make sure we use the same port no matter whether we use encryption or not:
 #
-@ifdef (Communication::listen_port_clear)
-redef Communication::listen_port_clear    = 47758/tcp;
-@endif
+redef Communication::listen_port = 47758/tcp;
 
-# If we're using encrypted communication, redef the SSL port and hook in
-# the necessary certificates:
-#
-@ifdef (Communication::listen_port_ssl)
-redef Communication::listen_port_ssl      = 47758/tcp;
-redef ssl_ca_certificate   = "<path>/ca_cert.pem";
-redef ssl_private_key      = "<path>/bro.pem";
-@endif
+# Redef this to T if you want to use encryption.
+redef Communication::listen_encrypted = F;
+
+# Set the SSL certificates being used to something real if you are using encryption.
+#redef ssl_ca_certificate   = "<path>/ca_cert.pem";
+#redef ssl_private_key      = "<path>/bro.pem";
 
 module enumtest;
 

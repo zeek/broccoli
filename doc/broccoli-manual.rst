@@ -1142,14 +1142,15 @@ quickly enable/disable a certificate configuration, the
     /broccoli/host_cert        <path>/bro_cert.pem
     /broccoli/host_key         <path>/bro_cert.key
 
-In a Bro policy, you need to load the ``listen-ssl.bro`` script and
-redef ``ssl_ca_certificate`` and ``ssl_private_key``, defined in
-``bro.init``:
+In a Bro policy, you need to load the ``frameworks/communication/listen.bro``
+script and redef ``Communication::listen_encrypted=T``,
+``ssl_ca_certificate``, and ``ssl_private_key``, defined in ``bro.init``:
 
 .. code:: bro
 
-    @load frameworks/communication/listen-ssl
+    @load frameworks/communication/listen
 
+    redef Communication::listen_encrypted=T;
     redef ssl_ca_certificate   = "<path>/ca_cert.pem";
     redef ssl_private_key      = "<path>/bro.pem";
 
@@ -1174,29 +1175,26 @@ Configuring event reception in Bro scripts
 Before a remote Bro will accept your connection and your events, it
 needs to have its policy configured accordingly:
 
-1. Load either ``listen-ssl`` or ``listen-clear``,
-   depending on whether you want to have encrypted or cleartext
-   communication. Obviously, encrypting the event exchange is
-   recommended and cleartext should only be used for early experimental
-   setups. See below for details on how to set up encrypted
-   communication via SSL.
+1. Load ``frameworks/communication/listen``, and redef the boolean variable
+  ``Communication::listen_encrypted`` depending on whether you want to have
+  encrypted or cleartext communication. Obviously, encrypting the event
+  exchange is recommended and cleartext should only be used for early
+  experimental setups. See below for details on how to set up encrypted
+  communication via SSL.
 
 #. You need to find a port to use for the Bros and Broccoli applications
    that will listen for connections. Every such agent can use a
    different port, though default ports are provided in the Bro
    policies.  To change the port the Bro agent will be listening on from
-   its default, redefine the ``listen_port_ssl`` or
-   ``listen_port_clear`` variables from ``listen-clear.bro`` or
-   ``listen-ssl.bro``, respectively, in the
-   ``policy/frameworks/communication/`` scripts subdirectory.  Have a
+   its default, redefine the ``Communication::listen_port``.  Have a
    look at these policies as well as
    ``base/frameworks/communication/main.bro`` for the default values.
    Here is the policy for the unencrypted case:
 
    .. code:: bro
 
-       @load frameworks/communication/listen-clear
-       redef listen_port_clear = 12345/tcp;
+       @load frameworks/communication/listen
+       redef Communication::listen_port = 12345/tcp;
 
    ..
 
@@ -1205,10 +1203,11 @@ needs to have its policy configured accordingly:
 
    .. code:: bro
 
-        @load frameworks/communication/listen-ssl
-        redef listen_port_ssl = 12345/tcp; redef
-        ssl_ca_certificate    = "<path>/ca_cert.pem"; redef
-        ssl_private_key       = "<path>/bro.pem";
+        @load frameworks/communication/listen
+        redef Communication::listen_encrypted = T;
+        redef Communication::listen_port = 12345/tcp; 
+        redef ssl_ca_certificate    = "<path>/ca_cert.pem";
+        redef ssl_private_key       = "<path>/bro.pem";
 
    ..
 
@@ -1222,9 +1221,8 @@ needs to have its policy configured accordingly:
    creative one would be "broccoli"), the IP address of the peer, the
    pattern of names of the events the Bro will accept from you, whether
    you want Bro to connect to your machine on startup or not, if so, a
-   port to connect to (defaults are ``default_port_ssl`` and
-   ``default_port_clear``, also defined in
-   ``base/frameworks/communication/main.bro.bro``), a retry timeout,
+   port to connect to (default is ``Communication::default_port`` also defined in
+   ``base/frameworks/communication/main.bro``), a retry timeout,
    whether to use SSL, and the class of a connection as set on the
    Broccoli side via ``bro_conn_set_class()``.
 
@@ -1289,7 +1287,7 @@ need to update the ``Communication::nodes`` variable accordingly:
 
 .. code:: bro
 
-    @load frameworks/communication/listen-clear;
+    @load frameworks/communication/listen;
 
     global ping_log = open_log_file("ping");
 
