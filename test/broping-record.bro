@@ -16,6 +16,8 @@ redef Communication::nodes += {
 	["broping"] = [$host = 127.0.0.1, $events = /ping/, $connect=F, $ssl=F]
 };
 
+global ping_log = open_log_file("ping");
+
 type ping_data: record {
 	seq: count;
 	src_time: time;
