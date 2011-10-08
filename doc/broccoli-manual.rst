@@ -1143,14 +1143,14 @@ quickly enable/disable a certificate configuration, the
     /broccoli/host_key         <path>/bro_cert.key
 
 In a Bro policy, you need to load the ``frameworks/communication/listen.bro``
-script and redef ``Communication::listen_encrypted=T``,
+script and redef ``Communication::listen_ssl=T``,
 ``ssl_ca_certificate``, and ``ssl_private_key``, defined in ``bro.init``:
 
 .. code:: bro
 
     @load frameworks/communication/listen
 
-    redef Communication::listen_encrypted=T;
+    redef Communication::listen_ssl=T;
     redef ssl_ca_certificate   = "<path>/ca_cert.pem";
     redef ssl_private_key      = "<path>/bro.pem";
 
@@ -1176,7 +1176,7 @@ Before a remote Bro will accept your connection and your events, it
 needs to have its policy configured accordingly:
 
 1. Load ``frameworks/communication/listen``, and redef the boolean variable
-  ``Communication::listen_encrypted`` depending on whether you want to have
+  ``Communication::listen_ssl`` depending on whether you want to have
   encrypted or cleartext communication. Obviously, encrypting the event
   exchange is recommended and cleartext should only be used for early
   experimental setups. See below for details on how to set up encrypted
@@ -1204,7 +1204,7 @@ needs to have its policy configured accordingly:
    .. code:: bro
 
         @load frameworks/communication/listen
-        redef Communication::listen_encrypted = T;
+        redef Communication::listen_ssl = T;
         redef Communication::listen_port = 12345/tcp; 
         redef ssl_ca_certificate    = "<path>/ca_cert.pem";
         redef ssl_private_key       = "<path>/bro.pem";
