@@ -2,8 +2,16 @@
 Broccoli: The Bro Client Communications Library
 ===============================================
 
-.. image:: images/logo.jpg
+{{git_pull('broccoli:doc/images/logo.jpg', 'jpg', 'broccoli-logo.jpg')}}
+
+.. image:: broccoli-logo.jpg
    :alt: Broccoli Logo
+
+This page documents Broccoli, the Bro client communications library.
+It allows you to create client sensors for the Bro intrusion detection
+system. Broccoli can speak a good subset of the Bro communication
+protocol, in particular, it can receive Bro IDs, send and receive Bro
+events, and send and receive event requests to/from peering Bros.
 
 .. contents::
 
@@ -1176,11 +1184,11 @@ Before a remote Bro will accept your connection and your events, it
 needs to have its policy configured accordingly:
 
 1. Load ``frameworks/communication/listen``, and redef the boolean variable
-  ``Communication::listen_ssl`` depending on whether you want to have
-  encrypted or cleartext communication. Obviously, encrypting the event
-  exchange is recommended and cleartext should only be used for early
-  experimental setups. See below for details on how to set up encrypted
-  communication via SSL.
+   ``Communication::listen_ssl`` depending on whether you want to have
+   encrypted or cleartext communication. Obviously, encrypting the event
+   exchange is recommended and cleartext should only be used for early
+   experimental setups. See below for details on how to set up encrypted
+   communication via SSL.
 
 #. You need to find a port to use for the Bros and Broccoli applications
    that will listen for connections. Every such agent can use a
@@ -1335,4 +1343,5 @@ Notes
 Broccoli API Reference
 ######################
 
-TODO
+The `API documentation <{{autodoc_broccoli_api}}/index.html>`_ is
+describes Broccoli's public C interface.

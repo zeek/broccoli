@@ -1,4 +1,15 @@
 
+1.7 | 2011-10-18 11:16:20 -0700
+
+  * Distribution cleanup. (John Siwek and Robin Sommer)
+
+  * Changed communications protocol option to listen_ssl from
+    listen_encrypted. (Seth Hall)
+
+  * Bug fix for a Bro test. (Seth Hall)
+
+  * Updates to make broccoli work with communication API updates.
+
 1.6-35 | 2011-09-15 16:48:01 -0700
 
   * Adding Ruby bindings for Broccoli. (Seth Hall)
