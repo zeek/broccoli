@@ -141,3 +141,4 @@ Please read the `complete Broccoli manual
 <{{git('broccoli:doc/broccoli-manual.rst')}}>`_. There is also an `API
 documentation <{{autodoc_broccoli_api}}/index.html>`_ for Broccoli's
 publuc C interface.
+
