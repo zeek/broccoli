@@ -1,5 +1,7 @@
 
-1.7 | 2011-10-18 11:16:20 -0700
+1.7 | 2011-10-21 15:16:54 -0500
+
+  * Make dist now cleans the copied source. (Jon Siwek)
 
   * Distribution cleanup. (John Siwek and Robin Sommer)
 
