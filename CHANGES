@@ -1,4 +1,8 @@
 
+1.7-1 | 2011-10-26 10:13:19 -0500
+
+  * Update submodules. (Jon Siwek)
+
 1.7 | 2011-10-25 20:18:58 -0700
 
   * Make dist now cleans the copied source. (Jon Siwek)
