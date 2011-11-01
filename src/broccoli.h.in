@@ -30,6 +30,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #ifndef broccoli_h
 #define broccoli_h
 
+#include <inttypes.h>
 #include <unistd.h>
 #include <sys/types.h>
 #include <stdlib.h>
@@ -123,9 +124,9 @@ extern int bro_debug_messages;
 /* ---------------------------- Typedefs ----------------------------- */
 
 @TYPEDEF_UINT@
-typedef unsigned long long uint64;
-typedef unsigned int   uint32;
-typedef unsigned short uint16;
+typedef uint64_t uint64;
+typedef uint32_t uint32;
+typedef uint16_t uint16;
 typedef unsigned char  uchar;
 
 typedef struct bro_conn BroConn;
