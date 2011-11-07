@@ -1,4 +1,13 @@
 
+1.71-11 | 2011-11-07 05:44:16 -0800
+
+  * Fixing compiler warnings. Addresses #388. (Jon Siwek)
+
+  * Update broccoli-ruby submodule. (Jon Siwek)
+
+  * Fix CMake warning when python bindings are disabled. Fixes #605.
+    (Jon Siwek)
+
 1.71 | 2011-10-27 17:42:45 -0700
 
   * Update submodules. (Jon Siwek)
