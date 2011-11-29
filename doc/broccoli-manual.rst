@@ -2,11 +2,6 @@
 Broccoli: The Bro Client Communications Library
 ===============================================
 
-{{git_pull('broccoli:doc/images/logo.jpg', 'jpg', 'broccoli-logo.jpg')}}
-
-.. image:: broccoli-logo.jpg
-   :alt: Broccoli Logo
-
 This page documents Broccoli, the Bro client communications library.
 It allows you to create client sensors for the Bro intrusion detection
 system. Broccoli can speak a good subset of the Bro communication
@@ -1343,5 +1338,5 @@ Notes
 Broccoli API Reference
 ######################
 
-The `API documentation <{{autodoc_broccoli_api}}/index.html>`_ is
-describes Broccoli's public C interface.
+The `API documentation <../../broccoli-api/index.html>`_ is
+described Broccoli's public C interface.
