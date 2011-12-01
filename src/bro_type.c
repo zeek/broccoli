@@ -96,6 +96,31 @@ static int          __bro_set_type_clone(BroSetType *dst, BroSetType *src);
 static uint32       __bro_set_type_hash(BroSetType *st);
 static int          __bro_set_type_cmp(BroSetType *st1, BroSetType *st2);
 
+static void         __bro_file_type_init(BroFileType *st);
+static void         __bro_file_type_free(BroFileType *ft);
+static int          __bro_file_type_read(BroFileType *ft, BroConn *bc);
+static int          __bro_file_type_write(BroFileType *ft, BroConn *bc);
+static int          __bro_file_type_clone(BroFileType *dst, BroFileType *src);
+static uint32       __bro_file_type_hash(BroFileType *ft);
+static int          __bro_file_type_cmp(BroFileType *ft1, BroFileType *ft2);
+
+static void         __bro_enum_type_init(BroEnumType *et);
+static void         __bro_enum_type_free(BroEnumType *et);
+static int          __bro_enum_type_read(BroEnumType *et, BroConn *bc);
+static int          __bro_enum_type_write(BroEnumType *et, BroConn *bc);
+static int          __bro_enum_type_clone(BroEnumType *dst, BroEnumType *src);
+static uint32       __bro_enum_type_hash(BroEnumType *et);
+static int          __bro_enum_type_cmp(BroEnumType *et1, BroEnumType *et2);
+
+static void         __bro_vector_type_init(BroVectorType *et);
+static void         __bro_vector_type_free(BroVectorType *et);
+static int          __bro_vector_type_read(BroVectorType *et, BroConn *bc);
+static int          __bro_vector_type_write(BroVectorType *et, BroConn *bc);
+static int          __bro_vector_type_clone(BroVectorType *dst, BroVectorType *src);
+static uint32       __bro_vector_type_hash(BroVectorType *et);
+static int          __bro_vector_type_cmp(BroVectorType *et1, BroVectorType *et2);
+
+
 
 BroType *
 __bro_type_new(void)
@@ -1298,5 +1323,482 @@ __bro_set_type_cmp(BroSetType *st1, BroSetType *st2)
   
   result = __bro_table_type_cmp((BroTableType*) st1,
 				(BroTableType*) st2);;
+  D_RETURN_(result);
+}
+
+
+BroFileType*
+__bro_file_type_new(void)
+{
+  BroFileType *ft;
+  
+  D_ENTER;
+
+  if (! (ft = calloc(1, sizeof(BroFileType))))
+    D_RETURN_(NULL);
+  
+  __bro_file_type_init(ft);
+  
+  D_RETURN_(ft);
+}
+
+
+static void
+__bro_file_type_init(BroFileType *ft)
+{
+  BroSObject *sobj = (BroSObject *) ft;
+
+  D_ENTER;
+  
+  __bro_type_init((BroType *) ft); 
+  
+  sobj->read  = (BroSObjectRead) __bro_file_type_read;
+  sobj->write = (BroSObjectWrite) __bro_file_type_write;
+  sobj->free  = (BroSObjectFree) __bro_file_type_free;
+  sobj->clone = (BroSObjectClone) __bro_file_type_clone;
+  sobj->hash  = (BroSObjectHash) __bro_file_type_hash;
+  sobj->cmp   = (BroSObjectCmp) __bro_file_type_cmp;
+  
+  sobj->type_id = SER_FILE_TYPE;
+
+  D_RETURN;
+}
+
+static void
+__bro_file_type_free(BroFileType *ft)
+{
+  D_ENTER;  
+  __bro_sobject_release((BroSObject *) ft->yield);
+  __bro_type_free((BroType *) ft);  
+  D_RETURN;
+}
+
+static int
+__bro_file_type_read(BroFileType *ft, BroConn *bc)
+{
+  int result;
+
+  D_ENTER;
+
+  if (! __bro_type_read((BroType *) ft, bc))
+    D_RETURN_(FALSE);
+
+  ft->yield = (BroType*) __bro_sobject_unserialize(SER_TYPE, bc);
+  result = ft->yield != 0;
+
+  D_RETURN_(result);
+}
+
+static int
+__bro_file_type_write(BroFileType *ft, BroConn *bc)
+{
+  D_ENTER;
+
+  if (! __bro_type_write((BroType *) ft, bc))
+    D_RETURN_(FALSE);
+
+  if (! __bro_sobject_serialize((BroSObject*) ft->yield, bc))
+    D_RETURN_(FALSE);
+
+  D_RETURN_(TRUE);
+}
+
+static int
+__bro_file_type_clone(BroFileType *dst, BroFileType *src)
+{
+  D_ENTER;
+  
+  if (! __bro_type_clone((BroType *) dst, (BroType *) src))
+    D_RETURN_(FALSE);
+
+  dst->yield = __bro_type_new();
+  if (! __bro_type_clone(dst->yield, src->yield))
+    D_RETURN_(FALSE);
+
+  D_RETURN_(TRUE);
+}
+
+static uint32
+__bro_file_type_hash(BroFileType *ft)
+{
+  uint32 result;
+
+  D_ENTER;
+  result = __bro_type_hash((BroType*) ft);
+  result ^= __bro_type_hash(ft->yield);
+  D_RETURN_(result);
+}
+
+static int
+__bro_file_type_cmp(BroFileType *ft1, BroFileType *ft2)
+{
+  int result;
+
+  D_ENTER;
+
+  if (! __bro_type_cmp((BroType*) ft1, (BroType*) ft2))
+    D_RETURN_(FALSE);
+
+  result = __bro_type_cmp(ft1->yield, ft2->yield);
+
+  D_RETURN_(result);
+}
+
+
+BroEnumType*
+__bro_enum_type_new(void)
+{
+  BroEnumType *et;
+  
+  D_ENTER;
+  
+  if (! (et = calloc(1, sizeof(BroEnumType))))
+    D_RETURN_(NULL);
+  
+  __bro_enum_type_init(et);
+  
+  D_RETURN_(et);
+}
+
+static void
+__bro_enum_type_init(BroEnumType *et)
+{
+  BroSObject *sobj = (BroSObject *) et;
+
+  D_ENTER;
+  
+  __bro_type_init((BroType *) et); 
+  
+  sobj->read  = (BroSObjectRead) __bro_enum_type_read;
+  sobj->write = (BroSObjectWrite) __bro_enum_type_write;
+  sobj->free  = (BroSObjectFree) __bro_enum_type_free;
+  sobj->clone = (BroSObjectClone) __bro_enum_type_clone;
+  sobj->hash  = (BroSObjectHash) __bro_enum_type_hash;
+  sobj->cmp   = (BroSObjectCmp) __bro_enum_type_cmp;
+  
+  sobj->type_id = SER_ENUM_TYPE;
+
+  /* A hashtable mapping enum entry name strings to their numeric
+   * value.
+   */
+  et->names = __bro_ht_new(__bro_ht_str_hash,
+			   __bro_ht_str_cmp,
+			   __bro_ht_mem_free,
+			   __bro_ht_mem_free,
+			   FALSE);
+  D_RETURN;
+}
+
+static void
+__bro_enum_type_free(BroEnumType *st)
+{
+  D_ENTER;
+  __bro_ht_free(st->names);
+  __bro_type_free((BroType *) st);
+  D_RETURN;
+}
+
+static int
+__bro_enum_type_read(BroEnumType *st, BroConn *bc)
+{
+  uint32 len;
+  char dummy;
+
+  D_ENTER;
+
+  if (! __bro_type_read((BroType *) st, bc))
+    D_RETURN_(FALSE);
+
+  if (! __bro_buf_read_int64(bc->rx_buf, &st->counter))
+    D_RETURN_(FALSE);
+  if (! __bro_buf_read_int(bc->rx_buf, &len))
+    D_RETURN_(FALSE);
+  if (! __bro_buf_read_char(bc->rx_buf, &dummy))
+    D_RETURN_(FALSE);
+  
+  while (len--) {
+    BroString name;
+    uint64 *val = (uint64*) calloc(1, sizeof(uint64));
+    
+    if (! __bro_buf_read_string(bc->rx_buf, &name) ||
+	! __bro_buf_read_int64(bc->rx_buf, val))
+      D_RETURN_(FALSE);
+    
+    __bro_ht_add(st->names, (void*) name.str_val, (void*) val);
+  }
+
+  D_RETURN_(TRUE);
+}
+
+static int
+__bro_enum_type_write_item(void *key, void *data, void *user_data)
+{
+  BroEnumType *st;
+  BroConn *bc;
+  BroString name;
+  uint64 val = *((uint64*) data);
+
+  D_ENTER;
+
+  st = (BroEnumType*) user_data;
+  bc = (BroConn*) __bro_sobject_data_get((BroSObject*) st,
+					 "__bro_enum_type_write");
+  bro_string_set(&name, (char*) key);
+
+  if (! __bro_buf_write_string(bc->tx_buf, &name)) {
+    bro_string_cleanup(&name);
+    D_RETURN_(FALSE);
+  }
+  
+  bro_string_cleanup(&name);  
+  
+  if (! __bro_buf_write_int64(bc->tx_buf, val))
+    D_RETURN_(FALSE);
+  
+  D_RETURN_(TRUE);
+}
+
+static int
+__bro_enum_type_write(BroEnumType *st, BroConn *bc)
+{
+  D_ENTER;
+
+  if (! __bro_type_write((BroType *) st, bc))
+    D_RETURN_(FALSE);
+
+  if (! __bro_buf_write_int64(bc->tx_buf, st->counter))
+    D_RETURN_(FALSE);
+  if (! __bro_buf_write_int(bc->tx_buf, __bro_ht_get_size(st->names)))
+    D_RETURN_(FALSE);
+  if (! __bro_buf_write_char(bc->tx_buf, 0))
+    D_RETURN_(FALSE);
+
+  /* We need both this object instance and the connection for context
+     in the iteration callback, so we temporarily add the conn handle
+     to the object's data store.
+  */
+  __bro_sobject_data_set((BroSObject*) st, 
+			 "__bro_enum_type_write", 
+			 bc);
+  
+  __bro_ht_foreach(st->names, __bro_enum_type_write_item, (void*) st);
+  
+  __bro_sobject_data_del((BroSObject*) st,
+			 "__bro_enum_type_write");
+
+  D_RETURN_(TRUE);
+}
+
+static int
+__bro_enum_type_clone_item(void *key, void *data, void *user_data)
+{
+  BroEnumType *dst;
+
+  D_ENTER;
+  dst = (BroEnumType*) user_data;
+  __bro_ht_add(dst->names, key, data);
+  D_RETURN_(TRUE);
+}
+
+static int
+__bro_enum_type_clone(BroEnumType *dst, BroEnumType *src)
+{
+  D_ENTER;
+  
+  if (! __bro_type_clone((BroType *) dst, (BroType *) src))
+    D_RETURN_(FALSE);
+  
+  dst->counter = src->counter;
+  __bro_ht_foreach(src->names, __bro_enum_type_clone_item, (void*) dst);
+  
+  D_RETURN_(TRUE);
+}
+
+static int
+__bro_enum_type_hash_item(void *key, void *data, void *user_data)
+{
+  BroEnumType *et;
+  BroString name;
+  uint64 val = *((uint64*) data);
+  uint32 result;
+
+  D_ENTER;
+
+  et = (BroEnumType*) user_data;
+  result = (uint32)(uintptr_t)
+    __bro_sobject_data_get((BroSObject*) et, 
+			   "__bro_enum_type_hash");
+
+  bro_string_set(&name, (char*) key);
+
+  result ^= __bro_ht_str_hash(name.str_val);
+  result ^= (uint32) (val >> 32);
+  result ^= (uint32) (val);
+  
+  __bro_sobject_data_set((BroSObject*) et, 
+			 "__bro_enum_type_hash",
+			 (void*)(uintptr_t) result);
+
+  bro_string_cleanup(&name);
+
+  D_RETURN_(TRUE);  
+}
+
+static uint32
+__bro_enum_type_hash(BroEnumType *et)
+{
+  uint32 result;
+
+  D_ENTER;
+
+  if (! et)
+    D_RETURN_(0);
+
+  __bro_sobject_data_set((BroSObject*) et, 
+			 "__bro_enum_type_hash",
+			 (void*)(uintptr_t) et->counter);
+  
+  __bro_ht_foreach(et->names, __bro_enum_type_hash_item, (void*) et);
+  
+  result = (uint32)(uintptr_t)
+    __bro_sobject_data_del((BroSObject*) et, 
+			   "__bro_enum_type_hash");
+  
+  D_RETURN_(result);
+}
+
+static int
+__bro_enum_type_cmp(BroEnumType *et1, BroEnumType *et2)
+{
+  int result;
+  
+  D_ENTER;
+  
+  if (! et1 || ! et2)
+    D_RETURN_(FALSE);
+
+  if (et1->counter != et2->counter)
+    D_RETURN_(FALSE);
+  
+  result = __bro_enum_type_hash(et1) == __bro_enum_type_hash(et2);
+  
+  D_RETURN_(result);
+}
+
+
+BroVectorType*
+__bro_vector_type_new(void)
+{
+  BroVectorType *vt;
+  
+  D_ENTER;
+
+  if (! (vt = calloc(1, sizeof(BroVectorType))))
+    D_RETURN_(NULL);
+  
+  __bro_vector_type_init(vt);
+  
+  D_RETURN_(vt);
+}
+
+
+static void
+__bro_vector_type_init(BroVectorType *vt)
+{
+  BroSObject *sobj = (BroSObject *) vt;
+
+  D_ENTER;
+  
+  __bro_type_init((BroType *) vt); 
+  
+  sobj->read  = (BroSObjectRead) __bro_vector_type_read;
+  sobj->write = (BroSObjectWrite) __bro_vector_type_write;
+  sobj->free  = (BroSObjectFree) __bro_vector_type_free;
+  sobj->clone = (BroSObjectClone) __bro_vector_type_clone;
+  sobj->hash  = (BroSObjectHash) __bro_vector_type_hash;
+  sobj->cmp   = (BroSObjectCmp) __bro_vector_type_cmp;
+  
+  sobj->type_id = SER_VECTOR_TYPE;
+
+  D_RETURN;
+}
+
+static void
+__bro_vector_type_free(BroVectorType *vt)
+{
+  D_ENTER;  
+  __bro_sobject_release((BroSObject *) vt->yield);
+  __bro_type_free((BroType *) vt);  
+  D_RETURN;
+}
+
+static int
+__bro_vector_type_read(BroVectorType *vt, BroConn *bc)
+{
+  int result;
+
+  D_ENTER;
+
+  if (! __bro_type_read((BroType *) vt, bc))
+    D_RETURN_(FALSE);
+
+  vt->yield = (BroType*) __bro_sobject_unserialize(SER_TYPE, bc);
+  result = vt->yield != 0;
+
+  D_RETURN_(result);
+}
+
+static int
+__bro_vector_type_write(BroVectorType *vt, BroConn *bc)
+{
+  D_ENTER;
+
+  if (! __bro_type_write((BroType *) vt, bc))
+    D_RETURN_(FALSE);
+
+  if (! __bro_sobject_serialize((BroSObject*) vt->yield, bc))
+    D_RETURN_(FALSE);
+
+  D_RETURN_(TRUE);
+}
+
+static int
+__bro_vector_type_clone(BroVectorType *dst, BroVectorType *src)
+{
+  D_ENTER;
+  
+  if (! __bro_type_clone((BroType *) dst, (BroType *) src))
+    D_RETURN_(FALSE);
+
+  dst->yield = __bro_type_new();
+  if (! __bro_type_clone(dst->yield, src->yield))
+    D_RETURN_(FALSE);
+
+  D_RETURN_(TRUE);
+}
+
+static uint32
+__bro_vector_type_hash(BroVectorType *vt)
+{
+  uint32 result;
+
+  D_ENTER;
+  result = __bro_type_hash((BroType*) vt);
+  result ^= __bro_type_hash(vt->yield);
+  D_RETURN_(result);
+}
+
+static int
+__bro_vector_type_cmp(BroVectorType *vt1, BroVectorType *vt2)
+{
+  int result;
+
+  D_ENTER;
+
+  if (! __bro_type_cmp((BroType*) vt1, (BroType*) vt2))
+    D_RETURN_(FALSE);
+
+  result = __bro_type_cmp(vt1->yield, vt2->yield);
+
   D_RETURN_(result);
 }

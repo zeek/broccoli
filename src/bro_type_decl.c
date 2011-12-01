@@ -113,6 +113,7 @@ __bro_type_decl_read(BroTypeDecl *td, BroConn *bc)
     D_RETURN_(FALSE);
   if (opt)
     {
+      D(("Reading optional attributes in TypeDecl instance.\n"));
       if (! (td->attrs = (BroAttrs *) __bro_sobject_unserialize(SER_ATTRIBUTES, bc)))
 	D_RETURN_(FALSE);
     }
@@ -123,11 +124,13 @@ __bro_type_decl_read(BroTypeDecl *td, BroConn *bc)
     __bro_sobject_release((BroSObject *) td->type);
   td->type = NULL;
 
+  D(("Reading type in in TypeDecl instance.\n"));
   if (! (td->type = (BroType *) __bro_sobject_unserialize(SER_IS_TYPE, bc)))
     D_RETURN_(FALSE);
 
   /* Read ID name string */
   
+  D(("Reading ID name string in TypeDecl instance.\n"));
   bro_string_cleanup(&td->id);
   if (! __bro_buf_read_string(bc->rx_buf, &td->id))
     D_RETURN_(FALSE);

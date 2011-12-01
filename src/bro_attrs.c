@@ -110,8 +110,12 @@ __bro_attrs_read(BroAttrs *attrs, BroConn *bc)
   if (attrs->type)
     __bro_sobject_release((BroSObject *) attrs->type);
 
-  if (! (attrs->type = (BroType *) __bro_sobject_unserialize(SER_IS_TYPE, bc)))
+  D(("Attempting to read type in Attributes...\n"));
+  if (! (attrs->type = (BroType *) __bro_sobject_unserialize(SER_IS_TYPE, bc))) {
+    D(("Reading type in attributes failed.\n"));
     D_RETURN_(FALSE);
+  }
+  D(("Successfully read type in attributes.\n"));
 
   if (attrs->attrs)
     {
@@ -129,6 +133,8 @@ __bro_attrs_read(BroAttrs *attrs, BroConn *bc)
   for (i = 0; i < attrs->num_attrs; i++)
     {
       BroAttr *attr;
+
+      D(("Attempting to read #%d of %d Attrs in Attributes...\n", i+1, attrs->num_attrs));
       
       if (! (attr = __bro_attr_new()))
 	D_RETURN_(FALSE);

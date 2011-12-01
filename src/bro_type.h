@@ -103,6 +103,27 @@ struct bro_set_type
   BroTableType     type;
 };
 
+struct bro_file_type
+{
+  BroType          type;
+  BroType         *yield;
+};
+
+struct bro_enum_type
+{
+  BroType          type;
+
+  BroHT           *names;
+  uint64           counter;
+};
+
+struct bro_vector_type
+{
+  BroType          type;
+  BroType         *yield;  
+};
+
+
 BroType         *__bro_type_new(void);
 BroType         *__bro_type_new_of_type(int type, const char *type_name);
 void             __bro_type_set_incomplete_impl(BroType *type, const BroString *type_name);
@@ -120,5 +141,11 @@ void             __bro_index_tye_set_yield_type(BroIndexType *it, BroType *yield
 BroTableType    *__bro_table_type_new(void);
 
 BroSetType      *__bro_set_type_new();
+
+BroEnumType     *__bro_enum_type_new(void);
+
+BroFileType     *__bro_file_type_new(void);
+
+BroVectorType   *__bro_vector_type_new(void);
 
 #endif
