@@ -1,4 +1,14 @@
 
+1.71-22 | 2011-12-03 15:58:34 -0800
+
+  * Support for more types (not exposed at the API-level yet) to allow
+    exchanging more complex record types. Adresses #606. (Christian
+    Kreibich)
+
+  * Broccoli now identifies itself as such when connecting to a peer.
+    This allows Bro to adapt its serialization format based on what's
+    supported by Broccoli. Adresses #606. (Christian Kreibich)
+    
 1.71-11 | 2011-11-07 05:44:16 -0800
 
   * Fixing compiler warnings. Addresses #388. (Jon Siwek)
