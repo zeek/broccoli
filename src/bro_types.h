@@ -87,6 +87,9 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 #define BRO_CAP_COMPRESS           1
 #define BRO_CAP_DONTCACHE          2
+#define BRO_CAP_64BIT              4 /* not used */
+#define BRO_CAP_NEW_CACHE_STRAT    8 /* not used */
+#define BRO_CAP_BROCCOLI_PEER      16 /* endpoint sending capabilities uses Broccoli */
 
 /* Message payload types -- these do not
  * respond to anything inside Bro and are
@@ -117,6 +120,9 @@ typedef struct bro_record_type BroRecordType;
 typedef struct bro_index_type BroIndexType;
 typedef struct bro_table_type BroTableType;
 typedef struct bro_set_type BroSetType;
+typedef struct bro_file_type BroFileType;
+typedef struct bro_enum_type BroEnumType;
+typedef struct bro_vector_type BroVectorType;
 
 typedef struct bro_id BroID;
 typedef struct bro_val BroVal;

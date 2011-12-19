@@ -78,10 +78,14 @@ static BroObjFactoryEntry obj_factories[] = {
 
   { SER_TYPE,             (BroSObjectNew) __bro_type_new },
   { SER_TYPE_LIST,        (BroSObjectNew) __bro_type_list_new },
-  { SER_RECORD_TYPE,      (BroSObjectNew) __bro_record_type_new },
   { SER_INDEX_TYPE,       (BroSObjectNew) __bro_index_type_new },
   { SER_TABLE_TYPE,       (BroSObjectNew) __bro_table_type_new },
   { SER_SET_TYPE,         (BroSObjectNew) __bro_set_type_new },
+  { SER_RECORD_TYPE,      (BroSObjectNew) __bro_record_type_new },
+  { SER_FILE_TYPE,        (BroSObjectNew) __bro_file_type_new },
+  { SER_ENUM_TYPE,        (BroSObjectNew) __bro_enum_type_new },
+  { SER_VECTOR_TYPE,      (BroSObjectNew) __bro_vector_type_new },
+
   { SER_ATTRIBUTES,       (BroSObjectNew) __bro_attrs_new },
   { SER_ID,               (BroSObjectNew) __bro_id_new },
   { SER_LOCATION,         (BroSObjectNew) __bro_loc_new },
@@ -426,6 +430,7 @@ __bro_sobject_unserialize(uint16 type_id_wanted, BroConn *bc)
    * read members in step by step, so by the time we return
    * from this function the object is fully unserialized.
    */
+  D(("Attempting read of object %i of type 0x%04x...\n", perm_id, type_id));
   if (! obj->read(obj, bc))
     {
       D(("Reading object %i of type 0x%04x FAILED.\n", perm_id, type_id));

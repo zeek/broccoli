@@ -190,8 +190,10 @@ conn_init_handshake(BroConn *bc)
   /* Unless user requested caching, tell peer we do not cache. Note
    * that at the moment we never cache data we send, so this only
    * affects received data.
+   *
+   * We always identify ourselves as a Broccoli instance.
    */
-  caps[0] = 0;
+  caps[0] = BRO_CAP_BROCCOLI_PEER;
   caps[1] = 0;
   caps[2] = 0;
 
