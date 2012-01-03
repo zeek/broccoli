@@ -1,4 +1,9 @@
 
+1.71-26 | 2012-01-03 15:41:37 -0800
+
+  * Remove record base type list since it's been removed from Bro.
+    (Jon Siwek)
+
 1.71-22 | 2011-12-03 15:58:34 -0800
 
   * Support for more types (not exposed at the API-level yet) to allow

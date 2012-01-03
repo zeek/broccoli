@@ -674,7 +674,6 @@ __bro_record_type_free(BroRecordType *rt)
 {
   D_ENTER;
   
-  __bro_sobject_release((BroSObject *) rt->base);
   __bro_list_free(rt->type_decls, (BroFunc) __bro_type_decl_free);
   __bro_type_free((BroType *) rt);
   
@@ -777,19 +776,6 @@ __bro_record_type_read(BroRecordType *rt, BroConn *bc)
 	}
     }
 
-  /* Read optional base */
-
-  __bro_sobject_release((BroSObject *) rt->base);
-  rt->base = NULL;
-  
-  if (! __bro_buf_read_char(bc->rx_buf, &opt))
-    D_RETURN_(FALSE);
-  if (opt)
-    {
-      if (! (rt->base = (BroTypeList *) __bro_sobject_unserialize(SER_TYPE_LIST, bc)))
-	D_RETURN_(FALSE);
-    }
-  
   D_RETURN_(TRUE);
 }
 
@@ -821,12 +807,6 @@ __bro_record_type_write(BroRecordType *rt, BroConn *bc)
 	D_RETURN_(FALSE);
     }
   
-  if (! __bro_buf_write_char(bc->tx_buf, rt->base ? 1 : 0))
-    D_RETURN_(FALSE);
-  
-  if (rt->base && ! __bro_sobject_serialize((BroSObject *) rt->base, bc))
-    D_RETURN_(FALSE);
-  
   D_RETURN_(TRUE);
 }
 
@@ -839,9 +819,6 @@ __bro_record_type_clone(BroRecordType *dst, BroRecordType *src)
   D_ENTER;
 
   if (! __bro_type_clone((BroType *) dst, (BroType *) src))
-    D_RETURN_(FALSE);
-  
-  if (src->base && ! (dst->base = (BroTypeList *) __bro_sobject_copy((BroSObject *) src->base)))
     D_RETURN_(FALSE);
   
   dst->num_fields = src->num_fields;
@@ -873,8 +850,7 @@ __bro_record_type_hash(BroRecordType *rt)
   if (! rt)
     D_RETURN_(0);
 
-  result = __bro_type_list_hash(rt->base);
-  result ^= rt->num_fields;
+  result = rt->num_fields;
   result ^= rt->num_types << 16;
   
   for (l = rt->type_decls; l; l = __bro_list_next(l))
@@ -895,8 +871,7 @@ __bro_record_type_cmp(BroRecordType *rt1, BroRecordType *rt2)
     D_RETURN_(FALSE);
   
   if (rt1->num_fields != rt2->num_fields ||
-      rt1->num_types != rt2->num_types ||
-      ! __bro_type_list_cmp(rt1->base, rt2->base))
+      rt1->num_types != rt2->num_types)
     D_RETURN_(FALSE);
   
   for (l1 = rt1->type_decls, l2 = rt2->type_decls; l1 && l2;

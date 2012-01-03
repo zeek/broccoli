@@ -78,7 +78,6 @@ struct bro_record_type
 {
   BroType          type;
 
-  BroTypeList     *base;
   uint32           num_fields;
 
   uint32           num_types;
