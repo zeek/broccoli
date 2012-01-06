@@ -84,7 +84,11 @@ if (ENABLE_SHARED)
         set_target_properties(broccoli PROPERTIES
                               INSTALL_NAME_DIR ${CMAKE_INSTALL_PREFIX}/lib)
     endif ()
-    target_link_libraries(broccoli ${OpenSSL_LIBRARIES} ${BRO_LIBADD})
+    # BIND library is not necessary, but linked when a parent project
+    # uses it (for consistency and also to avoid missing inet_* symbols
+    # that can result from mismatching headers/libraries)
+    target_link_libraries(broccoli ${OpenSSL_LIBRARIES} ${BIND_LIBRARY}
+                          ${BRO_LIBADD})
     install(TARGETS broccoli DESTINATION lib)
 endif ()
 
@@ -95,7 +99,11 @@ if (ENABLE_STATIC)
         # shared library because they use different extensions (.a versus .so)
         set_target_properties(broccoliStatic PROPERTIES OUTPUT_NAME broccoli)
     endif ()
-    target_link_libraries(broccoliStatic ${OpenSSL_LIBRARIES} ${BRO_LIBADD})
+    # BIND library is not necessary, but linked when a parent project
+    # uses it (for consistency and also to avoid missing inet_* symbols
+    # that can result from mismatching headers/libraries)
+    target_link_libraries(broccoliStatic ${OpenSSL_LIBRARIES} ${BIND_LIBRARY}
+                          ${BRO_LIBADD})
     install(TARGETS broccoliStatic DESTINATION lib)
 endif ()
 
