@@ -137,5 +137,5 @@ website <http://www.bro-ids.org/community>`_.
 Documentation
 -------------
 
-Please see the :doc:`Broccoli User Manual <broccoli-manual>` and the
-`Broccoli API Reference <../../broccoli-api/index.html>`_.
+Please see the `Broccoli User Manual <./broccoli-manual.html>`_ and
+the `Broccoli API Reference <../../broccoli-api/index.html>`_.
