@@ -133,3 +133,9 @@ the API.
 
 Comments, feedback and patches are appreciated; please check the `Bro
 website <http://www.bro-ids.org/community>`_.
+
+Documentation
+-------------
+
+Please see the :doc:`Broccoli User Manual <broccoli-manual>` and the
+`Broccoli API Reference <../../broccoli-api/index.html>`_.
