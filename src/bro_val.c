@@ -251,7 +251,7 @@ __bro_val_assign(BroVal *val, const void *data)
       break;
       
     case BRO_TYPE_IPADDR:
-      val->val_int = *((uint32 *) data);
+      val->val_addr = *((BroAddr *) data);
       break;
       
     case BRO_TYPE_SUBNET:
@@ -419,6 +419,7 @@ __bro_val_read(BroVal *val, BroConn *bc)
 {
   char opt;
   uint32 tmp;
+  int i;
 
   D_ENTER;
 
@@ -496,38 +497,51 @@ __bro_val_read(BroVal *val, BroConn *bc)
       break;
 
     case BRO_INTTYPE_IPADDR:
-      if (! __bro_buf_read_int(bc->rx_buf, &tmp))
-	D_RETURN_(FALSE);
+		if (! __bro_buf_read_int(bc->rx_buf, &tmp))
+			D_RETURN_(FALSE);
       
-      if (tmp != 1)
-	{
-	  D(("We don't handle IPv6 addresses yet.\n"));
-	  D_RETURN_(FALSE);
-	}
-      
-      if (! __bro_buf_read_int(bc->rx_buf, &val->val_int))
-	D_RETURN_(FALSE);
+		if (tmp != 1 && tmp != 4)
+			{
+			D(("Bad IP addresses word length: %d.\n", tmp));
+			D_RETURN_(FALSE);
+			}
 
-      val->val_int = ntohl(val->val_int);
-      break;
+		val->val_addr.size = tmp;
+
+		for ( i = 0; i < tmp; ++i )
+			{
+			if (! __bro_buf_read_int(bc->rx_buf, &val->val_addr.addr[i]))
+				D_RETURN_(FALSE);
+			val->val_addr.addr[i] = ntohl(val->val_addr.addr[i]);
+			}
+
+		break;
 
     case BRO_INTTYPE_SUBNET:
-      if (! __bro_buf_read_int(bc->rx_buf, &tmp))
-	D_RETURN_(FALSE);
-      
-      if (tmp != 1)
-	{
-	  D(("We don't handle IPv6 addresses yet.\n"));
-	  D_RETURN_(FALSE);
-	}
+		if (! __bro_buf_read_int(bc->rx_buf, &tmp))
+			D_RETURN_(FALSE);
 
-      if (! __bro_buf_read_int(bc->rx_buf, &val->val_subnet.sn_net))
-	D_RETURN_(FALSE);
-      val->val_subnet.sn_net = ntohl(val->val_subnet.sn_net);
+		if (tmp != 1 && tmp != 4)
+			{
+			D(("Bad IP addresses word length: %d.\n", tmp));
+			D_RETURN_(FALSE);
+			}
 
-      if (! __bro_buf_read_int(bc->rx_buf, &val->val_subnet.sn_width))
-	D_RETURN_(FALSE);
-      break;
+		val->val_subnet.sn_net.size = tmp;
+
+		for ( i = 0; i < tmp; ++i )
+			{
+			if (! __bro_buf_read_int(bc->rx_buf,
+			                         &val->val_subnet.sn_net.addr[i]))
+				D_RETURN_(FALSE);
+			val->val_subnet.sn_net.addr[i] =
+			    ntohl(val->val_subnet.sn_net.addr[i]);
+			}
+
+		if (! __bro_buf_read_int(bc->rx_buf, &val->val_subnet.sn_width))
+			D_RETURN_(FALSE);
+
+		break;
 
     case BRO_INTTYPE_OTHER:
       /* See Val.cc around 165 -- these are handled by derived classes.
@@ -553,6 +567,7 @@ __bro_val_write(BroVal *val, BroConn *bc)
 {
   BroType *type;
   BroSObject *obj;
+  int i;
 
   D_ENTER;
   
@@ -662,19 +677,22 @@ __bro_val_write(BroVal *val, BroConn *bc)
       break;
 
     case BRO_INTTYPE_IPADDR:
-      if (! __bro_buf_write_int(bc->tx_buf, 1))
-	D_RETURN_(FALSE);
-      if (! __bro_buf_write_int(bc->tx_buf, htonl(val->val_int)))
-	D_RETURN_(FALSE);
-      break;
+		if (! __bro_buf_write_int(bc->tx_buf, val->val_addr.size))
+			D_RETURN_(FALSE);
+		for ( i = 0; i < val->val_addr.size; ++i )
+			if (! __bro_buf_write_int(bc->tx_buf, htonl(val->val_addr.addr[i])))
+				D_RETURN_(FALSE);
+		break;
 
     case BRO_INTTYPE_SUBNET:
-      if (! __bro_buf_write_int(bc->tx_buf, 1))
-	D_RETURN_(FALSE);
-      if (! __bro_buf_write_int(bc->tx_buf, htonl(val->val_subnet.sn_net)))
-	D_RETURN_(FALSE);
-      if (! __bro_buf_write_int(bc->tx_buf, val->val_subnet.sn_width))
-	D_RETURN_(FALSE);
+		if (! __bro_buf_write_int(bc->tx_buf, val->val_subnet.sn_net.size))
+			D_RETURN_(FALSE);
+		for ( i = 0; i < val->val_subnet.sn_net.size; ++i )
+			if (! __bro_buf_write_int(bc->tx_buf,
+			                          htonl(val->val_subnet.sn_net.addr[i])))
+				D_RETURN_(FALSE);
+		if (! __bro_buf_write_int(bc->tx_buf, val->val_subnet.sn_width))
+			D_RETURN_(FALSE);
       break;
 
     case BRO_INTTYPE_OTHER:
@@ -727,7 +745,7 @@ __bro_val_clone(BroVal *dst, BroVal *src)
         dst->val_int64 = src->val_int64;
       break;
     case BRO_INTTYPE_IPADDR:
-	  dst->val_int = src->val_int;
+	  dst->val_addr = src->val_addr;
       break;
       
     case BRO_INTTYPE_DOUBLE:
@@ -758,6 +776,7 @@ static uint32
 __bro_val_hash(BroVal *val)
 {
   uint32 result;
+  int i;
 
   D_ENTER;
 
@@ -773,7 +792,8 @@ __bro_val_hash(BroVal *val)
       result ^= val->val_int64;
       break;
     case BRO_INTTYPE_IPADDR:
-      result ^= val->val_int;
+      for ( i = 0; i < val->val_addr.size; ++i )
+        result ^= val->val_addr.addr[i];
       break;
       
     case BRO_INTTYPE_DOUBLE:
@@ -785,7 +805,8 @@ __bro_val_hash(BroVal *val)
       break;
       
     case BRO_INTTYPE_SUBNET:
-      result ^= val->val_subnet.sn_net;
+      for ( i = 0; i < val->val_subnet.sn_net.size; ++i )
+        result ^= val->val_subnet.sn_net.addr[i];
       result ^= val->val_subnet.sn_width;
       break;
 
@@ -804,6 +825,7 @@ __bro_val_hash(BroVal *val)
 static int
 __bro_val_cmp(BroVal *val1, BroVal *val2)
 {
+  int i;
   D_ENTER;
   
   if (! val1 || ! val2)
@@ -821,8 +843,11 @@ __bro_val_cmp(BroVal *val1, BroVal *val2)
 	D_RETURN_(FALSE);
       break;
     case BRO_INTTYPE_IPADDR:
-      if (val1->val_int != val2->val_int)
-	D_RETURN_(FALSE);
+      if (val1->val_addr.size != val2->val_addr.size)
+        D_RETURN_(FALSE);
+      for (i = 0; i < val1->val_addr.size; ++i)
+        if (val1->val_addr.addr[i] != val2->val_addr.addr[i])
+          D_RETURN_(FALSE);
       break;
       
     case BRO_INTTYPE_DOUBLE:
@@ -836,9 +861,13 @@ __bro_val_cmp(BroVal *val1, BroVal *val2)
       break;
       
     case BRO_INTTYPE_SUBNET:
-      if (val1->val_subnet.sn_net != val2->val_subnet.sn_net ||
-	  val1->val_subnet.sn_width != val2->val_subnet.sn_width)
-	D_RETURN_(FALSE);
+      if (val1->val_subnet.sn_net.size != val2->val_subnet.sn_net.size)
+        D_RETURN_(FALSE);
+      for (i = 0; i < val1->val_subnet.sn_net.size; ++ i)
+        if (val1->val_subnet.sn_net.addr[i] != val2->val_subnet.sn_net.addr[i])
+          D_RETURN_(FALSE);
+      if (val1->val_subnet.sn_width != val2->val_subnet.sn_width)
+        D_RETURN_(FALSE);
       break;
 
     case BRO_INTTYPE_OTHER:
@@ -877,7 +906,7 @@ __bro_val_get(BroVal *val)
     case BRO_TYPE_COUNTER:
       return &val->val_int64;
     case BRO_TYPE_IPADDR:
-      return &val->val_int;
+      return &val->val_addr;
       
     case BRO_TYPE_PORT:
       return &val->val_port;

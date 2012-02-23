@@ -79,7 +79,8 @@ __bro_util_fill_subnet(BroSubnet *sn, uint32 net, uint32 width)
   if (! sn)
     return;
 
-  sn->sn_net = net;
+  sn->sn_net.addr[0] = net;
+  sn->sn_net.size = 1;
   sn->sn_width = width;
 }
 

@@ -60,6 +60,7 @@ struct bro_val
     double                     double_val;
     BroPort                    port_val;
     BroString                  str_val;
+    BroAddr                    addr_val;
     BroSubnet                  subnet_val;
   } val;
 
@@ -70,6 +71,7 @@ struct bro_val
 #define val_port               val.port_val
 #define val_str                val.str_val
 #define val_strlen             val.str_val.str_len
+#define val_addr               val.addr_val
 #define val_subnet             val.subnet_val
 };
 
