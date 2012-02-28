@@ -100,10 +100,11 @@ conn_generic(BroConn *bc, BroRecord *conn)
   BroSet *services;
   BroString *addl;
   BroPort *port;
-  uint32 *addr, *size, *state;
+  BroAddr *addr;
+  uint32 *size, *state;
   double *start_time, *duration;
-  struct in_addr ip;
   int type = BRO_TYPE_RECORD;
+  char addr_str[INET6_ADDRSTRLEN];
 
   if (! (id = bro_record_get_named_val(conn, "id", &type)))
     {
@@ -153,8 +154,10 @@ conn_generic(BroConn *bc, BroRecord *conn)
       return;
     }
 
-  ip.s_addr = *addr;
-  printf("%s/%"PRIu64" [%"PRIu32"/%"PRIu32"] -> ", inet_ntoa(ip), port->port_num, *size, *state);
+  inet_ntop(addr->size == 1 ? AF_INET : AF_INET6, addr->addr, addr_str,
+            INET6_ADDRSTRLEN);
+  printf("%s/%"PRIu64" [%"PRIu32"/%"PRIu32"] -> ", addr_str, port->port_num,
+         *size, *state);
   type = BRO_TYPE_IPADDR;
 
   if (! (addr = bro_record_get_named_val(id, "resp_h", &type)))
@@ -185,8 +188,10 @@ conn_generic(BroConn *bc, BroRecord *conn)
       return;
     }
 
-  ip.s_addr = *addr;
-  printf("%s/%"PRIu64" [%"PRIu32"/%"PRIu32"], ", inet_ntoa(ip), port->port_num, *size, *state);
+  inet_ntop(addr->size == 1 ? AF_INET : AF_INET6, addr->addr, addr_str,
+            INET6_ADDRSTRLEN);
+  printf("%s/%"PRIu64" [%"PRIu32"/%"PRIu32"] -> ", addr_str, port->port_num,
+         *size, *state);
   type = BRO_TYPE_TIME;
 
   if (! (start_time = bro_record_get_named_val(conn, "start_time", &type)))

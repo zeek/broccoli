@@ -266,11 +266,20 @@ typedef struct bro_port {
   int          port_proto; /**< IPPROTO_xxx */
 } BroPort;
 
-/** Subnets are a 4-byte address with a prefix width in bits.
+/** IP addresses are 16-bytes in network byte order.
+ * IPv4 addresses will only occupy the first 4 bytes.
+ */
+typedef struct bro_addr
+{
+  uint32       addr[4];    /**< IP address in network byte order */
+  int          size;       /**< Number of 4-byte words occupied in addr */
+} BroAddr;
+
+/** Subnets are a 16-byte address with a prefix width in bits.
  */
 typedef struct bro_subnet
 {
-  uint32       sn_net;     /**< IP address in network byte order */
+  BroAddr      sn_net;     /**< IP address in network byte order */
   uint32       sn_width;   /**< Length of prefix to consider. */
 } BroSubnet;
 

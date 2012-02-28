@@ -34,14 +34,14 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #ifdef __EMX__
 #include <strings.h>
-#endif 
+#endif
 
 #include <bro_util.h>
 
 #ifdef __MINGW32__
 
 /* MinGW does not define a gettimeofday so we need to roll our own.
- * This one is largely following 
+ * This one is largely following
  * http://lists.gnu.org/archive/html/bug-gnu-chess/2004-01/msg00020.html
  */
 
@@ -51,7 +51,7 @@ gettimeofday(struct timeval* p, void* tz /* IGNORED */){
     long long ns100; /*time since 1 Jan 1601 in 100ns units */
     FILETIME ft;
   } _now;
-  
+
   GetSystemTimeAsFileTime( &(_now.ft) );
   p->tv_usec=(long)((_now.ns100 / 10LL) % 1000000LL );
   p->tv_sec= (long)((_now.ns100-(116444736000000000LL))/10000000LL);
@@ -69,7 +69,7 @@ __bro_util_snprintf(char *str, size_t size, const char *format, ...)
   result = vsnprintf(str, size, format, al);
   va_end(al);
   str[size-1] = '\0';
-  
+
   return result;
 }
 
@@ -79,7 +79,8 @@ __bro_util_fill_subnet(BroSubnet *sn, uint32 net, uint32 width)
   if (! sn)
     return;
 
-  sn->sn_net = net;
+  sn->sn_net.addr[0] = net;
+  sn->sn_net.size = 1;
   sn->sn_width = width;
 }
 
@@ -88,10 +89,10 @@ double
 __bro_util_get_time(void)
 {
   struct timeval tv;
-  
+
   if (gettimeofday(&tv, 0) < 0)
     return 0.0;
-  
+
   return __bro_util_timeval_to_double(&tv);
 }
 
@@ -114,12 +115,12 @@ __bro_util_htond(double d)
   double tmp;
   char* src = (char*) &d;
   char* dst = (char*) &tmp;
-  
+
   dsize = sizeof(d) - 1;
-  
+
   for (i = 0; i <= dsize; i++)
     dst[i] = src[dsize - i];
-  
+
   return tmp;
 }
 

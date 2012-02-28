@@ -37,7 +37,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #ifdef __EMX__
 #include <strings.h>
-#endif 
+#endif
 
 #include <bro_types.h>
 #include <bro_type.h>
@@ -136,7 +136,7 @@ __bro_val_new_of_type(int type, const char *type_name)
       if (! (val = __bro_val_new()))
 	D_RETURN_(NULL);
       break;
-      
+
     case BRO_TYPE_SET:
       /* A hack -- sets are table vals, but have set type,
        * at least while Bro still has SetType.
@@ -150,7 +150,7 @@ __bro_val_new_of_type(int type, const char *type_name)
       if (! (val = (BroVal *) __bro_record_val_new()))
 	D_RETURN_(NULL);
       break;
-      
+
     case BRO_TYPE_PATTERN:
     case BRO_TYPE_ANY:
     case BRO_TYPE_UNION:
@@ -163,13 +163,13 @@ __bro_val_new_of_type(int type, const char *type_name)
       D(("Unsupported value type %i\n", type));
       D_RETURN_(NULL);
     }
-  
+
   if (! (val->val_type = __bro_type_new_of_type(type, type_name)))
     {
       __bro_val_free(val);
       D_RETURN_(NULL);
     }
-  
+
   D_RETURN_(val);
 }
 
@@ -184,7 +184,7 @@ __bro_val_assign(BroVal *val, const void *data)
       D(("Input error: (%p, %p)\n", val, data));
       D_RETURN_(FALSE);
     }
-  
+
   if (! data)
     {
       if (val->val_type)
@@ -233,11 +233,11 @@ __bro_val_assign(BroVal *val, const void *data)
 	bro_string_set_data(&val->val_str, str->str_val, str->str_len);
       }
       break;
-      
+
     case BRO_TYPE_PORT:
       {
 	BroPort *tmp = (BroPort *) data;
-	
+
 	if (tmp->port_proto != IPPROTO_TCP &&
 	    tmp->port_proto != IPPROTO_UDP &&
 	    tmp->port_proto != IPPROTO_ICMP)
@@ -245,63 +245,63 @@ __bro_val_assign(BroVal *val, const void *data)
 	    __bro_sobject_release((BroSObject *) data);
 	    D_RETURN_(FALSE);
 	  }
-	
+
 	val->val_port = *tmp;
       }
       break;
-      
+
     case BRO_TYPE_IPADDR:
-      val->val_int = *((uint32 *) data);
+      val->val_addr = *((BroAddr *) data);
       break;
-      
+
     case BRO_TYPE_SUBNET:
       val->val_subnet = *((BroSubnet *) data);
       break;
-      
+
     case BRO_TYPE_RECORD:
       {
 	BroList *l;
 	BroVal *tmp_val;
 	BroRecordVal *rv = (BroRecordVal *) val;
 	BroRecord *rec = (BroRecord *) data;
-	
+
 	if (rv->rec)
 	  __bro_record_free(rv->rec);
-	
+
 	rv->rec = __bro_record_copy(rec);
 
 	/* Record vals also have a record type, copy that: */
 	for (l = rec->val_list; l; l = __bro_list_next(l))
 	  {
 	    char *field;
-	    
+
 	    tmp_val = __bro_list_data(l);
-	    
+
 	    if (! tmp_val->val_type)
 	      {
 		D(("Cannot create record type component from val without type.\n"));
 		D_RETURN_(FALSE);
 	      }
-	    
+
 	    if (! (field = __bro_sobject_data_get((BroSObject *) tmp_val, "field")))
 	      {
 		D(("Val in record doesn't have field name associated with it.\n"));
 		D_RETURN_(FALSE);
 	      }
-	    
+
 	    __bro_record_type_add_type((BroRecordType *) val->val_type, field, tmp_val->val_type);;
 	  }
       }
       break;
-      
+
     case BRO_TYPE_TABLE:
       {
 	BroTableVal *tv = (BroTableVal *) val;
 	BroTable *table = (BroTable *) data;
-	
+
 	if (tv->table)
 	  __bro_table_free(tv->table);
-	
+
 	tv->table = __bro_table_copy(table);
 
 	/* XXX need to create the appropriate content in (BroTableType*) val->val_type! */
@@ -319,7 +319,7 @@ __bro_val_assign(BroVal *val, const void *data)
     case BRO_TYPE_ERROR:
       D(("Type %i currently unsupported.\n", val->val_type->tag));
       D_RETURN_(FALSE);
-      
+
     default:
       D(("Unknown type identifier %i\n", val->val_type->tag));
       D_RETURN_(FALSE);
@@ -335,9 +335,9 @@ __bro_val_init(BroVal *val)
   BroSObject *sobj = (BroSObject *) val;
 
   D_ENTER;
-  
+
   __bro_object_init((BroObject *) val);
-  
+
   sobj->read  = (BroSObjectRead) __bro_val_read;
   sobj->write = (BroSObjectWrite) __bro_val_write;
   sobj->free  = (BroSObjectFree) __bro_val_free;
@@ -373,13 +373,13 @@ __bro_val_free(BroVal *val)
 	case BRO_TYPE_STRING:
 	  bro_string_cleanup(&val->val_str);
 	  break;
-	  
+
 	default:
 	  /* Nothing to do */
 	  break;
 	}
     }
-  
+
   __bro_sobject_release((BroSObject *) val->val_type);
   __bro_object_free((BroObject *) val);
 
@@ -408,7 +408,7 @@ __bro_val_get_data(BroVal *val, int *type, void **data)
 
   if (type && val->val_type)
     *type = val->val_type->tag;
-  
+
   *data = val->get_data(val);
   return TRUE;
 }
@@ -419,6 +419,7 @@ __bro_val_read(BroVal *val, BroConn *bc)
 {
   char opt;
   uint32 tmp;
+  int i;
 
   D_ENTER;
 
@@ -441,9 +442,9 @@ __bro_val_read(BroVal *val, BroConn *bc)
 
   D(("Type in val has type tags %i/%i\n",
      val->val_type->tag, val->val_type->internal_tag));
-     
+
   /* Read optional Attributes */
-  
+
   if (val->val_attrs)
     {
       __bro_sobject_release((BroSObject *) val->val_attrs);
@@ -457,7 +458,7 @@ __bro_val_read(BroVal *val, BroConn *bc)
       if (! (val->val_attrs = (BroRecordVal *) __bro_sobject_unserialize(SER_RECORD_VAL, bc)))
 	D_RETURN_(FALSE);
     }
-  
+
   switch (val->val_type->internal_tag)
     {
     case BRO_INTTYPE_INT:
@@ -468,14 +469,14 @@ __bro_val_read(BroVal *val, BroConn *bc)
       uint64 tmp;
 	  if (! __bro_buf_read_int64(bc->rx_buf, &tmp))
 	    D_RETURN_(FALSE);
-	  
+
 	  if ( (tmp & 0xf0000) == 0x10000 )
 	    val->val_port.port_proto = IPPROTO_TCP;
 	  else if ( (tmp & 0xf0000) == 0x20000 )
 	    val->val_port.port_proto = IPPROTO_UDP;
 	  else if ( (tmp & 0xf0000) == 0x30000 )
 	    val->val_port.port_proto = IPPROTO_ICMP;
-	    
+
 	  val->val_port.port_num = (tmp & 0xFFFF);
 	}
       else
@@ -484,50 +485,65 @@ __bro_val_read(BroVal *val, BroConn *bc)
 	    D_RETURN_(FALSE);
 	}
       break;
-      
+
     case BRO_INTTYPE_DOUBLE:
       if (! __bro_buf_read_double(bc->rx_buf, &val->val_double))
 	D_RETURN_(FALSE);
       break;
-      
+
     case BRO_INTTYPE_STRING:
       if (! __bro_buf_read_string(bc->rx_buf, &val->val_str))
 	D_RETURN_(FALSE);
       break;
 
     case BRO_INTTYPE_IPADDR:
-      if (! __bro_buf_read_int(bc->rx_buf, &tmp))
-	D_RETURN_(FALSE);
-      
-      if (tmp != 1)
-	{
-	  D(("We don't handle IPv6 addresses yet.\n"));
-	  D_RETURN_(FALSE);
-	}
-      
-      if (! __bro_buf_read_int(bc->rx_buf, &val->val_int))
-	D_RETURN_(FALSE);
+		if (! __bro_buf_read_int(bc->rx_buf, &tmp))
+			D_RETURN_(FALSE);
 
-      val->val_int = ntohl(val->val_int);
-      break;
+		if (tmp != 1 && tmp != 4)
+			{
+			D(("Bad IP addresses word length: %d.\n", tmp));
+			D_RETURN_(FALSE);
+			}
+
+		val->val_addr.size = tmp;
+
+		for ( i = 0; i < tmp; ++i )
+			{
+			if (! __bro_buf_read_int(bc->rx_buf, &val->val_addr.addr[i]))
+				D_RETURN_(FALSE);
+
+			val->val_addr.addr[i] = ntohl(val->val_addr.addr[i]);
+			}
+
+		break;
 
     case BRO_INTTYPE_SUBNET:
-      if (! __bro_buf_read_int(bc->rx_buf, &tmp))
-	D_RETURN_(FALSE);
-      
-      if (tmp != 1)
-	{
-	  D(("We don't handle IPv6 addresses yet.\n"));
-	  D_RETURN_(FALSE);
-	}
+		if (! __bro_buf_read_int(bc->rx_buf, &tmp))
+			D_RETURN_(FALSE);
 
-      if (! __bro_buf_read_int(bc->rx_buf, &val->val_subnet.sn_net))
-	D_RETURN_(FALSE);
-      val->val_subnet.sn_net = ntohl(val->val_subnet.sn_net);
+		if (tmp != 1 && tmp != 4)
+			{
+			D(("Bad IP addresses word length: %d.\n", tmp));
+			D_RETURN_(FALSE);
+			}
 
-      if (! __bro_buf_read_int(bc->rx_buf, &val->val_subnet.sn_width))
-	D_RETURN_(FALSE);
-      break;
+		val->val_subnet.sn_net.size = tmp;
+
+		for ( i = 0; i < tmp; ++i )
+			{
+			if (! __bro_buf_read_int(bc->rx_buf,
+			                         &val->val_subnet.sn_net.addr[i]))
+				D_RETURN_(FALSE);
+
+			val->val_subnet.sn_net.addr[i] =
+			    ntohl(val->val_subnet.sn_net.addr[i]);
+			}
+
+		if (! __bro_buf_read_int(bc->rx_buf, &val->val_subnet.sn_width))
+			D_RETURN_(FALSE);
+
+		break;
 
     case BRO_INTTYPE_OTHER:
       /* See Val.cc around 165 -- these are handled by derived classes.
@@ -536,14 +552,14 @@ __bro_val_read(BroVal *val, BroConn *bc)
       if (val->val_type->tag != BRO_TYPE_FUNC &&
 	  val->val_type->tag != BRO_TYPE_FILE)
 	break;
-      
+
       /* Otherwise fall through to warning. */
 
     default:
       D(("Unsupported internal type tag: %i\n", val->val_type->internal_tag));
       D_RETURN_(FALSE);
     }
-  
+
   D_RETURN_(TRUE);
 }
 
@@ -553,9 +569,10 @@ __bro_val_write(BroVal *val, BroConn *bc)
 {
   BroType *type;
   BroSObject *obj;
+  int i;
 
   D_ENTER;
-  
+
   if (! val || !bc)
     D_RETURN_(FALSE);
 
@@ -571,7 +588,7 @@ __bro_val_write(BroVal *val, BroConn *bc)
 
   type = (BroType *) val->val_type;
   obj  = (BroSObject *) val;
-  
+
   switch (type->tag)
     {
     case BRO_TYPE_BOOL:
@@ -591,15 +608,15 @@ __bro_val_write(BroVal *val, BroConn *bc)
     case BRO_TYPE_PORT:
       obj->type_id = SER_PORT_VAL;
       break;
-      
+
     case BRO_TYPE_INTERVAL:
       obj->type_id = SER_INTERVAL_VAL;
       break;
-      
+
     case BRO_TYPE_IPADDR:
       obj->type_id = SER_ADDR_VAL;
       break;
-      
+
     case BRO_TYPE_SUBNET:
       obj->type_id = SER_SUBNET_VAL;
       break;
@@ -607,7 +624,7 @@ __bro_val_write(BroVal *val, BroConn *bc)
     case BRO_TYPE_RECORD:
       obj->type_id = SER_RECORD_VAL;
       break;
-      
+
     default:
       D(("Val %p's type unhandled: type tag is %i.\n", val, type->tag));
       D_RETURN_(FALSE);
@@ -621,10 +638,10 @@ __bro_val_write(BroVal *val, BroConn *bc)
 
   if (! __bro_buf_write_char(bc->tx_buf, val->val_attrs ? 1 : 0))
     D_RETURN_(FALSE);
-  
+
   if (val->val_attrs && ! __bro_sobject_serialize((BroSObject *) val->val_attrs, bc))
     D_RETURN_(FALSE);
-  
+
   switch (val->val_type->internal_tag)
     {
     case BRO_INTTYPE_INT:
@@ -633,7 +650,7 @@ __bro_val_write(BroVal *val, BroConn *bc)
       if (val->val_type->tag == BRO_TYPE_PORT)
 	{
 	  uint64 tmp = val->val_port.port_num;
-	  
+
 	  if (val->val_port.port_proto == IPPROTO_TCP)
 	    tmp |= 0x10000;
 	  else if (val->val_port.port_proto == IPPROTO_UDP)
@@ -650,31 +667,39 @@ __bro_val_write(BroVal *val, BroConn *bc)
 	    D_RETURN_(FALSE);
 	}
       break;
-      
+
     case BRO_INTTYPE_DOUBLE:
       if (! __bro_buf_write_double(bc->tx_buf, val->val_double))
 	D_RETURN_(FALSE);
       break;
-      
+
     case BRO_INTTYPE_STRING:
       if (! __bro_buf_write_string(bc->tx_buf, &val->val_str))
 	D_RETURN_(FALSE);
       break;
 
     case BRO_INTTYPE_IPADDR:
-      if (! __bro_buf_write_int(bc->tx_buf, 1))
-	D_RETURN_(FALSE);
-      if (! __bro_buf_write_int(bc->tx_buf, htonl(val->val_int)))
-	D_RETURN_(FALSE);
-      break;
+		if (! __bro_buf_write_int(bc->tx_buf, val->val_addr.size))
+			D_RETURN_(FALSE);
+
+		for ( i = 0; i < val->val_addr.size; ++i )
+			if (! __bro_buf_write_int(bc->tx_buf, htonl(val->val_addr.addr[i])))
+				D_RETURN_(FALSE);
+
+		break;
 
     case BRO_INTTYPE_SUBNET:
-      if (! __bro_buf_write_int(bc->tx_buf, 1))
-	D_RETURN_(FALSE);
-      if (! __bro_buf_write_int(bc->tx_buf, htonl(val->val_subnet.sn_net)))
-	D_RETURN_(FALSE);
-      if (! __bro_buf_write_int(bc->tx_buf, val->val_subnet.sn_width))
-	D_RETURN_(FALSE);
+		if (! __bro_buf_write_int(bc->tx_buf, val->val_subnet.sn_net.size))
+			D_RETURN_(FALSE);
+
+		for ( i = 0; i < val->val_subnet.sn_net.size; ++i )
+			if (! __bro_buf_write_int(bc->tx_buf,
+			                          htonl(val->val_subnet.sn_net.addr[i])))
+				D_RETURN_(FALSE);
+
+		if (! __bro_buf_write_int(bc->tx_buf, val->val_subnet.sn_width))
+			D_RETURN_(FALSE);
+
       break;
 
     case BRO_INTTYPE_OTHER:
@@ -682,12 +707,12 @@ __bro_val_write(BroVal *val, BroConn *bc)
        * like __bro_record_val_write().
        */
       break;
-      
+
     default:
       D(("Unknown internal type tag: %i\n", val->val_type->internal_tag));
       D_RETURN_(FALSE);
-    }  
-  
+    }
+
   D_RETURN_(TRUE);
 }
 
@@ -695,7 +720,7 @@ static int
 __bro_val_clone(BroVal *dst, BroVal *src)
 {
   D_ENTER;
-  
+
   if (! __bro_object_clone((BroObject *) dst, (BroObject *) src))
     {
       D(("Cloning parent failed.\n"));
@@ -706,9 +731,9 @@ __bro_val_clone(BroVal *dst, BroVal *src)
       ! (dst->val_type = (BroType *) __bro_sobject_copy((BroSObject *) src->val_type)))
     {
       D(("Cloning type failed.\n"));
-      D_RETURN_(FALSE);      
+      D_RETURN_(FALSE);
     }
-  
+
   if (src->val_attrs &&
       ! (dst->val_attrs = (BroRecordVal *) __bro_sobject_copy((BroSObject *) src->val_attrs)))
     {
@@ -727,13 +752,13 @@ __bro_val_clone(BroVal *dst, BroVal *src)
         dst->val_int64 = src->val_int64;
       break;
     case BRO_INTTYPE_IPADDR:
-	  dst->val_int = src->val_int;
+	  dst->val_addr = src->val_addr;
       break;
-      
+
     case BRO_INTTYPE_DOUBLE:
       dst->val_double = src->val_double;
       break;
-      
+
     case BRO_INTTYPE_STRING:
       bro_string_assign(&src->val_str, &dst->val_str);
       break;
@@ -745,12 +770,12 @@ __bro_val_clone(BroVal *dst, BroVal *src)
     case BRO_INTTYPE_OTHER:
       /* That's okay, handled in subtype */
       break;
-      
+
     default:
       D(("Unknown internal type tag: %i\n", dst->val_type->internal_tag));
       D_RETURN_(FALSE);
-    }  
-  
+    }
+
   D_RETURN_(TRUE);
 }
 
@@ -758,6 +783,7 @@ static uint32
 __bro_val_hash(BroVal *val)
 {
   uint32 result;
+  int i;
 
   D_ENTER;
 
@@ -765,7 +791,7 @@ __bro_val_hash(BroVal *val)
     D_RETURN_(0);
 
   result = __bro_sobject_hash((BroSObject*) val->val_type);
-  
+
   switch (val->val_type->internal_tag)
     {
     case BRO_INTTYPE_INT:
@@ -773,30 +799,33 @@ __bro_val_hash(BroVal *val)
       result ^= val->val_int64;
       break;
     case BRO_INTTYPE_IPADDR:
-      result ^= val->val_int;
+      for ( i = 0; i < val->val_addr.size; ++i )
+        result ^= val->val_addr.addr[i];
       break;
-      
+
     case BRO_INTTYPE_DOUBLE:
       result ^= (uint32) val->val_double;
       break;
-      
+
     case BRO_INTTYPE_STRING:
       result ^= __bro_ht_str_hash(val->val_str.str_val);
       break;
-      
+
     case BRO_INTTYPE_SUBNET:
-      result ^= val->val_subnet.sn_net;
+      for ( i = 0; i < val->val_subnet.sn_net.size; ++i )
+        result ^= val->val_subnet.sn_net.addr[i];
+
       result ^= val->val_subnet.sn_width;
       break;
 
     case BRO_INTTYPE_OTHER:
       D(("WARNING -- __bro_val_hash() invoked on derived type.\n"));
       break;
-      
+
     default:
       D(("Unknown internal type tag: %i\n", val->val_type->internal_tag));
       break;
-    }  
+    }
 
   D_RETURN_(result);
 }
@@ -804,15 +833,16 @@ __bro_val_hash(BroVal *val)
 static int
 __bro_val_cmp(BroVal *val1, BroVal *val2)
 {
+  int i;
   D_ENTER;
-  
+
   if (! val1 || ! val2)
     D_RETURN_(FALSE);
 
   if (! __bro_sobject_cmp((BroSObject*) val1->val_type,
 			  (BroSObject*) val2->val_type))
     D_RETURN_(FALSE);
-  
+
   switch (val1->val_type->internal_tag)
     {
     case BRO_INTTYPE_INT:
@@ -821,35 +851,45 @@ __bro_val_cmp(BroVal *val1, BroVal *val2)
 	D_RETURN_(FALSE);
       break;
     case BRO_INTTYPE_IPADDR:
-      if (val1->val_int != val2->val_int)
-	D_RETURN_(FALSE);
+      if (val1->val_addr.size != val2->val_addr.size)
+        D_RETURN_(FALSE);
+
+      for (i = 0; i < val1->val_addr.size; ++i)
+        if (val1->val_addr.addr[i] != val2->val_addr.addr[i])
+          D_RETURN_(FALSE);
       break;
-      
+
     case BRO_INTTYPE_DOUBLE:
       if (val1->val_double != val2->val_double)
 	D_RETURN_(FALSE);
       break;
-      
+
     case BRO_INTTYPE_STRING:
       if (! __bro_ht_str_cmp(val1->val_str.str_val, val2->val_str.str_val))
 	D_RETURN_(FALSE);
       break;
-      
+
     case BRO_INTTYPE_SUBNET:
-      if (val1->val_subnet.sn_net != val2->val_subnet.sn_net ||
-	  val1->val_subnet.sn_width != val2->val_subnet.sn_width)
-	D_RETURN_(FALSE);
+      if (val1->val_subnet.sn_net.size != val2->val_subnet.sn_net.size)
+        D_RETURN_(FALSE);
+
+      for (i = 0; i < val1->val_subnet.sn_net.size; ++ i)
+        if (val1->val_subnet.sn_net.addr[i] != val2->val_subnet.sn_net.addr[i])
+          D_RETURN_(FALSE);
+
+      if (val1->val_subnet.sn_width != val2->val_subnet.sn_width)
+        D_RETURN_(FALSE);
       break;
 
     case BRO_INTTYPE_OTHER:
       D(("WARNING -- __bro_val_cmp() invoked on derived type.\n"));
       break;
-      
+
     default:
       D(("Unknown internal type tag: %i\n", val1->val_type->internal_tag));
       break;
-    }  
-  
+    }
+
   D_RETURN_(TRUE);
 }
 
@@ -859,7 +899,7 @@ __bro_val_get(BroVal *val)
   /* Following the comments in broccoli.h, we return atomic values
    * as copies into *result, and complex types (i.e., structs) have
    * all members assigned to point to internal values so the user
-   * does not have to clean up the returned value. The user can 
+   * does not have to clean up the returned value. The user can
    * still keep those values around if necessary by copying them.
    */
   if (! val->val_type)
@@ -867,8 +907,8 @@ __bro_val_get(BroVal *val)
       D(("No type in val %p\n", val));
       return NULL;
     }
-  
-   switch (val->val_type->tag)    
+
+   switch (val->val_type->tag)
     {
     case BRO_TYPE_BOOL:
     case BRO_TYPE_INT:
@@ -877,22 +917,22 @@ __bro_val_get(BroVal *val)
     case BRO_TYPE_COUNTER:
       return &val->val_int64;
     case BRO_TYPE_IPADDR:
-      return &val->val_int;
-      
+      return &val->val_addr;
+
     case BRO_TYPE_PORT:
       return &val->val_port;
-      
+
     case BRO_TYPE_DOUBLE:
     case BRO_TYPE_TIME:
     case BRO_TYPE_INTERVAL:
       return &val->val_double;
-      
+
     case BRO_TYPE_STRING:
       return &val->val_str;
-      
+
     case BRO_TYPE_SUBNET:
       return &val->val_subnet;
-      
+
     case BRO_TYPE_RECORD:
       D(("WARNING: Inheritance broken -- record types should not be handled here.\n"));
       return NULL;
@@ -900,11 +940,11 @@ __bro_val_get(BroVal *val)
     case BRO_TYPE_TABLE:
       D(("WARNING: Inheritance broken -- table types should not be handled here.\n"));
       return NULL;
-      
+
     default:
       D(("Type %i currently not extractable.\n", val->val_type->tag));
     }
-   
+
    return NULL;
 }
 
@@ -920,7 +960,7 @@ __bro_list_val_new(void)
     D_RETURN_(NULL);
 
   __bro_list_val_init(val);
-  
+
   D_RETURN_(val);
 }
 
@@ -929,18 +969,18 @@ __bro_list_val_init(BroListVal *lv)
 {
   BroSObject *sobj = (BroSObject *) lv;
   BroVal *val = (BroVal *) lv;
-  
+
   D_ENTER;
-  
+
   __bro_val_init((BroVal *) lv);
-  
+
   sobj->read  = (BroSObjectRead) __bro_list_val_read;
   sobj->write = (BroSObjectWrite) __bro_list_val_write;
   sobj->free  = (BroSObjectFree) __bro_list_val_free;
   sobj->clone = (BroSObjectClone) __bro_list_val_clone;
   sobj->hash  = (BroSObjectHash) __bro_list_val_hash;
   sobj->cmp   = (BroSObjectCmp) __bro_list_val_cmp;
-  
+
   sobj->type_id = SER_LIST_VAL;
 
   val->get_data = (BroValAccessor) __bro_list_val_get;
@@ -952,13 +992,13 @@ static void
 __bro_list_val_free(BroListVal *lv)
 {
   D_ENTER;
-  
+
   if (! lv)
     D_RETURN;
-  
+
   __bro_list_free(lv->list, (BroFunc) __bro_sobject_release);
   __bro_val_free((BroVal *) lv);
-  
+
   D_RETURN;
 }
 
@@ -969,32 +1009,32 @@ __bro_list_val_read(BroListVal *lv, BroConn *bc)
   uint32 ui;
 
   D_ENTER;
-  
+
   if (! __bro_val_read((BroVal *) lv, bc))
     D_RETURN_(FALSE);
-  
+
   __bro_list_free(lv->list, (BroFunc) __bro_sobject_release);
   lv->list = NULL;
-  
+
   if (! __bro_buf_read_char(bc->rx_buf, &lv->type_tag))
     goto error_return;
   if (! __bro_buf_read_int(bc->rx_buf, &ui))
     goto error_return;
-  
+
   lv->len = (int) ui;
 
   for (i = 0; i < lv->len; i++)
     {
       BroVal *val;
-      
+
       if (! (val = (BroVal *) __bro_sobject_unserialize(SER_IS_VAL, bc)))
 	goto error_return;
-      
+
       lv->list = __bro_list_append(lv->list, val);
     }
-  
+
   D_RETURN_(TRUE);
-  
+
  error_return:
   __bro_list_free(lv->list, (BroFunc) __bro_sobject_release);
   lv->list = NULL;
@@ -1005,26 +1045,26 @@ static int
 __bro_list_val_write(BroListVal *lv, BroConn *bc)
 {
   BroList *l;
-  
+
   D_ENTER;
-  
+
   if (! __bro_val_write((BroVal *) lv, bc))
     D_RETURN_(FALSE);
-  
+
   if (! __bro_buf_write_char(bc->tx_buf, lv->type_tag))
     D_RETURN_(FALSE);
-  
+
   if (! __bro_buf_write_int(bc->tx_buf, lv->len))
     D_RETURN_(FALSE);
-  
+
   for (l = lv->list; l; l = __bro_list_next(l))
     {
       BroVal *val = __bro_list_data(l);
-      
+
       if (! __bro_sobject_serialize((BroSObject *) val, bc))
 	D_RETURN_(FALSE);
     }
-  
+
   D_RETURN_(TRUE);
 }
 
@@ -1040,7 +1080,7 @@ __bro_list_val_clone(BroListVal *dst, BroListVal *src)
 
   dst->type_tag = src->type_tag;
   dst->len = src->len;
-  
+
   if (dst->list)
     {
       __bro_list_free(dst->list, (BroFunc) __bro_sobject_release);
@@ -1049,7 +1089,7 @@ __bro_list_val_clone(BroListVal *dst, BroListVal *src)
 
   for (l = src->list; l; l = __bro_list_next(l))
     dst->list = __bro_list_append(dst->list, __bro_sobject_copy(__bro_list_data(l)));
-  
+
   D_RETURN_(TRUE);
 }
 
@@ -1060,15 +1100,15 @@ __bro_list_val_hash(BroListVal *lv)
   BroList *l;
 
   D_ENTER;
-  
+
   if (! lv)
     D_RETURN_(0);
-  
+
   result = lv->len ^ lv->type_tag;
-  
+
   for (l = lv->list; l; l = __bro_list_next(l))
     result ^= __bro_sobject_hash((BroSObject *) __bro_list_data(l));
-  
+
   D_RETURN_(result);
 }
 
@@ -1078,14 +1118,14 @@ __bro_list_val_cmp(BroListVal *lv1, BroListVal *lv2)
   BroList *l1, *l2;
 
   D_ENTER;
-  
+
   if (! lv1 || ! lv2)
     D_RETURN_(FALSE);
 
   if (lv1->len != lv2->len ||
-      lv1->type_tag != lv2->type_tag)    
+      lv1->type_tag != lv2->type_tag)
     D_RETURN_(FALSE);
-      
+
   for (l1 = lv1->list, l2 = lv2->list; l1 && l2;
        l1 = __bro_list_next(l1), l2 = __bro_list_next(l2))
     {
@@ -1099,7 +1139,7 @@ __bro_list_val_cmp(BroListVal *lv1, BroListVal *lv2)
       D(("WARNING -- list length inconsistency.\n"));
       D_RETURN_(FALSE);
     }
-  
+
   D_RETURN_(TRUE);
 }
 
@@ -1134,13 +1174,13 @@ __bro_list_val_pop_front(BroListVal *lv)
 
   if (! lv)
     D_RETURN_(NULL);
-  
+
   l = lv->list;
   lv->list = __bro_list_remove(lv->list, lv->list);
-  
+
   result = (BroVal*) __bro_list_data(l);
   __bro_list_free(l, NULL);
-  
+
   D_RETURN_(result);
 }
 
@@ -1154,7 +1194,7 @@ __bro_list_val_get_front(BroListVal *lv)
 
   if (! lv)
     D_RETURN_(NULL);
-  
+
   D_RETURN_((BroVal*) __bro_list_data(lv->list));
 }
 
@@ -1162,10 +1202,10 @@ int
 __bro_list_val_get_length(BroListVal *lv)
 {
   D_ENTER;
-  
+
   if (! lv)
     D_RETURN_(0);
-  
+
   D_RETURN_(lv->len);
 }
 
@@ -1191,18 +1231,18 @@ static void
 __bro_mutable_val_init(BroMutableVal *mv)
 {
   BroSObject *sobj = (BroSObject *) mv;
-  
+
   D_ENTER;
-  
+
   __bro_val_init((BroVal *) mv);
-  
+
   sobj->read  = (BroSObjectRead) __bro_mutable_val_read;
   sobj->write = (BroSObjectWrite) __bro_mutable_val_write;
   sobj->free  = (BroSObjectFree) __bro_mutable_val_free;
   sobj->clone = (BroSObjectClone) __bro_mutable_val_clone;
   sobj->hash  = (BroSObjectHash) __bro_mutable_val_hash;
   sobj->cmp   = (BroSObjectCmp) __bro_mutable_val_cmp;
-  
+
   sobj->type_id = SER_MUTABLE_VAL;
 
   /* BroMutableVal inherits __bro_val_get and doesn't override it. */
@@ -1215,10 +1255,10 @@ static void
 __bro_mutable_val_free(BroMutableVal *mv)
 {
   D_ENTER;
-  
+
   __bro_sobject_release((BroSObject *) mv->id);
   __bro_val_free((BroVal *) mv);
-  
+
   D_RETURN;
 }
 
@@ -1252,16 +1292,16 @@ static int
 __bro_mutable_val_write(BroMutableVal *mv, BroConn *bc)
 {
   D_ENTER;
-  
+
   if (! __bro_val_write((BroVal *) mv, bc))
     D_RETURN_(FALSE);
-  
+
   if (! __bro_buf_write_char(bc->tx_buf, mv->props))
     D_RETURN_(FALSE);
-  
+
   if (! __bro_buf_write_string(bc->tx_buf, (mv->id ? &mv->id->name : NULL)))
     D_RETURN_(FALSE);
-  
+
   D_RETURN_(TRUE);
 }
 
@@ -1270,15 +1310,15 @@ static int
 __bro_mutable_val_clone(BroMutableVal *dst, BroMutableVal *src)
 {
   D_ENTER;
-  
+
   if (! __bro_val_clone((BroVal *) dst, (BroVal *) src))
     D_RETURN_(FALSE);
-  
+
   if (src->id && ! (dst->id = (BroID *) __bro_sobject_copy((BroSObject *) src->id)))
     D_RETURN_(FALSE);
-  
+
   src->props = dst->props;
-  
+
   D_RETURN_(TRUE);
 }
 
@@ -1340,9 +1380,9 @@ __bro_record_val_init(BroRecordVal *rv)
   BroVal *val = (BroVal *) rv;
 
   D_ENTER;
-  
+
   __bro_mutable_val_init((BroMutableVal *) rv);
-  
+
   sobj->read  = (BroSObjectRead) __bro_record_val_read;
   sobj->write = (BroSObjectWrite) __bro_record_val_write;
   sobj->free  = (BroSObjectFree) __bro_record_val_free;
@@ -1353,7 +1393,7 @@ __bro_record_val_init(BroRecordVal *rv)
   sobj->type_id = SER_RECORD_VAL;
 
   val->get_data = (BroValAccessor) __bro_record_val_get;
-  
+
   D_RETURN;
 }
 
@@ -1365,7 +1405,7 @@ __bro_record_val_free(BroRecordVal *rv)
 
   if (! rv)
     D_RETURN;
-  
+
   __bro_record_free(rv->rec);
   __bro_mutable_val_free((BroMutableVal *) rv);
 
@@ -1379,23 +1419,23 @@ __bro_record_val_read(BroRecordVal *rv, BroConn *bc)
   char opt;
   uint32 i, len;
   BroVal *val;
-  
+
   D_ENTER;
-  
+
   if (! __bro_mutable_val_read((BroMutableVal *) rv, bc))
     D_RETURN_(FALSE);
 
   /* Clean out old vals, if any */
   __bro_record_free(rv->rec);
-  
+
   if (! (rv->rec = __bro_record_new()))
     D_RETURN_(FALSE);
-  
+
   /* Read in new vals */
 
   if (! __bro_buf_read_int(bc->rx_buf, &len))
     goto error_return;
-  
+
   for (i = 0; i < len; i++)
     {
       const char *field_name;
@@ -1407,7 +1447,7 @@ __bro_record_val_read(BroRecordVal *rv, BroConn *bc)
 
       if (! __bro_buf_read_char(bc->rx_buf, &opt))
 	goto error_return;
-      
+
       if (opt)
 	{
 	  if (! (val = (BroVal *) __bro_sobject_unserialize(SER_IS_VAL, bc)))
@@ -1426,9 +1466,9 @@ __bro_record_val_read(BroRecordVal *rv, BroConn *bc)
 	  if (! (val = __bro_val_new()))
 	    goto error_return;
 	}
-      
+
       __bro_record_add_val(rv->rec, val);
-      
+
       if (! (field_name = __bro_record_type_get_nth_field((BroRecordType *) rv_type, i)))
 	{
 	  D(("WARNING -- record type field %i has no name.\n", i));
@@ -1437,7 +1477,7 @@ __bro_record_val_read(BroRecordVal *rv, BroConn *bc)
 
       __bro_record_set_nth_name(rv->rec, i, field_name);
     }
-  
+
   D_RETURN_(TRUE);
 
  error_return:
@@ -1458,31 +1498,31 @@ __bro_record_val_write(BroRecordVal *rv, BroConn *bc)
 
   if (! __bro_mutable_val_write((BroMutableVal *) rv, bc))
     D_RETURN_(FALSE);
-  
+
   if (! __bro_buf_write_int(bc->tx_buf, rv->rec->val_len))
     D_RETURN_(FALSE);
-  
+
   if (! rv->rec && rv->rec->val_len > 0)
     D_RETURN_(FALSE);
-  
+
   D(("Writing out %i vals in record %p.\n", rv->rec->val_len, rv->rec));
 
   for (i = 0, l = rv->rec->val_list; l; i++, l = __bro_list_next(l))
     {
       val = __bro_list_data(l);
-      
+
       D(("Val %i/%p's type: %p\n", i, val, val->val_type));
-      
+
       if (! __bro_buf_write_char(bc->tx_buf, (val->val_type ? 1 :0)))
 	D_RETURN_(FALSE);
-      
+
       if (val->val_type)
-	{	  
+	{
 	  if (! __bro_sobject_serialize((BroSObject *) val, bc))
 	    D_RETURN_(FALSE);
 	}
     }
-  
+
   D_RETURN_(TRUE);
 }
 
@@ -1491,13 +1531,13 @@ static int
 __bro_record_val_clone(BroRecordVal *dst, BroRecordVal *src)
 {
   D_ENTER;
-  
+
   if (! __bro_mutable_val_clone((BroMutableVal *) dst, (BroMutableVal *) src))
     D_RETURN_(FALSE);
-  
+
   if (src->rec && ! (dst->rec = __bro_record_copy(src->rec)))
     D_RETURN_(FALSE);
-  
+
   D_RETURN_(TRUE);
 }
 
@@ -1506,9 +1546,9 @@ static uint32
 __bro_record_val_hash(BroRecordVal *rv)
 {
   uint32 result;
-  
+
   D_ENTER;
-  
+
   if (! rv)
     D_RETURN_(0);
 
@@ -1526,7 +1566,7 @@ __bro_record_val_cmp(BroRecordVal *rv1, BroRecordVal *rv2)
 
   if (! rv1 || ! rv2)
     D_RETURN_(FALSE);
-  
+
   if (! __bro_record_cmp(rv1->rec, rv2->rec))
     D_RETURN_(FALSE);
 
@@ -1548,12 +1588,12 @@ __bro_table_val_new(void)
   BroTableVal *val;
 
   D_ENTER;
-  
+
   if (! (val = calloc(1, sizeof(BroTableVal))))
     D_RETURN_(NULL);
 
   __bro_table_val_init(val);
-  
+
   D_RETURN_(val);
 }
 
@@ -1564,19 +1604,19 @@ __bro_table_val_init(BroTableVal *tbl)
   BroVal *val = (BroVal *) tbl;
 
   D_ENTER;
-  
+
   __bro_mutable_val_init((BroMutableVal *) tbl);
-  
+
   sobj->read  = (BroSObjectRead) __bro_table_val_read;
   sobj->write = (BroSObjectWrite) __bro_table_val_write;
   sobj->free  = (BroSObjectFree) __bro_table_val_free;
   sobj->clone = (BroSObjectClone) __bro_table_val_clone;
   sobj->hash  = (BroSObjectHash) __bro_table_val_hash;
   sobj->cmp   = (BroSObjectCmp) __bro_table_val_cmp;
-  
+
   sobj->type_id = SER_TABLE_VAL;
-  
-  val->get_data = (BroValAccessor) __bro_table_val_get;  
+
+  val->get_data = (BroValAccessor) __bro_table_val_get;
 
   D_RETURN;
 }
@@ -1585,13 +1625,13 @@ static void
 __bro_table_val_free(BroTableVal *tbl)
 {
   D_ENTER;
-  
+
   if (! tbl)
     D_RETURN;
-  
+
   __bro_table_free(tbl->table);
   __bro_mutable_val_free((BroMutableVal *) tbl);
-  
+
   D_RETURN;
 }
 
@@ -1603,16 +1643,16 @@ __bro_table_val_read(BroTableVal *tbl, BroConn *bc)
   int num_keys = 0, num_vals = 0;
 
   D_ENTER;
-  
+
   if (! __bro_mutable_val_read((BroMutableVal *) tbl, bc))
     D_RETURN_(FALSE);
-  
+
   /* Clean out old vals, if any */
   __bro_table_free(tbl->table);
-  
+
   if (! (tbl->table = __bro_table_new()))
     D_RETURN_(FALSE);
-  
+
   /* expire_time, currently unused */
   if (! __bro_buf_read_double(bc->rx_buf, &d))
     goto error_return;
@@ -1627,7 +1667,7 @@ __bro_table_val_read(BroTableVal *tbl, BroConn *bc)
 	  goto error_return;
 	}
     }
-  
+
   if (! __bro_buf_read_char(bc->rx_buf, &opt))
     goto error_return;
   if (opt)
@@ -1681,7 +1721,7 @@ __bro_table_val_read(BroTableVal *tbl, BroConn *bc)
 	key_type = __bro_list_val_get_front(keys)->val_type->tag;
       else
 	goto error_return;
-      
+
       if (tbl->table->tbl_key_type != BRO_TYPE_UNKNOWN &&
 	  tbl->table->tbl_key_type != key_type)
 	{
@@ -1691,7 +1731,7 @@ __bro_table_val_read(BroTableVal *tbl, BroConn *bc)
 	}
 
       tbl->table->tbl_key_type = key_type;
-      
+
       if (tbl->table->tbl_val_type != BRO_TYPE_UNKNOWN &&
 	  tbl->table->tbl_val_type != val_type)
 	{
@@ -1700,8 +1740,8 @@ __bro_table_val_read(BroTableVal *tbl, BroConn *bc)
 	  goto error_return;
 	}
 
-      tbl->table->tbl_val_type = val_type;	
-      
+      tbl->table->tbl_val_type = val_type;
+
       /* Eat two doubles -- one for the last access time and
        * one for when the item is supposed to expire.
        * XXX: currently unimplemented.
@@ -1732,10 +1772,10 @@ __bro_table_val_write_cb_direct(BroVal *key, BroVal *val, BroConn *bc)
 {
   if (! __bro_sobject_serialize((BroSObject *) key, bc))
     return FALSE;
-  
+
   if (val && ! __bro_sobject_serialize((BroSObject *) val, bc))
     return FALSE;
-  
+
   return TRUE;
 }
 
@@ -1744,20 +1784,20 @@ __bro_table_val_write_cb_unpack(BroVal *key, BroRecordVal *val, BroConn *bc)
 {
   BroRecord *rec = val->rec;
   BroListVal *lv = __bro_list_val_new();
-  
+
   /* Just hook the list into the list val, we unhook below. */
   lv->list = rec->val_list;
   lv->len = rec->val_len;
-  
+
   if (! __bro_sobject_serialize((BroSObject *) lv, bc))
     goto error_return;
-  
+
   if (val && ! __bro_sobject_serialize((BroSObject *) val, bc))
     goto error_return;
-  
+
   lv->list = NULL;
   __bro_list_val_free(lv);
-  
+
   return TRUE;
 
  error_return:
@@ -1809,7 +1849,7 @@ __bro_table_val_clone(BroTableVal *dst, BroTableVal *src)
 
   if (src->table && ! (dst->table = __bro_table_copy(src->table)))
     D_RETURN_(FALSE);
-  
+
   D_RETURN_(TRUE);
 }
 
@@ -1819,14 +1859,14 @@ __bro_table_val_hash(BroTableVal *tv)
   uint32 result;
 
   D_ENTER;
-  
+
   if (! tv)
     D_RETURN_(0);
-  
+
   result = __bro_sobject_hash((BroSObject*) tv->table_type);
   result ^= __bro_sobject_hash((BroSObject*) tv->attrs);
   result ^= __bro_table_hash(tv->table);
-  
+
   D_RETURN_(result);
 
 }
@@ -1842,10 +1882,10 @@ __bro_table_val_cmp(BroTableVal *tv1, BroTableVal *tv2)
   if (! __bro_sobject_cmp((BroSObject*) tv1->table_type,
 			  (BroSObject*) tv2->table_type))
     D_RETURN_(FALSE);
-  
+
   if (! __bro_table_cmp(tv1->table, tv2->table))
     D_RETURN_(FALSE);
-  
+
   D_RETURN_(TRUE);
 }
 
@@ -1858,7 +1898,7 @@ __bro_table_val_get(BroTableVal *tbl)
 int
 __bro_table_val_has_atomic_key(BroTableVal *tbl)
 {
-  if (! tbl || ! tbl->table_type) 
+  if (! tbl || ! tbl->table_type)
     return FALSE;
 
   return ((BroIndexType *) tbl->table_type)->indices->num_types == 1;

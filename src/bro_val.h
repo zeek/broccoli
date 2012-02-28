@@ -42,7 +42,7 @@ struct bro_val
    * a val:
    */
   BroValAccessor               get_data;
-  
+
   /* The full type object of this val -- this also yields
    * what member of the union is used below (unless we're
    * inside a derived type and store our data elsewhere).
@@ -50,7 +50,7 @@ struct bro_val
    * unassigned val.
    */
   BroType                     *val_type;
-  
+
   BroRecordVal                *val_attrs;
 
   union {
@@ -60,6 +60,7 @@ struct bro_val
     double                     double_val;
     BroPort                    port_val;
     BroString                  str_val;
+    BroAddr                    addr_val;
     BroSubnet                  subnet_val;
   } val;
 
@@ -70,6 +71,7 @@ struct bro_val
 #define val_port               val.port_val
 #define val_str                val.str_val
 #define val_strlen             val.str_val.str_len
+#define val_addr               val.addr_val
 #define val_subnet             val.subnet_val
 };
 
@@ -97,7 +99,7 @@ struct bro_mutable_val
 struct bro_record_val
 {
   BroMutableVal                mutable;
-  
+
   /* We don't use the full record val when interacting
    * with the user, but only what's really necessary.
    */
@@ -110,7 +112,7 @@ struct bro_table_val
 
   BroTableType                *table_type;
   BroAttrs                    *attrs;
-  
+
   BroTable                    *table;
 };
 

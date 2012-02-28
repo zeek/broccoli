@@ -281,12 +281,24 @@ follows:
 
 - Sets: BroSet, kept opaque. See also `Handling Sets`_.
 
+- IP Address: BroAddr, defined as follows:
+
+  .. code:: c
+
+    typedef struct bro_addr {
+      uint32      addr[4];   /**< IP address in network byte order */
+      int         size;      /**< Number of 4-byte words occupied in addr */
+    } BroAddr;
+
+  Both IPv4 and IPv6 addresses are supported, with the former occupying
+  only the first 4 bytes of the ``addr`` array.
+
 - Subnets: BroSubnet, defined as follows:
 
   .. code:: c
 
      typedef struct bro_subnet {
-         uint32       sn_net;     /* IP address in network byte order /*
+         BroAddr      sn_net;     /* IP address in network byte order /*
          uint32       sn_width;   /* Length of prefix to consider. /*
      } BroSubnet;
 
@@ -536,8 +548,8 @@ Timestamp                       ``BRO_TYPE_TIME``      ``double`` (see also ``br
 Time interval                   ``BRO_TYPE_INTERVAL``  ``double``
 Strings (text and binary)       ``BRO_TYPE_STRING``    ``BroString`` (see also family of ``bro_string_xxx()`` functions)
 Network ports                   ``BRO_TYPE_PORT``      ``BroPort``, with the port number in host byte order
-IPv4 address                    ``BRO_TYPE_IPADDR``    ``uint32``, in network byte order
-IPv4 subnet                     ``BRO_TYPE_SUBNET``    ``BroSubnet``, with the ``sn_net`` member in network byte order
+IPv4/IPv6 address               ``BRO_TYPE_IPADDR``    ``BroAddr``, with the ``addr`` member in network byte order and ``size`` member indicating the address family and number of 4-byte words of ``addr`` that are occupied (1 for IPv4 and 4 for IPv6)
+IPv4/IPv6 subnet                ``BRO_TYPE_SUBNET``    ``BroSubnet``, with the ``sn_net`` member in network byte order
 Record                          ``BRO_TYPE_RECORD``    ``BroRecord`` (see also the family of ``bro_record_xxx()`` functions and their explanation below)
 Table                           ``BRO_TYPE_TABLE``     ``BroTable`` (see also the family of ``bro_table_xxx()`` functions and their explanation below)
 Set                             ``BRO_TYPE_SET``       ``BroSet`` (see also the family of ``bro_set_xxx()`` functions and their explanation below)
