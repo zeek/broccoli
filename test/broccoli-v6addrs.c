@@ -1,6 +1,8 @@
 #include <stdio.h>
-#include <sys/select.h>
 #include <arpa/inet.h>
+#include <sys/select.h>
+#include <sys/socket.h>
+
 #include <broccoli.h>
 
 void bro_addr_cb(BroConn* bc, void* user_data, BroAddr* a)
