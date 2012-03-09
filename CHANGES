@@ -1,4 +1,18 @@
 
+1.8-8 | 2012-03-09 15:13:14 -0800
+
+  * Bump data format version corresponding to Bro's removal of match
+    expression. (Jon Siwek)
+
+  * Adding missing include needed on FreeBSD. (Robin Sommer)
+    
+  * Update Broccoli library to handle IPv6 addrs/subnets. Addresses
+    #448. Addresses now use a new BroAddr struct to hold the address
+    data and BroSubnet changed to use a BroAddr member instead of a
+    single uint32 to represent the address. (Jon Siwek)
+
+  * Raise minimum required CMake version to 2.6.3. (Jon Siwek)
+    
 1.8 | 2012-01-10 19:33:08 -0800
 
   * Tweaks for OpenBSD support. (Jon Siwek)
