@@ -34,6 +34,6 @@ event remote_connection_handshake_done(p: event_peer)
 	print "handshake done with peer";
 	event bro_addr(1.2.3.4);
 	event bro_subnet(10.0.0.0/16);
-	event bro_addr(2607:f8b0:4009:802::1014);
-	event bro_subnet(2607:f8b0:4009:802::1014/32);
+	event bro_addr([2607:f8b0:4009:802::1014]);
+	event bro_subnet([2607:f8b0:4009:802::1014]/32);
     }
