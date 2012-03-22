@@ -127,6 +127,7 @@ extern int bro_debug_messages;
 typedef uint64_t uint64;
 typedef uint32_t uint32;
 typedef uint16_t uint16;
+typedef uint8_t uint8;
 typedef unsigned char  uchar;
 
 typedef struct bro_conn BroConn;
@@ -267,12 +268,12 @@ typedef struct bro_port {
 } BroPort;
 
 /** IP addresses are 16-bytes in network byte order.
- * IPv4 addresses will only occupy the first 4 bytes.
+ * IPv4 addresses use the standard IPv4-in-IPv6 mapping: 10 bytes off, 2 bytes
+ * on, then 4 bytes of the address.
  */
 typedef struct bro_addr
 {
   uint32       addr[4];    /**< IP address in network byte order */
-  int          size;       /**< Number of 4-byte words occupied in addr */
 } BroAddr;
 
 /** Subnets are a 16-byte address with a prefix width in bits.
@@ -1427,7 +1428,21 @@ double         bro_util_current_time(void);
  * point double, with the fraction of a second between 0.0 and 1.0.
  */
 double         bro_util_timeval_to_double(const struct timeval *tv);
-  
+
+/**
+ * bro_util_is_v4_addr - Checks if an address is IPv4
+ * @param addr pointer to address structure
+ *
+ * @returns %TRUE if the address is IPv4, else %FALSE
+ */
+int            bro_util_is_v4_addr(const BroAddr *a);
+
+/**
+ * The standard 12-byte prefix of a 16-byte IPv6 address that indicates
+ * it's a mapped IPv4 address.
+ */
+extern const uint8 BRO_IPV4_MAPPED_PREFIX[12];
+
 #ifdef __cplusplus
 }
 #endif

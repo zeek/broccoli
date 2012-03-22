@@ -1974,5 +1974,11 @@ bro_util_timeval_to_double(const struct timeval *tv)
   return __bro_util_timeval_to_double(tv);
 }
 
+int
+bro_util_is_v4_addr(const BroAddr *a)
+{
+  return __bro_util_is_v4_addr(a);
+}
 
+const uint8 BRO_IPV4_MAPPED_PREFIX[12] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0xff, 0xff };
 

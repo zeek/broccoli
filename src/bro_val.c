@@ -46,6 +46,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <bro_val.h>
 #include <bro_record.h>
 #include <bro_table.h>
+#include <bro_util.h>
 
 /* The virtual implementations of BroSObject's functions are
  * kept static in this module, and so are the ..._init() methods
@@ -506,14 +507,22 @@ __bro_val_read(BroVal *val, BroConn *bc)
 			D_RETURN_(FALSE);
 			}
 
-		val->val_addr.size = tmp;
-
-		for ( i = 0; i < tmp; ++i )
+		if ( tmp == 1 )
 			{
-			if (! __bro_buf_read_int(bc->rx_buf, &val->val_addr.addr[i]))
+			if (! __bro_buf_read_int(bc->rx_buf, &tmp))
 				D_RETURN_(FALSE);
+			__bro_util_fill_v4_addr(&val->val_addr, ntohl(tmp));
+			}
 
-			val->val_addr.addr[i] = ntohl(val->val_addr.addr[i]);
+		else
+			{
+			for ( i = 0; i < tmp; ++i )
+				{
+				if (! __bro_buf_read_int(bc->rx_buf, &val->val_addr.addr[i]))
+					D_RETURN_(FALSE);
+
+				val->val_addr.addr[i] = ntohl(val->val_addr.addr[i]);
+				}
 			}
 
 		break;
@@ -528,16 +537,24 @@ __bro_val_read(BroVal *val, BroConn *bc)
 			D_RETURN_(FALSE);
 			}
 
-		val->val_subnet.sn_net.size = tmp;
-
-		for ( i = 0; i < tmp; ++i )
+		if ( tmp == 1 )
 			{
-			if (! __bro_buf_read_int(bc->rx_buf,
-			                         &val->val_subnet.sn_net.addr[i]))
+			if (! __bro_buf_read_int(bc->rx_buf, &tmp))
 				D_RETURN_(FALSE);
+			__bro_util_fill_v4_addr(&val->val_subnet.sn_net, ntohl(tmp));
+			}
 
-			val->val_subnet.sn_net.addr[i] =
-			    ntohl(val->val_subnet.sn_net.addr[i]);
+		else
+			{
+			for ( i = 0; i < tmp; ++i )
+				{
+				if (! __bro_buf_read_int(bc->rx_buf,
+										 &val->val_subnet.sn_net.addr[i]))
+					D_RETURN_(FALSE);
+
+				val->val_subnet.sn_net.addr[i] =
+					ntohl(val->val_subnet.sn_net.addr[i]);
+				}
 			}
 
 		if (! __bro_buf_read_int(bc->rx_buf, &val->val_subnet.sn_width))
@@ -679,20 +696,30 @@ __bro_val_write(BroVal *val, BroConn *bc)
       break;
 
     case BRO_INTTYPE_IPADDR:
-		if (! __bro_buf_write_int(bc->tx_buf, val->val_addr.size))
+		if ( __bro_util_is_v4_addr(&val->val_addr) )
+			i = 1;
+		else
+			i = 4;
+
+		if (! __bro_buf_write_int(bc->tx_buf, i))
 			D_RETURN_(FALSE);
 
-		for ( i = 0; i < val->val_addr.size; ++i )
+		for ( i = 4 - i; i < 4; ++i )
 			if (! __bro_buf_write_int(bc->tx_buf, htonl(val->val_addr.addr[i])))
 				D_RETURN_(FALSE);
 
 		break;
 
     case BRO_INTTYPE_SUBNET:
-		if (! __bro_buf_write_int(bc->tx_buf, val->val_subnet.sn_net.size))
+		if ( __bro_util_is_v4_addr(&val->val_subnet.sn_net) )
+			i = 1;
+		else
+			i = 4;
+
+		if (! __bro_buf_write_int(bc->tx_buf, i))
 			D_RETURN_(FALSE);
 
-		for ( i = 0; i < val->val_subnet.sn_net.size; ++i )
+		for ( i = 4 - i; i < 4; ++i )
 			if (! __bro_buf_write_int(bc->tx_buf,
 			                          htonl(val->val_subnet.sn_net.addr[i])))
 				D_RETURN_(FALSE);
@@ -799,7 +826,7 @@ __bro_val_hash(BroVal *val)
       result ^= val->val_int64;
       break;
     case BRO_INTTYPE_IPADDR:
-      for ( i = 0; i < val->val_addr.size; ++i )
+      for ( i = 0; i < 4; ++i )
         result ^= val->val_addr.addr[i];
       break;
 
@@ -812,7 +839,7 @@ __bro_val_hash(BroVal *val)
       break;
 
     case BRO_INTTYPE_SUBNET:
-      for ( i = 0; i < val->val_subnet.sn_net.size; ++i )
+      for ( i = 0; i < 4; ++i )
         result ^= val->val_subnet.sn_net.addr[i];
 
       result ^= val->val_subnet.sn_width;
@@ -851,10 +878,7 @@ __bro_val_cmp(BroVal *val1, BroVal *val2)
 	D_RETURN_(FALSE);
       break;
     case BRO_INTTYPE_IPADDR:
-      if (val1->val_addr.size != val2->val_addr.size)
-        D_RETURN_(FALSE);
-
-      for (i = 0; i < val1->val_addr.size; ++i)
+      for (i = 3; i >= 0; --i)
         if (val1->val_addr.addr[i] != val2->val_addr.addr[i])
           D_RETURN_(FALSE);
       break;
@@ -870,10 +894,7 @@ __bro_val_cmp(BroVal *val1, BroVal *val2)
       break;
 
     case BRO_INTTYPE_SUBNET:
-      if (val1->val_subnet.sn_net.size != val2->val_subnet.sn_net.size)
-        D_RETURN_(FALSE);
-
-      for (i = 0; i < val1->val_subnet.sn_net.size; ++ i)
+      for (i = 3; i >= 0; --i)
         if (val1->val_subnet.sn_net.addr[i] != val2->val_subnet.sn_net.addr[i])
           D_RETURN_(FALSE);
 

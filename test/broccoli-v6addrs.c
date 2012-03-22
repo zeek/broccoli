@@ -8,8 +8,10 @@
 void bro_addr_cb(BroConn* bc, void* user_data, BroAddr* a)
 	{
 	char addr[INET6_ADDRSTRLEN];
-	inet_ntop(a->size == 1 ? AF_INET : AF_INET6, a->addr, addr,
-			INET6_ADDRSTRLEN);
+	if ( bro_util_is_v4_addr(a) )
+		inet_ntop(AF_INET, a->addr + 3, addr, INET6_ADDRSTRLEN);
+	else
+		inet_ntop(AF_INET6, a->addr, addr, INET6_ADDRSTRLEN);
 	printf("Received bro_addr(%s)\n", addr);
 
 	BroEvent* event;
@@ -22,8 +24,10 @@ void bro_addr_cb(BroConn* bc, void* user_data, BroAddr* a)
 void bro_subnet_cb(BroConn* bc, void* user_data, BroSubnet* s)
 	{
 	char addr[INET6_ADDRSTRLEN];
-	inet_ntop(s->sn_net.size == 1 ? AF_INET : AF_INET6, s->sn_net.addr, addr,
-			INET6_ADDRSTRLEN);
+	if ( bro_util_is_v4_addr(&s->sn_net) )
+		inet_ntop(AF_INET, s->sn_net.addr + 3, addr, INET6_ADDRSTRLEN);
+	else
+		inet_ntop(AF_INET6, s->sn_net.addr, addr, INET6_ADDRSTRLEN);
 	printf("Received bro_subnet(%s/%"PRIu32")\n", addr, s->sn_width);
 
 	BroEvent* event;

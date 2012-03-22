@@ -30,6 +30,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdarg.h>
+#include <string.h>
 #include <sys/time.h>
 
 #ifdef __EMX__
@@ -74,13 +75,22 @@ __bro_util_snprintf(char *str, size_t size, const char *format, ...)
 }
 
 void
+__bro_util_fill_v4_addr(BroAddr *a, uint32 addr)
+{
+  if ( ! a )
+    return;
+
+  memcpy(a->addr, BRO_IPV4_MAPPED_PREFIX, sizeof(BRO_IPV4_MAPPED_PREFIX));
+  a->addr[3] = addr;
+}
+
+void
 __bro_util_fill_subnet(BroSubnet *sn, uint32 net, uint32 width)
 {
   if (! sn)
     return;
 
-  sn->sn_net.addr[0] = net;
-  sn->sn_net.size = 1;
+  __bro_util_fill_v4_addr(&sn->sn_net, net);
   sn->sn_width = width;
 }
 
@@ -104,6 +114,14 @@ __bro_util_timeval_to_double(const struct timeval *tv)
     return 0.0;
 
   return ((double) tv->tv_sec) + ((double) tv->tv_usec) / 1000000;
+}
+
+
+int
+__bro_util_is_v4_addr(const BroAddr *a)
+{
+  return memcmp(a->addr, BRO_IPV4_MAPPED_PREFIX,
+                sizeof(BRO_IPV4_MAPPED_PREFIX)) == 0;
 }
 
 #ifndef WORDS_BIGENDIAN
