@@ -4,7 +4,7 @@ include(cmake/CommonCMakeConfig.cmake)
 
 file(STRINGS "${CMAKE_CURRENT_SOURCE_DIR}/VERSION" VERSION LIMIT_COUNT 1)
 
-set(SOVersion 4) # this must be incremented when broccoli interface changes
+set(SOVersion 5) # this must be incremented when broccoli interface changes
 set(SOVersionMinor 0)
 set(SOVersionRelease 0)
 

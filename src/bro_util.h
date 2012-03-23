@@ -41,11 +41,15 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 int      __bro_util_snprintf(char *str, size_t size, const char *format, ...);
 
+void     __bro_util_fill_v4_addr(BroAddr *a, uint32 addr);
+
 void     __bro_util_fill_subnet(BroSubnet *sn, uint32 net, uint32 width);
 
 double   __bro_util_get_time(void);
 
 double   __bro_util_timeval_to_double(const struct timeval *tv);
+
+int      __bro_util_is_v4_addr(const BroAddr* a);
 
 #ifdef WORDS_BIGENDIAN
 #define  __bro_util_ntohd(x) x

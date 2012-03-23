@@ -154,8 +154,7 @@ conn_generic(BroConn *bc, BroRecord *conn)
       return;
     }
 
-  inet_ntop(addr->size == 1 ? AF_INET : AF_INET6, addr->addr, addr_str,
-            INET6_ADDRSTRLEN);
+  inet_ntop(AF_INET6, addr->addr, addr_str, INET6_ADDRSTRLEN);
   printf("%s/%"PRIu64" [%"PRIu32"/%"PRIu32"] -> ", addr_str, port->port_num,
          *size, *state);
   type = BRO_TYPE_IPADDR;
@@ -188,8 +187,7 @@ conn_generic(BroConn *bc, BroRecord *conn)
       return;
     }
 
-  inet_ntop(addr->size == 1 ? AF_INET : AF_INET6, addr->addr, addr_str,
-            INET6_ADDRSTRLEN);
+  inet_ntop(AF_INET6, addr->addr, addr_str, INET6_ADDRSTRLEN);
   printf("%s/%"PRIu64" [%"PRIu32"/%"PRIu32"] -> ", addr_str, port->port_num,
          *size, *state);
   type = BRO_TYPE_TIME;
