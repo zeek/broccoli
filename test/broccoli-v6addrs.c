@@ -2,6 +2,7 @@
 #include <arpa/inet.h>
 #include <sys/select.h>
 #include <sys/socket.h>
+#include <sys/time.h>
 
 #include <broccoli.h>
 
@@ -61,8 +62,11 @@ int main(int argc, char** argv)
 	fd_set fds;
 	FD_ZERO(&fds);
 	FD_SET(fd, &fds);
+	struct timeval to;
+	to.tv_sec = 3;
+	to.tv_usec = 0;
 
-	while ( select(fd+1, &fds, 0, 0, 0) > 0 )
+	while ( select(fd+1, &fds, 0, 0, &to) > 0 )
 		bro_conn_process_input(bc);
 
 	printf("Terminating\n");
