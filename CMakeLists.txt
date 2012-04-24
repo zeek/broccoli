@@ -8,14 +8,12 @@ set(SOVersion 5) # this must be incremented when broccoli interface changes
 set(SOVersionMinor 0)
 set(SOVersionRelease 0)
 
-# Figure out where the default broccoli.conf file will be installed
-# if the install prefix of /usr was given, change the install location
-# of the config file to be /etc instead of /usr/etc
-if (${CMAKE_INSTALL_PREFIX} STREQUAL /usr)
-    set(BRO_SYSCONF_DIR /etc)
-else ()
+if ( "${BRO_ETC_INSTALL_DIR}" STREQUAL "" )
     set(BRO_SYSCONF_DIR ${CMAKE_INSTALL_PREFIX}/etc)
+else ()
+    set(BRO_SYSCONF_DIR ${BRO_ETC_INSTALL_DIR})
 endif ()
+
 
 if (NOT BRO_SYSCONF_FILE)
     # BRO_SYSCONF_FILE not already defined from the --with-configfile option

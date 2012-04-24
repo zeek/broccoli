@@ -1,4 +1,20 @@
 
+1.8-21 | 2012-04-24 14:48:44 -0700
+
+  * Add option to set 'etc' directory. Addresses #801. (Daniel Thayer)
+    
+  * Change BroAddr to use standard IPv4 in IPv6 mapping. (Jon Siwek)
+    
+    The size field is now removed and the bro_util_is_v4_addr()
+    function can be used instead to check whether the BroAddr is IPv4
+    or not. Addresses #800.
+
+  * Add timeout to broccoli-v6addrs.c test. Addresses #793. (Jon
+    Siwek)
+
+  * Update IPv6 literal syntax in test scripts. (Jon Siwek)
+    
+
 1.8-8 | 2012-03-09 15:13:14 -0800
 
   * Bump data format version corresponding to Bro's removal of match
