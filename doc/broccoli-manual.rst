@@ -70,8 +70,8 @@ Broccoli applications will typically do one or more of the following:
   is used to configure remotely running Bros without the need for a
   restart.
 
-- *Interfacing other Systems:* the Broccoli application
-  is used to convert Bro events to other alert/notice formats, for into
+- *Interfacing with other Systems:* the Broccoli application
+  is used to convert Bro events to other alert/notice formats, or into
   syslogd entries.
 
 - *Host-based Sensor Feeds into Bro:* the Broccoli
@@ -204,7 +204,7 @@ In order to make the API known, include ``broccoli.h``:
 Initialization
 --------------
 
-Broccoli requires global initialization before most of its other other
+Broccoli requires global initialization before most of its other
 functions can be used. Generally, the way to initialize Broccoli is as
 follows:
 
@@ -215,7 +215,7 @@ follows:
 The argument to ``bro_init()`` provides optional initialization context,
 and may be kept ``NULL`` for normal use. If required, you may allocate a
 ``BroCtx`` structure locally, initialize it using ``bro_ctx_init()``,
-fill in additional values as required and and subsequently pass it to
+fill in additional values as required and subsequently pass it to
 ``bro_init()``:
 
 .. code:: c
@@ -259,8 +259,8 @@ follows:
   .. code:: c
 
      typedef struct bro_port {
-         uint16       port_num;   /* port number in host byte order \*
-         int          port_proto; /* IPPROTO_xxx \*/
+         uint16       port_num;   /* port number in host byte order */
+         int          port_proto; /* IPPROTO_xxx */
      } BroPort;
 
 - Records: BroRecord, kept opaque. See also `Handling Records`_.
@@ -286,8 +286,8 @@ follows:
   .. code:: c
 
     typedef struct bro_addr {
-      uint32      addr[4];   /**< IP address in network byte order */
-      int         size;      /**< Number of 4-byte words occupied in addr */
+      uint32      addr[4];   /* IP address in network byte order */
+      int         size;      /* Number of 4-byte words occupied in addr */
     } BroAddr;
 
   Both IPv4 and IPv6 addresses are supported, with the former occupying
@@ -298,8 +298,8 @@ follows:
   .. code:: c
 
      typedef struct bro_subnet {
-         BroAddr      sn_net;     /* IP address in network byte order /*
-         uint32       sn_width;   /* Length of prefix to consider. /*
+         BroAddr      sn_net;     /* IP address in network byte order */
+         uint32       sn_width;   /* Length of prefix to consider. */
      } BroSubnet;
 
 Managing Connections
@@ -307,9 +307,9 @@ Managing Connections
 
 You can use Broccoli to establish a connection to a remote Bro, or to
 create a Broccoli-enabled server application that other Bros will
-connect to. (This means that in principle, you can also use Broccoli
+connect to (this means that in principle, you can also use Broccoli
 purely as middleware and have multiple Broccoli applications communicate
-directly.)
+directly).
 
 In order to establish a connection to a remote Bro, you first obtain a
 connection handle. You then use this connection handle to request
@@ -335,8 +335,8 @@ behaviour.  These flags are:
 
 - ``BRO_CFLAG_RECONNECT``:
   When using this option, Broccoli will attempt to reconnect to the peer
-  after lost connectivity transparently. Essentially whenever you try to
-  read from or write to the peer and its connection broke down, a full
+  transparently after losing connectivity. Essentially whenever you try to
+  read from or write to the peer and its connection has broke down, a full
   reconnect including complete handshaking is attempted. You can check
   whether the connection to a peer is alive at any time using
   ``bro_conn_alive()``.
@@ -412,7 +412,7 @@ connection using ``bro_conn_get_fd()``:
     /* Now connect to the peer: */
     if (! bro_conn_connect(bc))
         {
-        / *Error handling - could not connect to remote Bro. /*
+        /* Error handling - could not connect to remote Bro. */
         }
 
     /* Send and receive events ... */
@@ -451,7 +451,7 @@ applications with different purposes, the peer needs a means to
 understand what kind of application each connection belongs to. The real
 meaning of "kind of application" here is "sets of event types to
 request", because depending on the class of an application, the peer
-will likey want to receive different types of events.
+will likely want to receive different types of events.
 
 Broccoli lets you set the class of a connection using
 ``bro_conn_set_class()``. When using this feature, you need to call that
@@ -542,7 +542,7 @@ Type                            Type tag               Data type pointed to
 Boolean                         ``BRO_TYPE_BOOL``      ``int``
 Integer value                   ``BRO_TYPE_INT``       ``uint64``
 Counter (nonnegative integers)  ``BRO_TYPE_COUNT``     ``uint64``
-Enums (enumerated values)       ``BRO_TYPE_ENUM``      ``uint64`` (see also description of ``bro_event-add_val()``'s ``type_name`` argument)
+Enums (enumerated values)       ``BRO_TYPE_ENUM``      ``uint64`` (see also description of ``bro_event_add_val()``'s ``type_name`` argument)
 Floating-point number           ``BRO_TYPE_DOUBLE``    ``double``
 Timestamp                       ``BRO_TYPE_TIME``      ``double`` (see also ``bro_util_timeval_to_double()`` and ``bro_util_current_time()``)
 Time interval                   ``BRO_TYPE_INTERVAL``  ``double``
@@ -579,7 +579,7 @@ Knowing these, we can now compose a ``request_connections`` event:
 
 The third argument to ``bro_event_add_val()`` lets you specify a
 specialization of the types listed in Table-1_. This is generally not
-necessary except for one situation: When using ``BRO_TYPE_ENUM``. You
+necessary except for one situation: when using ``BRO_TYPE_ENUM``. You
 currently cannot define a Bro-level enum type in Broccoli, and thus when
 sending an enum value, you have to specify the type of the enum along
 with the value. For example, in order to add an instance of enum
@@ -600,7 +600,7 @@ All that's left to do now is to send off the event. For this, use
 ``bro_event_send()`` and pass it the connection handle and the event.
 The function returns ``TRUE`` when the event could be sent right away or
 if it was queued for later delivery. ``FALSE`` is returned on error. If
-the event get queued, this does not indicate an error -- likely the
+the event gets queued, this does not indicate an error -- likely the
 connection was just not ready to send the event at this point. Whenever
 you call ``bro_event_send()``, Broccoli attempts to send as much of an
 existing event queue as possible.  Again, the event is copied internally
@@ -692,7 +692,7 @@ those look as follows:
     event remote_conn(req_id: int, conn: connection);
 
 The reply events contain the request ID so we can associate requests
-with replies, and a connection record (defined in ``bro.init`` in Bro.
+with replies, and a connection record (defined in ``bro.init`` in Bro).
 (It'd be nicer to report all replies in a single event but we'll
 ignore that for now.) For this event, our callback would look like
 this:
@@ -729,7 +729,7 @@ arguments themselves.
 
 In order to register a callback with compact argument passing, use
 ``bro_event_registry_add_compact()`` and pass it similar arguments as
-you'd use with ``bro_event_registry_add()`` The callback's type is
+you'd use with ``bro_event_registry_add()``. The callback's type is
 defined as follows:
 
 .. code:: c
@@ -742,7 +742,7 @@ defined as follows:
    You do not have to clean up the BroEvMeta structure or any of its
    contents.
 
-Below is sample code for extracting the arguments form the BroEvMeta
+Below is sample code for extracting the arguments from the BroEvMeta
 structure, using our running example. This is still written with the
 assumption that we know the types of the arguments, but note that this
 is not a requirement for this style of callback:
@@ -838,7 +838,7 @@ Handling Records
 Broccoli supports record structures, i.e., types that pack a set of
 values together, placing each value into its own field. In Broccoli, the
 way you handle records is somewhat similar to events: after creating an
-empty record (of opaque type ``BroRecord``, you can iteratively add
+empty record (of opaque type ``BroRecord``), you can iteratively add
 fields and values to it. The main difference is that you must specify a
 field name with the value; each value in a record can be identified both
 by position (a numerical index starting from zero), and by field name.
@@ -887,7 +887,7 @@ which we assume should be a string, in the following ways:
     /* --- Example 1 --- */
 
     type = BRO_TYPE_STRING;
-    /* Use type-checking, will not accept other type */
+    /* Use type-checking, will not accept other types */
 
     if (! (string = bro_record_get_named_val(rec, "label", &type)))
         {
@@ -899,7 +899,7 @@ which we assume should be a string, in the following ways:
     /* --- Example 2 --- */
 
     type = BRO_TYPE_UNKNOWN;
-    /* No type checking, just report the existant type */
+    /* No type checking, just report the existent type */
 
     if (! (string = bro_record_get_named_val(rec, "label", &type)))
         {
@@ -1058,7 +1058,7 @@ configuration settings will then only be answered with values specified
 in that section. A section is started by putting its name (no whitespace
 please) between square brackets. Configuration items positioned before
 the first section title are in the default domain and will be used by
-default.::
+default::
 
     # This section contains all settings for myapp.
     [ myapp ]
@@ -1077,20 +1077,21 @@ Broccoli provides an API for dynamically allocatable, growable,
 shrinkable, and consumable buffers with ``BroBuf``. You may or may not
 find this useful -- Broccoli mainly provides this feature in
 ``broccoli.h`` because these buffers are used internally anyway and
-because they are typical case of something that people implement
+because they are a typical case of something that people implement
 themselves over and over again, for example to collect a set of data
 before sending it through a file descriptor, etc.
 
 The buffers work as follows. The structure implementing a buffer is
-called ``BroBuf``. ``BroBuf``s are initialized to a default size when
+called ``BroBuf``, and is initialized to a default size when
 created via ``bro_buf_new()`` and released using ``bro_buf_free()``.
 Each ``BroBuf`` has a content pointer that points to an arbitrary
 location between the start of the buffer and the first byte after the
 last byte currently used in the buffer (see ``buf_off`` in the
 illustration below).  The content pointer can seek to arbitrary
 locations, and data can be copied from and into the buffer, adjusting
-the content pointer accordingly.  You can repeatedly append data to end
-of the buffer's used contents using ``bro_buf_append()``.::
+the content pointer accordingly.  You can repeatedly append data to the end
+of the buffer's used contents using ``bro_buf_append()``.
+::
 
     <---------------- allocated buffer space ------------>
     <======== used buffer space ========>                ^
@@ -1118,10 +1119,10 @@ certificate signed by the CA and containing the public key, the
 corresponding private key, and a copy of the CA's certificate.
 
 The OpenSSL command line tool ``openssl`` can be used to create all
-files neccessary, but its unstructured arguments and poor documentation
+files necessary, but its unstructured arguments and poor documentation
 make it a pain to use and waste lots of people a lot of time [#]_.
 For an alternative tool to create SSL certificates for secure Bro/Broccoli
-communication, see the ``create-cert`` tool availabe at
+communication, see the ``create-cert`` tool available at
 ftp://ee.lbl.gov/create-cert.tar.gz.
 
 In order to enable encrypted communication for your Broccoli
@@ -1350,5 +1351,5 @@ Notes
 Broccoli API Reference
 ######################
 
-The `API documentation <../../broccoli-api/index.html>`_ is
-described Broccoli's public C interface.
+The `API documentation <../../broccoli-api/index.html>`_
+describes Broccoli's public C interface.

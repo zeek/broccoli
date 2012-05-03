@@ -1,7 +1,7 @@
 ..	-*- mode: rst-mode -*-
 ..
 .. Version number is filled in automatically.
-.. |version| replace:: 1.8-21
+.. |version| replace:: 1.8-23
 
 ===============================================
 Broccoli: The Bro Client Communications Library
@@ -68,7 +68,7 @@ installed before you begin:
         for how to use it to build this distribution.  CMake generates
         native Makefiles that depend on GNU Make by default.
 
-Broccoli can also make uses of some optional libraries if they are found at
+Broccoli can also make use of some optional libraries if they are found at
 installation time:
 
 Libpcap headers and libraries

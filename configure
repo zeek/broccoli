@@ -44,11 +44,11 @@ Usage: $0 [OPTION]... [VAR=VALUE]...
   Optional Packages in Non-Standard Locations:
     --with-pcap=PATH       path to libpcap install root
     --with-python=PATH     path to Python interpreter
-    --with-python-lib=PATH path to libpython
+    --with-python-lib=PATH path to Python library
     --with-python-inc=PATH path to Python headers
-    --with-ruby=PATH       path to Python interpreter
-    --with-ruby-lib=PATH   path to libpython
-    --with-ruby-inc=PATH   path to Python headers
+    --with-ruby=PATH       path to Ruby interpreter
+    --with-ruby-lib=PATH   path to Ruby library
+    --with-ruby-inc=PATH   path to Ruby headers
     --with-swig=PATH       path to SWIG executable
 
   Packaging Options (for developers):
