@@ -1015,21 +1015,21 @@ considering adding support for volatile configuration items that are
 read from the file every time they are requested).
 
 A configuration is read from a single configuration file.  This file can
-be read from two different locations:
+be read from different locations.  Broccoli searches in this order
+for the config file:
+
+- The location specified by the ``BROCCOLI_CONFIG_FILE`` environment
+  variable.
+
+- A per-user configuration file stored in ``~/.broccoli.conf``.
 
 - The system-wide configuration file. You can obtain the location
   of this config file by running ``broccoli-config --config``.
 
-- Alternatively, a per-user configuration file stored in
-  ``~/.broccoli.conf`` can be used.
-
-If a user has a configuration file in ``~/.broccoli.conf``, it is used
-exclusively, otherwise the global one is used.
-
-.. note:: ``~/.broccoli.conf`` will only be used if
-   it is a regular file, not executable, and neither group nor others
-   have any permissions on the file. That is, the file's permissions
-   must look like ``-rw-------`` *or* ``-r--------``.
+.. note:: ``BROCCOLI_CONFIG_FILE`` or ``~/.broccoli.conf`` will only be
+   used if it is a regular file, not executable, and neither group nor
+   others have any permissions on the file. That is, the file's
+   permissions must look like ``-rw-------`` *or* ``-r--------``.
 
 In the configuration file, a ``#`` anywhere starts a comment that runs to
 the end of the line. Configuration items are specified as key-value
