@@ -5,7 +5,7 @@ include(cmake/CommonCMakeConfig.cmake)
 file(STRINGS "${CMAKE_CURRENT_SOURCE_DIR}/VERSION" VERSION LIMIT_COUNT 1)
 
 set(SOVersion 5) # this must be incremented when broccoli interface changes
-set(SOVersionMinor 0)
+set(SOVersionMinor 1)
 set(SOVersionRelease 0)
 
 if ( "${BRO_ETC_INSTALL_DIR}" STREQUAL "" )

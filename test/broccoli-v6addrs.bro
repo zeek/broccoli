@@ -1,7 +1,9 @@
 @load frameworks/communication/listen
 
+const peer_ip: addr = 127.0.0.1 &redef;
+
 redef Communication::nodes += {
-	["v6addrs"] = [$host=127.0.0.1, $connect=F, $ssl=F,
+	["v6addrs"] = [$host=peer_ip, $connect=F, $ssl=F,
 	$events=/broccoli_.*/]
 };
 
@@ -37,3 +39,8 @@ event remote_connection_handshake_done(p: event_peer)
 	event bro_addr([2607:f8b0:4009:802::1014]);
 	event bro_subnet([2607:f8b0:4009:802::1014]/32);
     }
+
+event remote_connection_closed(p: event_peer)
+	{
+	terminate();
+	}
