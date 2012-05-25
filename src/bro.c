@@ -433,11 +433,29 @@ bro_conn_new(struct in_addr *ip_addr, uint16 port, int flags)
 {
   BroConn *bc;
   char hostname[1024];
+  char addr[INET_ADDRSTRLEN];
 
   BRO_SAFETY_CHECK;
 
   D_ENTER;
-  __bro_util_snprintf(hostname, 1024, "%s:%hu", inet_ntoa(*ip_addr), ntohs(port));
+  inet_ntop(AF_INET, ip_addr, addr, INET_ADDRSTRLEN);
+  __bro_util_snprintf(hostname, 1024, "%s:%hu", addr, ntohs(port));
+  bc = bro_conn_new_str(hostname, flags);
+  D_RETURN_(bc);
+}
+
+BroConn *
+bro_conn_new6(struct in6_addr *ip_addr, uint16 port, int flags)
+{
+  BroConn *bc;
+  char hostname[1024];
+  char addr[INET6_ADDRSTRLEN];
+
+  BRO_SAFETY_CHECK;
+
+  D_ENTER;
+  inet_ntop(AF_INET6, ip_addr, addr, INET6_ADDRSTRLEN);
+  __bro_util_snprintf(hostname, 1024, "%s:%hu", addr, ntohs(port));
   bc = bro_conn_new_str(hostname, flags);
   D_RETURN_(bc);
 }

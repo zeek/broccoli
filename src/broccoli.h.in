@@ -372,6 +372,22 @@ void           bro_ctx_init(BroCtx *ctx);
  */
 BroConn       *bro_conn_new(struct in_addr *ip_addr, uint16 port, int flags);
 
+/**
+ * bro_conn_new6 - Creates and returns a handle for a connection to a remote Bro.
+ * @param ip_addr 16-byte IPv6 address of Bro to contact, in network byte order.
+ * @param port port of machine at @p ip_addr to contact, in network byte order.
+ * @param flags an or-combination of the %BRO_CONN_xxx flags.
+ *
+ * The function creates a new Bro connection handle for communication with
+ * Bro through a network. Depending on the flags passed in, the connection
+ * and its setup process can be adjusted. If you don't want to pass any
+ * flags, use %BRO_CFLAG_NONE.
+ *
+ * @returns pointer to a newly allocated and initialized
+ * Bro connection structure. You need this structure for all
+ * other calls in order to identify the connection to Bro.
+ */
+BroConn       *bro_conn_new6(struct in6_addr *ip_addr, uint16 port, int flags);
 
 /**
  * bro_conn_new_str - Same as bro_conn_new(), but accepts strings for hostname and port.

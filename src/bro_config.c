@@ -193,9 +193,10 @@ __bro_conf_init(void)
   static int deja_vu = FALSE;
   struct stat st;    
   char *pwd_home = NULL;
+  char* env_config;
   char home_config[MAXPATHLEN];
   char home_config2[MAXPATHLEN];
-  int try_env = TRUE, debug_messages, debug_calltrace;
+  int try_env = TRUE, try_pwd = TRUE, debug_messages, debug_calltrace;
 
   if (deja_vu)
     return;
@@ -214,13 +215,23 @@ __bro_conf_init(void)
 			  __bro_ht_mem_free,
 			  (BroHTFreeFunc)__bro_ht_free,
 			  FALSE);
-  
-  /* Now figure out what config file to read: if the user
-   * has a ~/.broccoli.conf, use that, otherwise use the
-   * global one. We first try via the passwd entry, then
-   * fall back to using $HOME.
+
+  /* Now figure out what config file to read in this order of preference:
+   * 1) BROCCOLI_CONFIG_FILE environment variable
+   * 2) user's ~/.broccoli.conf
+   * 3) user's $HOME/.broccoli.conf if it's different than (2)
+   * 4) the installed/global config file determined at ./configure time
    */
-  if ( (pwd_home = get_passwd_home()))
+
+  env_config = getenv("BROCCOLI_CONFIG_FILE");
+  if ( env_config  && stat(env_config, &st) == 0 && conf_permissions_ok(&st) )
+    {
+    config_file = strdup(env_config);
+    try_pwd = FALSE;
+    try_env = FALSE;
+    }
+
+  if (try_pwd && (pwd_home = get_passwd_home()))
     {
       __bro_util_snprintf(home_config, MAXPATHLEN, "%s/.broccoli.conf", pwd_home);      
       free(pwd_home);
@@ -231,7 +242,7 @@ __bro_conf_init(void)
 	  try_env = FALSE;
 	}	
     }
-  
+
   if (try_env)
     {
       __bro_util_snprintf(home_config2, MAXPATHLEN, "%s/.broccoli.conf", getenv("HOME"));

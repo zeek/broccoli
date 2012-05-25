@@ -1,4 +1,14 @@
 
+1.8-28 | 2012-05-24 17:37:35 -0700
+
+  * Tweak a test script to register events with both IPv4 & IPv6
+    loopback. (Jon Siwek)
+
+  * BROCCOLI_CONFIG_FILE env. variable can now specify config file
+    path. (Jon Siwek)
+
+  * Add ability to connect to Bro peers over IPv6. (Jon Siwek)
+
 1.8-23 | 2012-05-03 11:33:03 -0700
 
   * Fix typos and a few reST formatting problems. (Daniel Thayer)

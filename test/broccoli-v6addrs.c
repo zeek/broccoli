@@ -1,4 +1,7 @@
 #include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <errno.h>
 #include <arpa/inet.h>
 #include <sys/select.h>
 #include <sys/socket.h>
@@ -38,16 +41,90 @@ void bro_subnet_cb(BroConn* bc, void* user_data, BroSubnet* s)
 	bro_event_free(event);
 	}
 
+static void usage()
+	{
+	printf("broccoli-v6addrs - send/recv events w/ IPv6 address args to Bro.\n"
+			"USAGE: broccoli-v6addrs [-h|-?] [-4|-6] [-p port] host\n");
+	exit(0);
+	}
+
 int main(int argc, char** argv)
 	{
+	int opt, port, ipv4_host = 0, ipv6_host = 0;
+	extern char* optarg;
+	extern int optind;
 	BroConn* bc;
-	char* host = "localhost:47757";
+	const char* host_str = "localhost";
+	const char* port_str = "47757";
+	char hostname[512];
+	struct in_addr in4;
+	struct in6_addr in6;
+
+	while ( (opt = getopt(argc, argv, "?h46p:")) != -1 )
+		{
+		switch ( opt ) {
+		case '4':
+			ipv4_host = 1;
+			break;
+		case '6':
+			ipv6_host = 1;
+			break;
+		case 'p':
+			port_str = optarg;
+			break;
+		case 'h':
+		case '?':
+		default:
+			usage();
+		}
+		}
+
+	argc -= optind;
+	argv += optind;
+
+	if ( argc > 0 )
+		host_str = argv[0];
+
+	snprintf(hostname, 512, "%s:%s", host_str, port_str);
+
+	port = strtol(port_str, 0, 0);
+	if ( errno == ERANGE )
+		{
+		fprintf(stderr, "invalid port string: %s\n", port_str);
+		return 1;
+		}
 
 	bro_init(0);
 
-	if ( ! (bc = bro_conn_new_str(host, BRO_CFLAG_NONE)) )
+	if ( ipv4_host )
 		{
-		fprintf(stderr, "failed to get connection handle for %s\n", host);
+		if ( inet_pton(AF_INET, host_str, &in4) <= 0 )
+			{
+			fprintf(stderr, "invalid IPv4 address: %s\n", host_str);
+			return 1;
+			}
+		if ( ! (bc = bro_conn_new(&in4, htons(port), BRO_CFLAG_NONE)) )
+			{
+			fprintf(stderr, "bro_conn_new IPv4 failed for %s\n", hostname);
+			return 1;
+			}
+		}
+	else if ( ipv6_host )
+		{
+		if ( inet_pton(AF_INET6, host_str, &in6) <= 0 )
+			{
+			fprintf(stderr, "invalid IPv6 address: %s\n", host_str);
+			return 1;
+			}
+		if ( ! (bc = bro_conn_new6(&in6, htons(port), BRO_CFLAG_NONE)) )
+			{
+			fprintf(stderr, "bro_conn_new IPv6 failed for %s\n", hostname);
+			return 1;
+			}
+		}
+	else if ( ! (bc = bro_conn_new_str(hostname, BRO_CFLAG_NONE)) )
+		{
+		fprintf(stderr, "bro_conn_new_str failed for %s\n", hostname);
 		return 1;
 		}
 
@@ -56,11 +133,11 @@ int main(int argc, char** argv)
 
 	if ( ! bro_conn_connect(bc) )
 		{
-		fprintf(stderr, "failed to connect to %s\n", host);
+		fprintf(stderr, "failed to connect to %s\n", hostname);
 		return 1;
 		}
 
-	printf("Connected to Bro instance at: %s\n", host);
+	printf("Connected to Bro instance at: %s\n", hostname);
 
 	int fd = bro_conn_get_fd(bc);
 	fd_set fds;

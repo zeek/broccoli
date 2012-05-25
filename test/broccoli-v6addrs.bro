@@ -1,7 +1,9 @@
 @load frameworks/communication/listen
 
 redef Communication::nodes += {
-	["v6addrs"] = [$host=127.0.0.1, $connect=F, $ssl=F,
+	["v6addrs-over-v6"] = [$host=[::1], $connect=F, $ssl=F,
+	$events=/broccoli_.*/],
+	["v6addrs-over-v4"] = [$host=127.0.0.1, $connect=F, $ssl=F,
 	$events=/broccoli_.*/]
 };
 

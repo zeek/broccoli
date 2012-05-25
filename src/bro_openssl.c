@@ -80,10 +80,9 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * is that they use SSL_read/SSL_write, thus losing the transparency of
  * the generic BIO_... functions regarding the use of encryption (we do
  * allow for plaintext communication as well). Since I don't want to write
- * duplicate code for the encrypted and unencrypted traffic, I use the
- * approach given in man BIO_f_ssl(3), which uses BIO_new_ssl_connect()
- * so I can still speak into a BIO at all times. In the case of no encryption,
- * it'll simply be a regular BIO.
+ * duplicate code for the encrypted and unencrypted traffic, a socket
+ * BIO is always used and, in the case of encryption, that is simply
+ * appended to an SSL BIO.
  *
  * We currently do not support the following:
  * - ephemeral keying.
@@ -435,96 +434,86 @@ __bro_openssl_encrypted(void)
 }
 
 static int
-openssl_connect_impl(BIO *bio, int with_hack)
-{
-  int sockfd, port;
-  struct sockaddr_in addr;
-  char *hostname, *colon;
-  struct hostent *he;
- 
-  /* Okay, I must ask you not to scream now. All the rest of this function
-   * is to make sure that we detect whether the peer is listening or not.
-   * OpenSSL sometimes considers failure to connect() a temporary problem
-   * and I cannot figure out a way to force it to give up when connection
-   * establishment fails. So we establish our own connection and tear it
-   * down right away in case we succeeded. Unfortunately I cannot seem to
-   * figure out a way to just make OpenSSL use the existing connection
-   * either. It's such a mess.
-   */
+try_connect(const char* host_and_port)
+	{
+	int status, sockfd = -1;
+	char* colon;
+	char* tmp;
+	char host[512];
+	char port[16];
+	struct addrinfo hints, *res, *res0;
 
-  /* In the encrypted case we do not have this problem, since the handshake
-   * here is a real one that only succeeds when the remote side answers.
-   */
-  if (ctx)
-    return BIO_do_connect(bio);
-  
-  if (! with_hack)
-    return 1;
+	D_ENTER;
 
-  /* I've found BIO_get_conn_...() to be broken even after calling
-   * BIO_do_connect() first, so I'm just doing this whole crap here
-   * manually to get to hostname and port.
-   */
-  if (! (hostname = strdup(BIO_get_conn_hostname(bio))))
-    {
-      D(("Out of memory.\n"));
-      return 0;
-    }
+	memset(&hints, 0, sizeof(hints));
+	hints.ai_family = PF_UNSPEC;
+	hints.ai_protocol = IPPROTO_TCP;
+	hints.ai_socktype = SOCK_STREAM;
 
-  if (! (colon = strchr(hostname, ':')))
-    {
-      free(hostname);
-      return 0;
-    }
+	if ( ! (tmp = strdup(host_and_port)) )
+		{
+		D(("Out of memory.\n"));
+		D_RETURN_(-1);
+		}
 
-  *colon = '\0';
-  port = atoi(colon + 1);
-  D(("OpenSSL kludge: manual connection to %s:%s\n", hostname, colon+1));
-  
-  if (! (he = gethostbyname(hostname)))
-    {
-      D(("gethostbyname() failed.\n"));
-      free(hostname);
-      return 0;
-    }
-  
-  free(hostname);
-  
-  if (he->h_addr_list[0] == NULL)
-    {
-      D(("Could not resolve hostname.\n"));
-      return 0;
-    }
-  
-  if ( (sockfd = socket(AF_INET, SOCK_STREAM, 0)) < 0)
-    {
-      D(("Could not create socket: %s\n", strerror(errno)));   
-      return 0;
-    }
-  
-  bzero(&addr, sizeof(struct sockaddr_in));
-  addr.sin_family = AF_INET;
-  addr.sin_port = htons(port);
-  addr.sin_addr = *((struct in_addr *) he->h_addr_list[0]);
+	if ( ! (colon = strrchr(tmp, ':')) )
+		{
+		D(("Invalid host:port string: %s\n", host_and_port));
+		free(tmp);
+		D_RETURN_(-1);
+		}
 
-  if (connect(sockfd, (struct sockaddr *) &addr, sizeof(struct sockaddr_in)) != 0)
-    goto error_return;
+	if ( ! colon[1] )
+		{
+		D(("Invalid port in host:port string: %s\n", host_and_port));
+		free(tmp);
+		D_RETURN_(-1);
+		}
 
-  close(sockfd);
-  return 1;
+	*colon = '\0';
+	__bro_util_snprintf(host, sizeof(host), "%s", tmp);
+	__bro_util_snprintf(port, sizeof(port), "%s", colon + 1);
+	free(tmp);
 
- error_return:
-  D(("Connection error: %s\n", strerror(errno)));
-  close(sockfd);
-  return 0;
-}
+	D(("Trying to connect to [%s]:%s\n", host, port));
 
+	status = getaddrinfo(host, port, &hints, &res0);
+	if ( status != 0 )
+		{
+		D(("Error in getaddrinfo: %s\n", gai_strerror(status)));
+		D_RETURN_(-1);
+		}
+
+	for ( res = res0; res; res = res->ai_next )
+		{
+		sockfd = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
+		if ( sockfd < 0 )
+			{
+			D(("socket() failed: %s\n", strerror(errno)));
+			continue;
+			}
+
+		if ( connect(sockfd, res->ai_addr, res->ai_addrlen) < 0 )
+			{
+			D(("connect() to %s failed: %s\n", host_and_port, strerror(errno)));
+			close(sockfd);
+			sockfd = -1;
+			continue;
+			}
+
+		break;
+		}
+
+	freeaddrinfo(res0);
+	D_RETURN_(sockfd);
+	}
 
 static int
-openssl_connect(BroConn *bc, int with_hack)
+openssl_connect(BroConn *bc)
 {
- int flags;
+  int flags, sockfd = -1;
   BIO *bio = NULL;
+  BIO *ssl_bio = NULL;
 
   D_ENTER;
 
@@ -535,81 +524,60 @@ openssl_connect(BroConn *bc, int with_hack)
   if (! __bro_openssl_init())
     D_RETURN_(FALSE);
 
-  /* If we got a socket, we wrap it into a BIO and are done. */
-  if (bc->socket >= 0)
-    {
-      if (! (bio = BIO_new_socket(bc->socket, BIO_CLOSE)))
-	{
-	  D(("Error creating connection BIO from socket.\n"));
-	  goto err_return;
-	}
+	/* Use socket provided by user if BroConn came via bro_conn_new_socket */
+	if ( bc->socket >= 0 )
+		{
+		D(("Connection created from externally provided socket.\n"));
+		sockfd = bc->socket;
+		}
+	else
+		sockfd = try_connect(bc->peer);
 
-      if ( (flags = fcntl(bc->socket, F_GETFL, 0)) < 0)
-	{
-	  D(("Error getting socket flags.\n"));
-	  goto err_return;
-	}
-	
-	if ( fcntl(bc->socket, F_SETFL, flags|O_NONBLOCK) < 0 )
-	{
-	  D(("Error setting socket to non-blocking.\n"));
-	  goto err_return;
-	}
-	
+	if ( sockfd == -1 )
+		{
+		D(("Error connecting to %s.\n", bc->peer));
+		goto err_return;
+		}
+
+	if ( ! (bio = BIO_new_socket(sockfd, BIO_CLOSE)) )
+		{
+		D(("Error creating connection BIO from socket.\n"));
+		goto err_return;
+		}
+
+	if ( (flags = fcntl(sockfd, F_GETFL, 0)) < 0 )
+		{
+		D(("Error getting socket flags.\n"));
+		goto err_return;
+		}
+
+	if ( fcntl(sockfd, F_SETFL, flags|O_NONBLOCK) < 0 )
+		{
+		D(("Error setting socket to non-blocking.\n"));
+		goto err_return;
+		}
+
 	/* Don't know whether this is needed but it does not hurt either. 
 	 * It is however not sufficient to just call this; we manually need to
 	 * set the socket to non-blocking as done above. */
 	BIO_set_nbio(bio, 1);
 
+	/* Add SSL if available */
+	if ( ctx )
+		{
+		if ( ! (ssl_bio = BIO_new_ssl(ctx, 1)) )
+			{
+			D(("Error creating ssl BIO.\n"));
+			goto err_return;
+			}
+		BIO_set_close(ssl_bio, BIO_CLOSE);
+		BIO_push(ssl_bio, bio);
+		bio = ssl_bio;
+		}
+
 	bc->bio = bio;
-	D(("Connection created from externally provided socket.\n"));
+	D(("Connection established successfully.\n"));
 	D_RETURN_(TRUE);
-    }
-
-  /* If we managed to set up a context object, we use encryption. */
-  if (ctx)
-    {
-      if (! (bio = BIO_new_ssl_connect(ctx)))
-	{
-	  D(("Error creating SSL connection BIO.\n"));
-	  goto err_return;
-	}
-
-      BIO_set_conn_hostname(bio, bc->peer);
-    }
-  else
-    {
-      if (! (bio = BIO_new_connect(bc->peer)))
-	{
-	  D(("Error creating non-SSL connection BIO.\n"));
-	  goto err_return;
-	}
-    }
-
-  /* BIO_set_nbio's manpage says we need to set nonblocking before
-   * connecting.
-   */
-  BIO_set_nbio(bio, 1);
-
-  /* This is not exactly elegant but we want to make sure we only
-   * return once the potential SSL handshake is complete.
-   */
-  for ( ; ; )
-    {
-      if (openssl_connect_impl(bio, with_hack) > 0)
-	break;    
-
-      if ( ! BIO_should_retry(bio))
-	{
-	  D(("Error connecting to peer.\n"));
-	  goto err_return;
-	}
-    }
-  
-  bc->bio = bio;
-  D(("Connection established successfully.\n"));
-
-  D_RETURN_(TRUE);
 
  err_return:
 
@@ -634,13 +602,13 @@ openssl_connect(BroConn *bc, int with_hack)
 int
 __bro_openssl_connect(BroConn *bc)
 {
-  return openssl_connect(bc, FALSE);
+  return openssl_connect(bc);
 }
 
 int
 __bro_openssl_reconnect(BroConn *bc)
 {
-  return openssl_connect(bc, TRUE);
+  return openssl_connect(bc);
 }
 
 
