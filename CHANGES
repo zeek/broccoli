@@ -1,4 +1,8 @@
 
+1.8-32 | 2012-06-20 14:33:59 -0700
+
+  * Fix a warning, and fix other typos in documentation. (Daniel Thayer)
+
 1.8-28 | 2012-05-24 17:37:35 -0700
 
   * Tweak a test script to register events with both IPv4 & IPv6

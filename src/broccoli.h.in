@@ -49,7 +49,7 @@ extern "C" {
  * bro_debug_calltrace - Debugging output switch for call tracing.
  *
  * If you have debugging support built in (i.e., your package was configured
- * with --enable-debugging), you can enable/disable debugging output for
+ * with --enable-debug), you can enable/disable debugging output for
  * call tracing by setting this to 0 (off) or 1 (on). Default is off.
  */
 extern int bro_debug_calltrace;
@@ -58,7 +58,7 @@ extern int bro_debug_calltrace;
  * bro_debug_messages - Output switch for debugging messages.
  *
  * If you have debugging support built in (i.e., your package was configured
- * with --enable-debugging), you can enable/disable debugging messages
+ * with --enable-debug), you can enable/disable debugging messages
  * by setting this to 0 (off) or 1 (on). Default is off.
  */
 extern int bro_debug_messages;
@@ -106,7 +106,7 @@ extern int bro_debug_messages;
 #define BRO_TYPE_VECTOR           22
 #define BRO_TYPE_ERROR            23
 #define BRO_TYPE_PACKET           24 /* CAUTION -- not defined in Bro! */
-#define BRO_TYPE_SET              25 /* ----------- (ditto) ---------- */
+#define BRO_TYPE_SET              25 /* CAUTION -- not defined in Bro! */
 #define BRO_TYPE_MAX              26
 
 /* Flags for new connections, to pass to bro_conn_new()
@@ -118,7 +118,7 @@ extern int bro_debug_messages;
 #define BRO_CFLAG_SHAREABLE           (1 << 2) /**< DO NOT USE -- no longer supported */
 #define BRO_CFLAG_DONTCACHE           (1 << 3) /**< Ask peer not to use I/O cache (default) */
 #define BRO_CFLAG_YIELD               (1 << 4) /**< Process just one event at a time */
-#define BRO_CFLAG_CACHE               (1 << 5) /**< Ask per to use I/O cache */
+#define BRO_CFLAG_CACHE               (1 << 5) /**< Ask peer to use I/O cache */
 
 
 /* ---------------------------- Typedefs ----------------------------- */
@@ -157,7 +157,7 @@ typedef void (*BroEventFunc) (BroConn *bc, void *user_data, ...);
  * BroCompactEventFunc - The signature of compact event callbacks.
  * @param bc Bro connection handle.
  * @param user_data user data provided to bro_event_registry_add_compact().
- * @param meta metadata for the event
+ * @param meta metadata for the event.
  *
  * This is the signature of callbacks for handling received
  * Bro events, called in the compact-argument style. For details
@@ -193,7 +193,7 @@ typedef void (*OpenSSL_lock_func) (int mode, int n, const char *file, int line);
  * @param id target pointer into which the current thread's numeric ID must be written.
  * 
  * Please refer to pages 74ff in O'Reilly's OpenSSL book, and also see
- * the comments for OpenSSL_lockfunc.
+ * the comments for OpenSSL_lockfunc().
  */
 typedef unsigned long (*OpenSSL_thread_id_func) (void);
 
@@ -263,7 +263,7 @@ typedef struct bro_string {
  * whether they are TCP or UDP.
  */
 typedef struct bro_port {
-  uint64       port_num;   /**< port number in host byte order */
+  uint64       port_num;   /**< Port number in host byte order */
   int          port_proto; /**< IPPROTO_xxx */
 } BroPort;
 
@@ -289,7 +289,7 @@ typedef struct bro_subnet
  */
 typedef struct bro_ev_arg
 {
-  void        *arg_data;   /** Pointer to the actual event argument */
+  void        *arg_data;   /**< Pointer to the actual event argument */
   int          arg_type;   /**< A BRO_TYPE_xxx constant */
 } BroEvArg;
 
@@ -302,8 +302,8 @@ struct bro_ev_meta
   double       ev_ts;     /**< Timestamp of event, taken from BroEvent itself */
   int          ev_numargs;/**< How many arguments are passed */
   BroEvArg    *ev_args;   /**< Array of BroEvArgs, one for each argument */
-  const uchar *ev_start;  /**< Start and end pointers to serialized version */
-  const uchar *ev_end;    /**< of currently processed event. */
+  const uchar *ev_start;  /**< Start pointer to serialized version of currently processed event */
+  const uchar *ev_end;    /**< End pointer to serialized version of currently processed event */
 };
 
 #cmakedefine BRO_PCAP_SUPPORT
@@ -486,7 +486,7 @@ int            bro_conn_reconnect(BroConn *bc);
 
 /**
  * bro_conn_delete - terminates and releases connection.
- * @param bc Bro connection handle
+ * @param bc Bro connection handle.
  *
  * This function will terminate the given connection if necessary
  * and release all resources associated with the connection handle.
@@ -534,7 +534,7 @@ void           bro_conn_adopt_events(BroConn *src, BroConn *dst);
  * @param bc Bro connection handle.
  *
  * If you need to know the file descriptor of the connection
- * (such as when select()ing it etc), use this accessor function.
+ * (such as when select()ing it, etc.), use this accessor function.
  *
  * @returns file descriptor for connection @p bc, or negative value
  * on error.
@@ -544,7 +544,7 @@ int            bro_conn_get_fd(BroConn *bc);
 
 /**
  * bro_conn_process_input - Processes input sent to the sensor by Bro.
- * @param bc Bro connection handle
+ * @param bc Bro connection handle.
  *
  * The function reads all input sent to the local sensor by the
  * Bro peering at the connection identified by @p bc. It is up
@@ -656,7 +656,7 @@ int            bro_event_add_val(BroEvent *be, int type,
  * @param val value to put in.
  *
  * The function replaces whatever value is currently stored in the
- * event pointed to by @p be with the val specified through the @p type and
+ * event pointed to by @p be with the value specified through the @p type and
  * @p val arguments. If the event does not currently hold enough
  * values to replace one in position @p val_num, the function does
  * nothing. If you want to indicate a type specialized from @p type,
@@ -670,7 +670,7 @@ int            bro_event_set_val(BroEvent *be, int val_num,
 
 /**
  * bro_event_send - Tries to send an event to a Bro agent.
- * @param bc Bro connection handle
+ * @param bc Bro connection handle.
  * @param be event to send.
  *
  * The function tries to send @p be to the Bro agent connected
@@ -689,7 +689,7 @@ int            bro_event_send(BroConn *bc, BroEvent *be);
 
 /**
  * bro_event_send_raw - Enqueues a serialized event directly into a connection's send buffer.
- * @param bc Bro connection handle
+ * @param bc Bro connection handle.
  * @param data pointer to serialized event data.
  * @param data_len length of buffer pointed to by @p data.
  *
@@ -703,7 +703,7 @@ int            bro_event_send_raw(BroConn *bc, const uchar *data, int data_len);
 
 /**
  * bro_event_queue_length - Returns current queue length.
- * @param bc Bro connection handle
+ * @param bc Bro connection handle.
  *
  * Use this function to find out how many events are currently queued
  * on the client side.
@@ -715,7 +715,7 @@ int            bro_event_queue_length(BroConn *bc);
 
 /**
  * bro_event_queue_length_max - Returns maximum queue length.
- * @param bc Bro connection handle
+ * @param bc Bro connection handle.
  *
  * Use this function to find out how many events can be queued before
  * events start to get dropped.
@@ -727,7 +727,7 @@ int            bro_event_queue_length_max(BroConn *bc);
 
 /**
  * bro_event_queue_flush - Tries to flush the send queue of a connection.
- * @param bc Bro connection handle
+ * @param bc Bro connection handle.
  *
  * The function tries to send as many queued events to the Bro
  * agent as possible.
@@ -741,8 +741,8 @@ int            bro_event_queue_flush(BroConn *bc);
 
 /**
  * bro_event_registry_add - Adds an expanded-argument event callback to the event registry.
- * @param bc Bro connection handle
- * @param event_name Name of events that trigger callback
+ * @param bc Bro connection handle.
+ * @param event_name Name of events that trigger callback.
  * @param func callback to invoke.
  * @param user_data user data passed through to the callback.
  *
@@ -755,7 +755,7 @@ int            bro_event_queue_flush(BroConn *bc);
  * Note that this function only registers the callback in the state
  * associated with @p bc. If you use bro_event_registry_add() and @p bc
  * has not yet been connected via bro_conn_connect(), then no further
- * action is required. bro_conn_connect() request ant registered event types.
+ * action is required. bro_conn_connect() requests any registered event types.
  * If however you are requesting additional event types after the connection has
  * been established, then you also need to call bro_event_registry_request()
  * in order to signal to the peering Bro that you want to receive those events.
@@ -767,8 +767,8 @@ void           bro_event_registry_add(BroConn *bc,
 
 /**
  * bro_event_registry_add_compact - Adds a compact-argument event callback to the event registry.
- * @param bc Bro connection handle
- * @param event_name Name of events that trigger callback
+ * @param bc Bro connection handle.
+ * @param event_name Name of events that trigger callback.
  * @param func callback to invoke.
  * @param user_data user data passed through to the callback.
  *
@@ -786,7 +786,7 @@ void           bro_event_registry_add_compact(BroConn *bc,
 
 /**
  * bro_event_registry_remove - Removes an event handler.
- * @param bc Bro connection handle
+ * @param bc Bro connection handle.
  * @param event_name event to ignore from now on.
  *
  * The function removes all callbacks for event @p event_name from the
@@ -796,7 +796,7 @@ void           bro_event_registry_remove(BroConn *bc, const char *event_name);
 
 /**
  * bro_event_registry_request - Notifies peering Bro to send events.
- * @param bc Bro connection handle
+ * @param bc Bro connection handle.
  *
  * The function requests the events you have previously requested using
  * bro_event_registry_add() from the Bro listening on @p bc.
@@ -810,7 +810,7 @@ void           bro_event_registry_request(BroConn *bc);
 /**
  * bro_buf_new - Creates a new buffer object.
  *
- * Returns a new buffer object, or %NULL on error. Use paired with
+ * @returns a new buffer object, or %NULL on error. Use paired with
  * bro_buf_free().
  */
 BroBuf        *bro_buf_new(void);
@@ -871,7 +871,7 @@ void           bro_buf_reset(BroBuf *buf);
  * bro_buf_get - Returns pointer to actual start of buffer.
  * @param buf buffer pointer.
  *
- * Returns the entire buffer's contents.
+ * @returns the entire buffer's contents.
  */
 uchar         *bro_buf_get(BroBuf *buf);
 
@@ -1005,7 +1005,7 @@ void           bro_conf_set_domain(const char *domain);
 
 
 /**
- * bro_conf_get_int - Retrieves an integer from the configuration
+ * bro_conf_get_int - Retrieves an integer from the configuration.
  * @param val_name key name for the value.
  * @param val result pointer for the value.
  *
@@ -1019,7 +1019,7 @@ int            bro_conf_get_int(const char *val_name, int *val);
 
 
 /**
- * bro_conf_get_dbl - Retrieves a double float from the configuration
+ * bro_conf_get_dbl - Retrieves a double float from the configuration.
  * @param val_name key name for the value.
  * @param val result pointer for the value.
  *
@@ -1033,7 +1033,7 @@ int            bro_conf_get_dbl(const char *val_name, double *val);
 
 
 /**
- * bro_conf_get_str - Retrieves an integer from the configuration
+ * bro_conf_get_str - Retrieves an integer from the configuration.
  * @param val_name key name for the value.
  *
  * The function tries to find a string item named @p val_name in the
@@ -1069,7 +1069,7 @@ void           bro_string_init(BroString *bs);
  * after calling this, and you need to call bro_string_cleanup() on the
  * BroString pointed to by @p bs.
  *
- * @returns %TRUE is successful, %FALSE otherwise.
+ * @returns %TRUE if successful, %FALSE otherwise.
  */
 int            bro_string_set(BroString *bs, const char *s);
 
@@ -1083,7 +1083,7 @@ int            bro_string_set(BroString *bs, const char *s);
  * bytes starting at @p data. @p data's content is copied, so you can modify
  * or free @p data after calling this.
  *
- * @returns %TRUE is successful, %FALSE otherwise.
+ * @returns %TRUE if successful, %FALSE otherwise.
  */
 int            bro_string_set_data(BroString *bs, const uchar *data, int data_len);
 
@@ -1154,11 +1154,11 @@ void           bro_string_free(BroString *bs);
  * bro_record_new - Creates a new record.
  *
  * The function allocates and initializes a new empty record. BroRecords
- * are used for adding and retrieving records vals to/from events. You
+ * are used for adding and retrieving record values to/from events. You
  * do not have to specify a record type separately when you create a
  * record. The type is defined implicitly by the sequence of types formed
- * by the sequence of vals added to the record, along with the names for
- * each val. See the manual for details.
+ * by the sequence of values added to the record, along with the names for
+ * each value. See the manual for details.
  *
  * @returns a new record, or %NULL on error.
  */
@@ -1177,21 +1177,21 @@ void           bro_record_free(BroRecord *rec);
  * bro_record_get_length - Returns number of fields in record.
  * @param rec record handle.
  *
- * Returns the number of fields in the record.
+ * @returns the number of fields in the record.
  */
 int            bro_record_get_length(BroRecord *rec);
 
 /**
- * bro_record_add_val - Adds a val to a record.
+ * bro_record_add_val - Adds a value to a record.
  * @param rec record handle.
  * @param name field name of the added val.
  * @param type numerical type tag of the new val.
  * @param type_name optional name of specialized type.
- * @param val pointer to the new val*.
+ * @param val pointer to the new val.
  *
  * The function adds a new field to the record pointed to by @p rec and
  * assigns the value passed in to that field. The field name is given
- * in @p name, the type of the val is given in @p type and must be one of
+ * in @p name, the type of the value is given in @p type and must be one of
  * the %BRO_TYPE_xxx constants defined in broccoli.h. The type you give
  * implies what data type @p val must be pointing to; see the manual for
  * details. If you want to indicate a type specialized from @p type,
@@ -1208,7 +1208,7 @@ int            bro_record_add_val(BroRecord *rec, const char *name,
 				  const void *val);
 
 /**
- * bro_record_get_nth_val - Retrieves a val from a record by field index.
+ * bro_record_get_nth_val - Retrieves a value from a record by field index.
  * @param rec record handle.
  * @param num field index, starting from 0.
  * @param type value-result argument for the expected/actual type of the value.
@@ -1217,7 +1217,7 @@ int            bro_record_add_val(BroRecord *rec, const char *name,
  * by @p rec, expected to be of @p type. The returned value is internal
  * and needs to be duplicated if you want to keep it around. Upon
  * return, the int pointed to by @p type tells you the type of the returned
- * val, as a BRO_TYPE_xxx type tag. If the int pointed to upon calling
+ * value, as a BRO_TYPE_xxx type tag. If the int pointed to upon calling
  * the function has the value BRO_TYPE_UNKNOWN, no type checking is
  * performed and the value is returned. If it is any other type tag,
  * its value is compared to that of the value, and if they match, the
@@ -1243,7 +1243,7 @@ const char*    bro_record_get_nth_name(BroRecord *rec, int num);
 
 
 /**
- * bro_record_get_named_val - Retrieves a val from a record by field name.
+ * bro_record_get_named_val - Retrieves a value from a record by field name.
  * @param rec record handle.
  * @param name field name.
  * @param type value-result argument for the expected/actual type of the value.
@@ -1259,7 +1259,7 @@ void*          bro_record_get_named_val(BroRecord *rec, const char *name, int *t
 
 
 /**
- * bro_record_set_nth_val - Replaces a val in a record, identified by field index.
+ * bro_record_set_nth_val - Replaces a value in a record, identified by field index.
  * @param rec record handle.
  * @param num field index, starting from 0.
  * @param type expected type of the value.
@@ -1280,7 +1280,7 @@ int            bro_record_set_nth_val(BroRecord *rec, int num,
 				      const void *val);
 
 /**
- * bro_record_set_named_val - Replaces a val in a record, identified by name.
+ * bro_record_set_named_val - Replaces a value in a record, identified by name.
  * @param rec record handle.
  * @param name field name.
  * @param type expected type of the value.
@@ -1385,12 +1385,12 @@ void           bro_conn_set_packet_ctxt(BroConn *bc, int link_type);
 void           bro_conn_get_packet_ctxt(BroConn *bc, int *link_type);
 
 /** 
- * bro_packet_new - Creates new packet.
+ * bro_packet_new - Creates a new packet.
  * @param hdr pointer to libpcap packet header.
  * @param data pointer to libpcap packet data.
  * @param tag pointer to ASCII tag (0 for no tag).
  * 
- * The function creates a new BroPacket by copying @p hdr and @p data
+ * @returns a new BroPacket by copying @p hdr and @p data
  * internally.
  * Release the resulting packet using bro_packet_free().
  */
@@ -1429,7 +1429,7 @@ int            bro_packet_send(BroConn *bc, BroPacket *packet);
 /* --------------------------- Miscellaneous ------------------------- */
 
 /**
- * bro_util_current_time - Gets current time
+ * bro_util_current_time - Gets current time.
  * 
  * @returns the current system time as a double, in seconds, suitable
  * for passing to bro_event_add_time().
@@ -1446,10 +1446,10 @@ double         bro_util_current_time(void);
 double         bro_util_timeval_to_double(const struct timeval *tv);
 
 /**
- * bro_util_is_v4_addr - Checks if an address is IPv4
- * @param addr pointer to address structure
+ * bro_util_is_v4_addr - Checks if an address is IPv4.
+ * @param a pointer to address structure.
  *
- * @returns %TRUE if the address is IPv4, else %FALSE
+ * @returns %TRUE if the address is IPv4, else %FALSE.
  */
 int            bro_util_is_v4_addr(const BroAddr *a);
 
