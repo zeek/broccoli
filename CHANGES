@@ -1,4 +1,8 @@
 
+1.9-2 | 2012-07-10 16:05:43 -0700
+
+  * Add --conf-files-dir option to configure wrapper script. (Jon Siwek)
+
 1.9 | 2012-07-05 12:59:54 -0700
 
   * Fix a warning, and fix other typos in documentation. (Daniel Thayer)
