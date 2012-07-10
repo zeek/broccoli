@@ -8,12 +8,7 @@ set(SOVersion 5) # this must be incremented when broccoli interface changes
 set(SOVersionMinor 1)
 set(SOVersionRelease 0)
 
-if ( "${BRO_ETC_INSTALL_DIR}" STREQUAL "" )
-    set(BRO_SYSCONF_DIR ${CMAKE_INSTALL_PREFIX}/etc)
-else ()
-    set(BRO_SYSCONF_DIR ${BRO_ETC_INSTALL_DIR})
-endif ()
-
+set(BRO_SYSCONF_DIR ${BRO_ETC_INSTALL_DIR})
 
 if (NOT BRO_SYSCONF_FILE)
     # BRO_SYSCONF_FILE not already defined from the --with-configfile option

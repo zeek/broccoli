@@ -21,6 +21,7 @@ Usage: $0 [OPTION]... [VAR=VALUE]...
 
   Installation Directories:
     --prefix=PREFIX        installation directory [/usr/local]
+    --conf-files-dir=DIR   config files installation directory [PREFIX/etc]
     --python-install-dir   the desired installation directory for
                            broccoli python bindings (if present)
                            [PREFIX/lib/python]
@@ -81,9 +82,10 @@ append_cache_entry () {
 
 # set defaults
 builddir=build
+prefix=/usr/local
 CMakeCacheEntries=""
-append_cache_entry CMAKE_INSTALL_PREFIX PATH     /usr/local
-append_cache_entry PY_MOD_INSTALL_DIR   PATH     /usr/local/lib/python
+append_cache_entry CMAKE_INSTALL_PREFIX PATH     $prefix
+append_cache_entry PY_MOD_INSTALL_DIR   PATH     $prefix/lib/python
 append_cache_entry ENABLE_DEBUG         BOOL     false
 append_cache_entry BRO_PCAP_SUPPORT     BOOL     true
 append_cache_entry CPACK_SOURCE_IGNORE_FILES STRING
@@ -104,8 +106,13 @@ while [ $# -ne 0 ]; do
             builddir=$optarg
             ;;
         --prefix=*)
+            prefix=$optarg
             append_cache_entry CMAKE_INSTALL_PREFIX PATH   $optarg
             append_cache_entry PY_MOD_INSTALL_DIR   PATH   $optarg/lib/python
+            ;;
+        --conf-files-dir=*)
+            append_cache_entry BRO_ETC_INSTALL_DIR  PATH   $optarg
+            user_set_conffilesdir="true"
             ;;
         --enable-debug)
             append_cache_entry ENABLE_DEBUG         BOOL   true
@@ -189,6 +196,10 @@ while [ $# -ne 0 ]; do
     esac
     shift
 done
+
+if [ "$user_set_conffilesdir" != "true" ]; then
+    append_cache_entry BRO_ETC_INSTALL_DIR PATH $prefix/etc
+fi
 
 if [ -d $builddir ]; then
     # If build directory exists, check if it has a CMake cache
