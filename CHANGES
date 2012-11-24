@@ -1,4 +1,9 @@
 
+1.92-3 | 2012-11-23 19:51:14 -0800
+
+  * Bump data serialization format version for Bro's new "hook"
+    function. (Jon Siwek)
+
 1.92 | 2012-08-22 16:15:18 -0700
 
   * Fix configure script to exit with non-zero status on error (Jon Siwek)
