@@ -219,8 +219,7 @@ main(int argc, char **argv)
   while (i > 0)
     {
       int status;
-
-      wait(&status);
+      wait(&status); // Ignore errors.
       i--;
     }
 

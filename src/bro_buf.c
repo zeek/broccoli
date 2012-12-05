@@ -63,8 +63,10 @@ __bro_buf_new(void)
 {
   BroBuf *buf;
 
-  if (! (buf = calloc(1, sizeof(BroBuf))))
+  if (! (buf = calloc(1, sizeof(BroBuf)))) {
+    D(("Unable to allocate memory in bro_buf_new.\n"));
     return NULL;
+  }
 
   __bro_buf_init(buf);
   buf->may_grow = TRUE;
@@ -121,6 +123,11 @@ __bro_buf_init(BroBuf *buf)
 
   memset(buf, 0, sizeof(BroBuf));
   buf->buf = calloc(1, BRO_BUF_DEFAULT);
+  if (buf->buf == NULL) {
+    D(("Unable to allocate memory in bro_buf_init.\n"));
+    D_RETURN;
+  }
+
   buf->buf_len = BRO_BUF_DEFAULT;
 
   D_RETURN;
@@ -429,8 +436,10 @@ __bro_buf_read_string(BroBuf *buf, BroString *val)
   /* We create space for the string's length plus one extra byte that
    * we use as the string terminator so things work with normal C strings.
    */
-  if (! (val->str_val = malloc(val->str_len + 1)))
+  if (! (val->str_val = malloc(val->str_len + 1))) {
+    D(("Unable to allocate memory in bro_buf_read_string.\n"));
     return FALSE;
+  }
   
   if (val->str_len > 0)
     {

@@ -286,8 +286,10 @@ conn_init(BroConn *bc)
   if (! (bc->tx_buf = __bro_buf_new()))
     goto error_exit;
 
-  if (! (bc->state = calloc(1, sizeof(BroConnState))))
+  if (! (bc->state = calloc(1, sizeof(BroConnState)))) {
+    D(("Out of memory in conn_init.\n"));
     goto error_exit;
+  }
   
   bc->state->conn_state_self = BRO_CONNSTATE_SETUP;
   bc->state->conn_state_peer = BRO_CONNSTATE_SETUP;
@@ -345,6 +347,11 @@ bro_init(const BroCtx* ctx)
 
   if (ctx == NULL) {
     ctx = calloc(1, sizeof(BroCtx));
+    if (ctx == NULL) {
+      D(("Unable to allocate memory in bro_init.\n"));
+      return FALSE;
+    }
+
     bro_ctx_init((BroCtx*) ctx);
   }
 
@@ -375,8 +382,10 @@ bro_conn_new_str(const char *hostname, int flags)
   if (! hostname || !*hostname)
     D_RETURN_(NULL);
   
-  if (! (bc = (BroConn *) calloc(1, sizeof(BroConn))))
+  if (! (bc = (BroConn *) calloc(1, sizeof(BroConn)))) {
+    D(("Unable to allocate memory in bro_conn_new_str.\n"));
     D_RETURN_(NULL);
+  }
   
   D(("Connecting to host %s\n", hostname));
 
@@ -1018,8 +1027,10 @@ bro_buf_new(void)
 {
   BroBuf *buf;
 
-  if (! (buf = calloc(1, sizeof(BroBuf))))
+  if (! (buf = calloc(1, sizeof(BroBuf)))) {
+    D(("Unable to allocate memory for buffer in bro_buf_new.\n"));
     return NULL;
+  }
 
   __bro_buf_init(buf);
   return buf;
@@ -1794,8 +1805,10 @@ bro_string_set_data(BroString *bs, const uchar *data, int data_len)
   if (! bs || !data || data_len < 0)
     return FALSE;
   
-  if (! (data_copy = malloc(data_len + 1)))
+  if (! (data_copy = malloc(data_len + 1))) {
+    D(("Out of memory in bro_string_set_data.\n"));
     return FALSE;
+  }
   
   memcpy(data_copy, data, data_len);
   data_copy[data_len] = '\0';
@@ -1829,8 +1842,10 @@ bro_string_copy(BroString *bs)
   if (! bs)
     return NULL;
 
-  if (! (result = calloc(1, sizeof(BroString))))
+  if (! (result = calloc(1, sizeof(BroString)))) {
+    D(("Unable to allocate memory for BroString in bro_string_copy.\n"));
     return NULL;
+  }
 
   bro_string_assign(bs, result);
   return result;
@@ -1913,14 +1928,17 @@ bro_packet_new(const struct pcap_pkthdr *hdr, const u_char *data, const char *ta
   if (! hdr || ! data)
     return NULL;
 
-  if (! (packet = calloc(1, sizeof(BroPacket))))
+  if (! (packet = calloc(1, sizeof(BroPacket)))) {
+    D(("Unable to allocate memory for packet in bro_packet_new.\n"));
     return NULL;
+  }
  
   packet->pkt_pcap_hdr = *hdr;
   packet->pkt_tag = strdup(tag ? tag : "");
 
   if (! (packet->pkt_data = malloc(hdr->caplen)))
     {
+      D(("Unable to allocate memory for pkt->data in bro_packet_new.\n"));
       free(packet);
       return NULL;
     }
@@ -1935,8 +1953,10 @@ bro_packet_clone(const BroPacket *src)
 {
   BroPacket *dst;
   
-  if (! (dst = calloc(1, sizeof(BroPacket))))
+  if (! (dst = calloc(1, sizeof(BroPacket)))) {
+    D(("Unable to allocate memory in bro_packet_clone.\n"));
     return NULL;
+  }
   
   if (! __bro_packet_clone(dst, src))
     {

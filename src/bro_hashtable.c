@@ -106,7 +106,10 @@ __bro_ht_new(BroHTHashFunc hash_func,
     D_RETURN_(NULL);
 
   if (! (ht = calloc(1, sizeof(BroHT))))
-    D_RETURN_(NULL);
+    {
+      D(("Out of memory in bro_ht_new.\n"));
+      D_RETURN_(NULL);
+    }
 
   ht->ht_numslots = BRO_HT_NUM_SLOTS;
   ht->ht_size = 0;
@@ -192,7 +195,7 @@ __bro_ht_add(BroHT *ht, void *key, void *data)
   
   if (! (it = calloc(1, sizeof(BroHTIt))))
     {
-      D(("Out of memory.\n"));
+      D(("Out of memory in bro_ht_add.\n"));
       D_RETURN_(FALSE);
     }
   
@@ -203,7 +206,7 @@ __bro_ht_add(BroHT *ht, void *key, void *data)
     {
       if (! (ht->ht_slots = calloc(ht->ht_numslots, sizeof(BroList*))))
 	{
-	  D(("Out of memory.\n"));
+	  D(("Out of memory in bro_ht_add for ht_slots.\n"));
 	  D_RETURN_(FALSE);
 	}
     }

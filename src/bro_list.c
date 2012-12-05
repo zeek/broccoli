@@ -47,6 +47,11 @@ __bro_list_new(void *data)
   BroList *l;
 
   l = calloc(1, sizeof(BroList));
+  if (l == NULL)
+    {
+      D(("WARNING: Unable to allocate memory in bro_list_new for BroList.\n"));
+      return NULL;
+    }
   l->prev = l->next = NULL;
   l->data = data;
 
