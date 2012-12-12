@@ -27,6 +27,8 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 # include <config.h>
 #endif
 
+#include <config-file.h>
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>

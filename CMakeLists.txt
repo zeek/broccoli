@@ -86,6 +86,8 @@ set(CMAKE_EXTRA_INCLUDE_FILES)
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/config.h.in
                ${CMAKE_CURRENT_BINARY_DIR}/config.h)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/config-file.h.in
+               ${CMAKE_CURRENT_BINARY_DIR}/config-file.h)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/broccoli-config.in
                ${CMAKE_CURRENT_BINARY_DIR}/broccoli-config
                @ONLY)
