@@ -29,7 +29,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <bro_object.h>
 
 /* Definitions of attribute type identifiers.
- * They must match the values of attr_tag in Bro's Attrs.h.
+ * They must match the values of attr_tag in Bro's Attr.h.
  */
 #define BRO_ATTR_OPTIONAL          0
 #define BRO_ATTR_DEFAULT           1
@@ -44,9 +44,14 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #define BRO_ATTR_EXPIRE_CREATE    10
 #define BRO_ATTR_PERSISTENT       11
 #define BRO_ATTR_SYNCHRONIZED     12
-#define BRO_ATTR_POSTPROCESSOR    13
-#define BRO_ATTR_ENCRYPT          14
-#define BRO_ATTR_MATCH            15
+#define BRO_ATTR_ENCRYPT          13
+#define BRO_ATTR_RAW_OUTPUT       14
+#define BRO_ATTR_MERGEABLE        15
+#define BRO_ATTR_PRIORITY         16
+#define BRO_ATTR_GROUP            17
+#define BRO_ATTR_LOG              18
+#define BRO_ATTR_ERROR_HANDLER    19
+#define BRO_ATTR_TYPE_COLUMN      20
 
 typedef struct bro_expr
 {
