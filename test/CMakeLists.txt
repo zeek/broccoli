@@ -15,6 +15,11 @@ target_link_libraries(broconftest ${Broccoli_LIBRARY})
 add_executable(broenum broenum.c)
 target_link_libraries(broenum ${Broccoli_LIBRARY})
 
+if (BRO_PCAP_SUPPORT)
+    add_executable(brosendpackets brosendpackets.c)
+    target_link_libraries(brosendpackets ${Broccoli_LIBRARY} ${PCAP_LIBRARY})
+endif()
+
 add_executable(brotable brotable.c)
 target_link_libraries(brotable ${Broccoli_LIBRARY})
 
