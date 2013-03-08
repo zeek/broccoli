@@ -8,7 +8,7 @@ Version: 0.9
 Release: 1
 License: BSD
 Group: Development/Libraries
-URL: http://www.bro-ids.org
+URL: http://www.bro.org
 Source: http://www.icir.org/christian/downloads/%{name}-%{version}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-buildroot
 Packager: Christian Kreibich <christian@whoop.org> 

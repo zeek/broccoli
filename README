@@ -23,11 +23,11 @@ Download
 --------
 
 You can find the latest Broccoli release for download at
-http://www.bro-ids.org/download.
+http://www.bro.org/download.
 
 Broccoli's git repository is located at
-`git://git.bro-ids.org/broccoli <git://git.bro-ids.org/broccoli>`_. You
-can browse the repository `here <http://git.bro-ids.org/broccoli>`_.
+`git://git.bro.org/broccoli <git://git.bro.org/broccoli>`_. You
+can browse the repository `here <http://git.bro.org/broccoli>`_.
 
 This document describes Broccoli |version|. See the ``CHANGES``
 file for version history.
@@ -132,7 +132,7 @@ relates to changes in the tree, the latter to compatibility changes in
 the API.
 
 Comments, feedback and patches are appreciated; please check the `Bro
-website <http://www.bro-ids.org/community>`_.
+website <http://www.bro.org/community>`_.
 
 Documentation
 -------------

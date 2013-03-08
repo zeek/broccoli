@@ -18,7 +18,7 @@ What is Broccoli?
 
 Broccoli is the BRO Client COmmunications LIbrary. It allows you to
 write applications that speak the communication protocol of the `Bro
-intrusion detection system <http://www.bro-ids.org>`_.
+intrusion detection system <http://www.bro.org>`_.
 
 Broccoli is free software under terms of the BSD license as given in the
 COPYING file distributed with its source code.
@@ -28,7 +28,7 @@ concepts of Bro, so please first review the documentation/publications
 available from the Bro website if necessary.
 
 Feedback, patches and bug reports are all welcome, please see
-http://www.bro-ids.org/community for instructions on how to participate
+http://www.bro.org/community for instructions on how to participate
 in the Bro community.
 
 Why do I care?
