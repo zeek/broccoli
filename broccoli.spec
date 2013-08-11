@@ -1,20 +1,16 @@
-# This spec file creates a single relocatable RPM.
-#
-%define prefix /usr
-
 Summary: The Bro Client Communications Library
 Name: broccoli
-Version: 0.9
-Release: 1
+Version: 1.92
+Release: 9
 License: BSD
 Group: Development/Libraries
 URL: http://www.bro.org
-Source: http://www.icir.org/christian/downloads/%{name}-%{version}.tar.gz
-BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-buildroot
-Packager: Christian Kreibich <christian@whoop.org> 
-Requires: openssl >= 0.9.7a
-Requires: openssl-devel >= 0.9.7a
-Prefix: %{prefix}
+Source: http://www.bro.org/downloads/release/%{name}-%{version}.tar.gz
+Packager: Derek Ditch <derek.ditch@gmail.com> 
+
+Requires: openssl >= 0.9.7a, python-libs, libpcap
+
+BuildRequires:	cmake >= 2.6.3, openssl-devel >= 0.9.7a, flex, bison, python-devel, swig, libpcap-devel
 
 %description
 Broccoli enables your applications to speak the Bro communication protocol,
@@ -26,28 +22,19 @@ turns Bro into a distributed policy-controlled event management system.
 
 %prep
 %setup -q
-# Needed for snapshot releases.
-if [ ! -f configure ]; then
-  CFLAGS="$RPM_OPT_FLAGS" ./autogen.sh --prefix=%prefix
-else
-  CFLAGS="$RPM_OPT_FLAGS" ./configure --prefix=%prefix
-fi
 
 %build
-
-if [ "$SMP" != "" ]; then
-  (make "MAKE=make -k -j $SMP"; exit 0)
-  make
-else
-  make
-fi
+./configure --prefix=/usr --conf-files-dir=%{_sysconfdir}/bro
+#cd build && #cmake .. <-- I'd rather use this
+make %{?_smp_mflags}
 
 %install
-rm -rf $RPM_BUILD_ROOT
-make prefix=$RPM_BUILD_ROOT%{prefix} sysconfdir=$RPM_BUILD_ROOT/etc install
+rm -rf %{buildroot}
+make DESTDIR=%{buildroot} install
+install -m 755 -d %{buildroot}/%{_bindir}
 
 %clean
-rm -rf $RPM_BUILD_ROOT
+rm -rf %{buildroot}
 
 %post -p /sbin/ldconfig
 
@@ -55,15 +42,18 @@ rm -rf $RPM_BUILD_ROOT
 
 %files
 %defattr(-,root,root,-)
-%doc AUTHORS COPYING ChangeLog NEWS README TODO
-%doc %{prefix}/share/gtk-doc/html/broccoli
-%{prefix}/lib/lib*.so.*
-%{prefix}/lib/lib*a
-%{prefix}/include/broccoli.h
-%{prefix}/bin/bro*
-%{prefix}/share/broccoli/*.bro
-/etc/broccoli.conf
+%doc AUTHORS COPYING README TODO
+/usr/lib/lib*.so.*
+/usr/lib/libbroccoli.so
+/usr/lib/lib*a
+/usr/lib/python/_broccoli_intern.so
+/usr/lib/python/broccoli.py*
+/usr/include/broccoli.h
+/usr/bin/bro*
+/etc/bro/broccoli.conf
 
 %changelog
-* Tue Dec  6 2004 Christian Kreibich <christian@whoop.org> 
+* Sun Aug 11 2013 Derek Ditch <derek.ditch@gmail.com>
+- Updated severely outdated spec file
+* Mon Dec 06 2004 Christian Kreibich <christian@whoop.org> 
 - Added spec file to tree.
