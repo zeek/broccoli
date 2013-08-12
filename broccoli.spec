@@ -24,7 +24,7 @@ turns Bro into a distributed policy-controlled event management system.
 %setup -q
 
 %build
-./configure --prefix=/usr --conf-files-dir=%{_sysconfdir}/bro
+./configure --prefix=/usr --conf-files-dir=%{_sysconfdir}/bro --python-install-dir=%{python_sitearch}
 #cd build && #cmake .. <-- I'd rather use this
 make %{?_smp_mflags}
 
@@ -43,13 +43,13 @@ rm -rf %{buildroot}
 %files
 %defattr(-,root,root,-)
 %doc AUTHORS COPYING README TODO
-/usr/lib/lib*.so.*
-/usr/lib/libbroccoli.so
-/usr/lib/lib*a
-/usr/lib/python/_broccoli_intern.so
-/usr/lib/python/broccoli.py*
-/usr/include/broccoli.h
-/usr/bin/bro*
+%{_libdir}/lib*.so.*
+%{_libdir}/libbroccoli.so
+%{_libdir}/lib*a
+%{python_sitearch}/_broccoli_intern.so
+%{python_sitearch}/broccoli.py*
+%{_prefix}/include/broccoli.h
+%{_prefix}/bin/bro*
 /etc/bro/broccoli.conf
 
 %changelog
