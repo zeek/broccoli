@@ -1,4 +1,12 @@
 
+1.93 | 2013-09-12 15:58:39 -0500
+
+  * Fix a broken link in documentation. (Daniel Thayer)
+
+  * Switching to relative submodule paths. (Robin Sommer)
+
+  * s/bro-ids.org/bro.org/g. (Robin Sommer)
+
 1.92-9 | 2013-01-31 12:17:39 -0800
 
   * A test program for sending packets through Broccoli, moved over
