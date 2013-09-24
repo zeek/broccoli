@@ -1,5 +1,11 @@
 
-1.93 | 2013-09-20 14:46:45 -0700
+1.93 | 2013-09-23 20:21:20 -0700
+
+  * Update 'make dist' target. (Jon Siwek)
+
+  * Change submodules to fixed URL. (Jon Siwek)
+
+  * Fix a compiler warning. (Daniel Thayer)
 
   * Fix a broken link in documentation. (Daniel Thayer)
 
