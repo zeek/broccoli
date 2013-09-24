@@ -769,7 +769,10 @@ __bro_record_type_read(BroRecordType *rt, BroConn *bc)
 		D_RETURN_(FALSE);
 	      
 	      if (! __bro_type_decl_read(td, bc))
-		D_RETURN_(FALSE);
+			{
+			__bro_type_decl_free(td);
+			D_RETURN_(FALSE);
+			}
 
 	      rt->type_decls = __bro_list_append(rt->type_decls, td);
 	    }
@@ -1497,7 +1500,10 @@ __bro_enum_type_read(BroEnumType *st, BroConn *bc)
     
     if (! __bro_buf_read_string(bc->rx_buf, &name) ||
 	! __bro_buf_read_int64(bc->rx_buf, val))
+      {
+      free(val);
       D_RETURN_(FALSE);
+      }
     
     __bro_ht_add(st->names, (void*) name.str_val, (void*) val);
   }

@@ -1499,6 +1499,7 @@ bro_table_insert(BroTable *tbl,
       if (! (kv = __bro_val_new_of_type(key_type, NULL)))
 	{
 	  D(("Could not create val of type %d\n", key_type));
+	  __bro_sobject_release((BroSObject*) lv);
 	  D_RETURN_(FALSE);
 	}
       
@@ -1511,6 +1512,7 @@ bro_table_insert(BroTable *tbl,
       if (! (vv = __bro_val_new_of_type(val_type, NULL)))
 	{
 	  D(("Could not crate val of type %d\n", val_type));
+	  __bro_sobject_release((BroSObject*) lv);
 	  D_RETURN_(FALSE);
 	}
       
@@ -1550,6 +1552,7 @@ bro_table_find(BroTable *tbl, const void *key)
       if (! (val = __bro_val_new_of_type(tbl->tbl_key_type, NULL)))
 	{
 	  D(("Could not create val of type %d.\n", tbl->tbl_key_type));
+	  __bro_sobject_release((BroSObject*) lv);
 	  D_RETURN_(NULL);
 	}
       

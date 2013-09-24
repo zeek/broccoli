@@ -163,6 +163,7 @@ __bro_loc_clone(BroLoc *dst, BroLoc *src)
     D_RETURN_(FALSE);
   
   dst->filename = *string;
+  free(string);
   dst->first_line = src->first_line;
   dst->last_line = src->last_line;
   dst->first_column = src->first_column;

@@ -815,6 +815,7 @@ __bro_io_event_queue(BroConn *bc, BroEvent *ev)
   if (! (ev_copy = __bro_event_copy(ev)))
     {
       D(("Could not clone event\n"));
+      __bro_io_msg_free(msg);
       D_RETURN_(FALSE);
     }
 
@@ -1003,6 +1004,7 @@ __bro_io_process_input(BroConn *bc)
 		D(("EEEK -- we speak protocol version %i, peer speeks %i. Aborting.\n",
 		   BRO_PROTOCOL_VERSION, proto_version));		
 		__bro_openssl_shutdown(bc);
+		free(data);
 		goto reset_return;
 	      } else {
 		D(("Protocols compatible, we speak version %i\n", BRO_PROTOCOL_VERSION));
@@ -1013,6 +1015,7 @@ __bro_io_process_input(BroConn *bc)
 		D(("EEEK -- we speak data format version %i, peer speeks %i. Aborting.\n",
 		   BRO_DATA_FORMAT_VERSION, data_version));		
 		__bro_openssl_shutdown(bc);
+		free(data);
 		goto reset_return;
 	      } else {
 		D(("Data formats compatible, we speak version %i\n", BRO_DATA_FORMAT_VERSION));

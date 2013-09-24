@@ -63,10 +63,10 @@ __bro_attr_copy(BroAttr *attr)
 
   D_ENTER;
 
-  if (! (copy = __bro_attr_new()))
+  if (! attr)
     D_RETURN_(NULL);
 
-  if (! attr)
+  if (! (copy = __bro_attr_new()))
     D_RETURN_(NULL);
 
   copy->tag = attr->tag;
