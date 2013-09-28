@@ -82,14 +82,14 @@ if (ENABLE_SHARED)
         # Mac OS X needs the directory portion of the install_name
         # shared lib field
         set_target_properties(broccoli PROPERTIES
-                              INSTALL_NAME_DIR ${LIB_INSTALL_DIR})
+                              INSTALL_NAME_DIR ${INSTALL_LIB_DIR})
     endif ()
     # BIND library is not necessary, but linked when a parent project
     # uses it (for consistency and also to avoid missing inet_* symbols
     # that can result from mismatching headers/libraries)
     target_link_libraries(broccoli ${OpenSSL_LIBRARIES} ${BIND_LIBRARY}
                           ${BRO_LIBADD})
-    install(TARGETS broccoli DESTINATION ${LIB_INSTALL_DIR})
+    install(TARGETS broccoli DESTINATION ${INSTALL_LIB_DIR})
 endif ()
 
 if (ENABLE_STATIC)
@@ -104,7 +104,7 @@ if (ENABLE_STATIC)
     # that can result from mismatching headers/libraries)
     target_link_libraries(broccoliStatic ${OpenSSL_LIBRARIES} ${BIND_LIBRARY}
                           ${BRO_LIBADD})
-    install(TARGETS broccoliStatic DESTINATION ${LIB_INSTALL_DIR})
+    install(TARGETS broccoliStatic DESTINATION ${INSTALL_LIB_DIR})
 endif ()
 
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/broccoli.h DESTINATION include)

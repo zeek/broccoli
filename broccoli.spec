@@ -24,8 +24,7 @@ turns Bro into a distributed policy-controlled event management system.
 %setup -q
 
 %build
-./configure --prefix=/usr --conf-files-dir=%{_sysconfdir}/bro --python-install-dir=%{python_sitearch}
-#cd build && #cmake .. <-- I'd rather use this
+./configure --prefix=%{_prefix} --libdir=%{_libdir} --conf-files-dir=%{_sysconfdir}/bro --python-install-dir=%{python_sitearch}
 make %{?_smp_mflags}
 
 %install

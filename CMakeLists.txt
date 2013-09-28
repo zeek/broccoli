@@ -95,17 +95,12 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/broccoli-config.in
 include_directories(BEFORE ${CMAKE_CURRENT_BINARY_DIR})
 add_definitions(-DHAVE_CONFIG_H)
 
-IF(UNIX AND NOT WIN32 AND NOT APPLE)
-  IF(CMAKE_SIZEOF_VOID_P MATCHES "8")
-      SET(LIB_POSTFIX "64" CACHE STRING "suffix for 32/64 dir placement")
-      MARK_AS_ADVANCED(LIB_POSTFIX)
-  ENDIF()
-ENDIF()
-IF(NOT DEFINED LIB_POSTFIX)
-    SET(LIB_POSTFIX "")
-ENDIF()
+# Offer the user the choice of overriding the installation directories
+set(INSTALL_LIB_DIR lib CACHE PATH "Installation directory for libraries")
 
-set(LIB_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/lib${LIB_POSTFIX}")
+if (NOT IS_ABSOLUTE "${INSTALL_LIB_DIR}")
+    set(INSTALL_LIB_DIR "${CMAKE_INSTALL_PREFIX}/${INSTALL_LIB_DIR}")
+endif()
 
 ########################################################################
 ## Install Files
@@ -162,7 +157,7 @@ message(
     "\n=================|  Broccoli Build Summary  |==================="
     "\n"
     "\nInstall prefix:    ${CMAKE_INSTALL_PREFIX}"
-    "\nLibrary prefix:    ${LIB_INSTALL_DIR}"
+    "\nLibrary prefix:    ${INSTALL_LIB_DIR}"
     "\nDebug mode:        ${ENABLE_DEBUG}"
     "\nShared libs:       ${ENABLE_SHARED}"
     "\nStatic libs:       ${ENABLE_STATIC}"
