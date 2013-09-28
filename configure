@@ -25,6 +25,8 @@ Usage: $0 [OPTION]... [VAR=VALUE]...
     --python-install-dir   the desired installation directory for
                            broccoli python bindings (if present)
                            [PREFIX/lib/python]
+    --libdir=DIR           installation directory for static and dynamic
+                           libraries [PREFIX/lib]
 
   Optional Features:
     --enable-debug         compile in debugging mode
@@ -86,6 +88,7 @@ prefix=/usr/local
 CMakeCacheEntries=""
 append_cache_entry CMAKE_INSTALL_PREFIX PATH     $prefix
 append_cache_entry PY_MOD_INSTALL_DIR   PATH     $prefix/lib/python
+append_cache_entry INSTALL_LIB_DIR      PATH     $prefix/lib
 append_cache_entry ENABLE_DEBUG         BOOL     false
 append_cache_entry BRO_PCAP_SUPPORT     BOOL     true
 append_cache_entry CPACK_SOURCE_IGNORE_FILES STRING
@@ -109,6 +112,11 @@ while [ $# -ne 0 ]; do
             prefix=$optarg
             append_cache_entry CMAKE_INSTALL_PREFIX PATH   $optarg
             append_cache_entry PY_MOD_INSTALL_DIR   PATH   $optarg/lib/python
+            append_cache_entry INSTALL_LIB_DIR      PATH   $optarg/lib
+            ;;
+        --libdir=*)
+            libdir=$optarg
+            append_cache_entry INSTALL_LIB_DIR      PATH   $optarg
             ;;
         --conf-files-dir=*)
             append_cache_entry BRO_ETC_INSTALL_DIR  PATH   $optarg

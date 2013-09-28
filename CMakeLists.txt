@@ -95,6 +95,13 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/broccoli-config.in
 include_directories(BEFORE ${CMAKE_CURRENT_BINARY_DIR})
 add_definitions(-DHAVE_CONFIG_H)
 
+# Offer the user the choice of overriding the installation directories
+set(INSTALL_LIB_DIR lib CACHE PATH "Installation directory for libraries")
+
+if (NOT IS_ABSOLUTE "${INSTALL_LIB_DIR}")
+    set(INSTALL_LIB_DIR "${CMAKE_INSTALL_PREFIX}/${INSTALL_LIB_DIR}")
+endif()
+
 ########################################################################
 ## Install Files
 
@@ -150,6 +157,7 @@ message(
     "\n=================|  Broccoli Build Summary  |==================="
     "\n"
     "\nInstall prefix:    ${CMAKE_INSTALL_PREFIX}"
+    "\nLibrary prefix:    ${INSTALL_LIB_DIR}"
     "\nDebug mode:        ${ENABLE_DEBUG}"
     "\nShared libs:       ${ENABLE_SHARED}"
     "\nStatic libs:       ${ENABLE_STATIC}"
