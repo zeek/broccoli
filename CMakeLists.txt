@@ -33,6 +33,13 @@ if (NOT DEFINED ENABLE_STATIC)
     set(ENABLE_STATIC true)
 endif ()
 
+# Offer the user the choice of overriding the installation directories
+set(INSTALL_LIB_DIR lib CACHE PATH "Installation directory for libraries")
+
+if (NOT IS_ABSOLUTE "${INSTALL_LIB_DIR}")
+    set(INSTALL_LIB_DIR "${CMAKE_INSTALL_PREFIX}/${INSTALL_LIB_DIR}")
+endif()
+
 ########################################################################
 ## Dependency Configuration
 
@@ -150,6 +157,7 @@ message(
     "\n=================|  Broccoli Build Summary  |==================="
     "\n"
     "\nInstall prefix:    ${CMAKE_INSTALL_PREFIX}"
+    "\nLibrary prefix:    ${INSTALL_LIB_DIR}"
     "\nDebug mode:        ${ENABLE_DEBUG}"
     "\nShared libs:       ${ENABLE_SHARED}"
     "\nStatic libs:       ${ENABLE_STATIC}"

@@ -49,7 +49,7 @@ while test $# -gt 0; do
       echo $includes -I$prefix/include @BRO_CFLAGSADD@ -DBROCCOLI 
       ;;
     --libs)
-      libdirs=-L$prefix/lib
+      libdirs=-L@INSTALL_LIB_DIR@
       echo $libdirs -lbroccoli @BRO_LIBADD@
       ;;
     --config)
