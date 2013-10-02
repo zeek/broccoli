@@ -1,4 +1,28 @@
 
+1.93-10 | 2013-10-02 10:38:27 -0700
+
+  * Remove dead code. (Jon Siwek)
+
+  * Fix mem leaks. (Jon Siwek)
+
+  * Updated specfile and configure script for libdir.  (Derek Ditch)
+    
+    Package maintainers and those that would otherwise compile from
+    source were unable to specify the installation directory of
+    architecture dependent libraries. Namely, many distributions use
+    lib64/ versus lib/ for the installation of architecture dependent
+    library archives.
+
+    * Add new 'configure' option, --libdir
+    * Defaults to old behavior of "$prefix/lib"
+    * Follows Kitware example for ProjectConfig.cmake on wiki
+
+    See https://github.com/bro/broccoli/pull/1
+
+  * Added back config-file bits to CMakeLists.txt (Derek Ditch)
+    
+  * Fix for setting REPO in Makefile. (Robin Sommer)
+
 1.93 | 2013-09-23 20:21:20 -0700
 
   * Update 'make dist' target. (Jon Siwek)

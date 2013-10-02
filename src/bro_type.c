@@ -34,7 +34,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #ifdef __EMX__
 #include <strings.h>
-#endif 
+#endif
 
 #include <bro_types.h>
 #include <bro_val.h>
@@ -144,9 +144,9 @@ __bro_type_new_of_type(int type_tag, const char *type_name)
   BroType *type = NULL;
   int internal_tag;
   char is_nbo = 0;
-  
+
   D_ENTER;
-  
+
   switch (type_tag)
     {
     case BRO_TYPE_BOOL:
@@ -154,40 +154,40 @@ __bro_type_new_of_type(int type_tag, const char *type_name)
     case BRO_TYPE_ENUM:
       internal_tag = BRO_INTTYPE_INT;
       break;
-      
+
     case BRO_TYPE_COUNT:
     case BRO_TYPE_COUNTER:
       internal_tag = BRO_INTTYPE_UNSIGNED;
       break;
-      
+
     case BRO_TYPE_PORT:
       internal_tag = BRO_INTTYPE_UNSIGNED;
       is_nbo = 1;
       break;
-      
+
     case BRO_TYPE_DOUBLE:
     case BRO_TYPE_TIME:
     case BRO_TYPE_INTERVAL:
       internal_tag = BRO_INTTYPE_DOUBLE;
       break;
-      
+
     case BRO_TYPE_STRING:
       internal_tag = BRO_INTTYPE_STRING;
       break;
-      
+
     case BRO_TYPE_IPADDR:
       internal_tag = BRO_INTTYPE_IPADDR;
       break;
-      
+
     case BRO_TYPE_SUBNET:
       internal_tag = BRO_INTTYPE_SUBNET;
       break;
-      
+
     case BRO_TYPE_PATTERN:
     case BRO_TYPE_TIMER:
     case BRO_TYPE_ANY:
     case BRO_TYPE_UNION:
-    case BRO_TYPE_LIST:      
+    case BRO_TYPE_LIST:
     case BRO_TYPE_FUNC:
     case BRO_TYPE_FILE:
     case BRO_TYPE_VECTOR:
@@ -197,17 +197,17 @@ __bro_type_new_of_type(int type_tag, const char *type_name)
     case BRO_TYPE_TABLE:
       if (! (type = (BroType *) __bro_table_type_new()))
 	D_RETURN_(NULL);
-      
+
       internal_tag = BRO_INTTYPE_OTHER;
       break;
-      
+
     case BRO_TYPE_RECORD:
       if (! (type = (BroType *) __bro_record_type_new()))
 	D_RETURN_(NULL);
-      
+
       internal_tag = BRO_INTTYPE_OTHER;
       break;
-      
+
     case BRO_TYPE_SET:
       if (! (type = (BroType *) __bro_set_type_new()))
 	D_RETURN_(NULL);
@@ -225,12 +225,12 @@ __bro_type_new_of_type(int type_tag, const char *type_name)
       if (! (type = __bro_type_new()))
 	D_RETURN_(NULL);
     }
- 
+
   type->tag          = type_tag;
   type->internal_tag = internal_tag;
   type->is_nbo       = is_nbo;
   type->is_complete  = TRUE;
-  
+
   if (type_name)
     {
       type->is_complete = FALSE;
@@ -281,7 +281,7 @@ static int
 __bro_type_read(BroType *type, BroConn *bc)
 {
   char opt;
-  
+
   D_ENTER;
 
   if (! __bro_object_read((BroObject *) type, bc))
@@ -305,7 +305,7 @@ __bro_type_read(BroType *type, BroConn *bc)
     {
       if (type->attrs_type)
 	__bro_sobject_release((BroSObject *) type->attrs_type);
-      
+
       if (! (type->attrs_type = (BroRecordType *)
 	     __bro_sobject_unserialize(SER_RECORD_TYPE, bc)))
 	D_RETURN_(FALSE);
@@ -337,10 +337,10 @@ __bro_type_write(BroType *type, BroConn *bc)
 
   if (! __bro_buf_write_char(bc->tx_buf, type->attrs_type ? 1 : 0))
     D_RETURN_(FALSE);
-  
+
   if (type->attrs_type && ! __bro_sobject_serialize((BroSObject *) type->attrs_type, bc))
     D_RETURN_(FALSE);
-  
+
   D_RETURN_(TRUE);
 }
 
@@ -398,14 +398,14 @@ __bro_type_cmp(BroType *type1, BroType *type2)
   int result;
 
   D_ENTER;
- 
+
   if (! type1 || ! type2)
     D_RETURN_(FALSE);
 
   if (type1->type_name.str_val && type2->type_name.str_val &&
       ! __bro_ht_str_cmp(type1->type_name.str_val, type2->type_name.str_val))
     D_RETURN_(FALSE);
-  
+
   if (type1->tag != type2->tag ||
       type1->internal_tag != type2->internal_tag ||
       type1->is_nbo != type2->is_nbo ||
@@ -440,15 +440,15 @@ __bro_type_list_init(BroTypeList *tl)
   BroSObject *sobj = (BroSObject *) tl;
 
   D_ENTER;
-  
+
   __bro_type_init((BroType *) tl);
-  
+
   sobj->read  = (BroSObjectRead) __bro_type_list_read;
   sobj->write = (BroSObjectWrite) __bro_type_list_write;
   sobj->free  = (BroSObjectFree) __bro_type_list_free;
   sobj->clone = (BroSObjectClone) __bro_type_list_clone;
   sobj->hash  = (BroSObjectHash) __bro_type_list_hash;
-  sobj->cmp   = (BroSObjectCmp) __bro_type_list_cmp;  
+  sobj->cmp   = (BroSObjectCmp) __bro_type_list_cmp;
 
   sobj->type_id = SER_TYPE_LIST;
 
@@ -464,9 +464,9 @@ __bro_type_list_free(BroTypeList *tl)
   D_ENTER;
 
   __bro_list_free(tl->types, (BroFunc) __bro_sobject_release);
-  __bro_sobject_release((BroSObject *) tl->pure_type);  
+  __bro_sobject_release((BroSObject *) tl->pure_type);
   __bro_type_free((BroType *) tl);
-  
+
   D_RETURN;
 }
 
@@ -481,36 +481,36 @@ __bro_type_list_read(BroTypeList *tl, BroConn *bc)
 
   if (! __bro_type_read((BroType *) tl, bc))
     D_RETURN_(FALSE);
-  
+
   if (! __bro_buf_read_char(bc->rx_buf, &opt))
     D_RETURN_(FALSE);
-  
+
   /* Clean out old optional pure type */
   if (tl->pure_type)
     __bro_sobject_release((BroSObject *) tl->pure_type);
-  
+
   if (opt)
     {
       if (! (tl->pure_type = (BroType *) __bro_sobject_unserialize(SER_IS_TYPE, bc)))
 	D_RETURN_(FALSE);
     }
-  
+
   if (! __bro_buf_read_int(bc->rx_buf, &tl->num_types))
     D_RETURN_(FALSE);
-  
+
   if (tl->num_types > 0)
     {
       for (i = 0; i < tl->num_types; i++)
 	{
 	  BroType *type;
-	  
+
 	  if (! (type = (BroType *) __bro_sobject_unserialize(SER_IS_TYPE, bc)))
 	    D_RETURN_(FALSE);
-	  
+
 	  tl->types = __bro_list_append(tl->types, type);
 	}
     }
-  
+
   D_RETURN_(TRUE);
 }
 
@@ -524,10 +524,10 @@ __bro_type_list_write(BroTypeList *tl, BroConn *bc)
 
   if (! __bro_type_write((BroType *) tl, bc))
     D_RETURN_(FALSE);
-  
+
   if (! __bro_buf_write_char(bc->tx_buf, tl->pure_type ? 1 : 0))
     D_RETURN_(FALSE);
-  
+
   if (tl->pure_type && ! __bro_sobject_serialize((BroSObject *) tl->pure_type, bc))
     D_RETURN_(FALSE);
 
@@ -539,7 +539,7 @@ __bro_type_list_write(BroTypeList *tl, BroConn *bc)
       if (! __bro_sobject_serialize((BroSObject *) __bro_list_data(l), bc))
 	D_RETURN_(FALSE);
     }
-  
+
   D_RETURN_(TRUE);
 }
 
@@ -561,22 +561,22 @@ __bro_type_list_clone(BroTypeList *dst, BroTypeList *src)
     __bro_list_free(dst->types, (BroFunc) __bro_sobject_release);
 
   dst->types = NULL;
-  
+
   for (l = src->types; l; l = __bro_list_next(l))
     {
       BroType *type_copy;
 
       type = __bro_list_data(l);
-      
+
       if (! (type_copy = (BroType *) __bro_sobject_copy((BroSObject *) type)))
 	D_RETURN_(FALSE);
 
       dst->types = __bro_list_append(dst->types, type_copy);
     }
-  
+
   if (src->pure_type && ! (dst->pure_type = (BroType *) __bro_sobject_copy((BroSObject *) src->pure_type)))
     D_RETURN_(FALSE);
-  
+
   D_RETURN_(TRUE);
 }
 
@@ -594,10 +594,10 @@ __bro_type_list_hash(BroTypeList *tl)
 
   result = tl->num_types;
   result ^= __bro_sobject_hash((BroSObject*) tl->pure_type);
-  
+
   for (l = tl->types; l; l = __bro_list_next(l))
     result ^= __bro_sobject_hash((BroSObject*) __bro_list_data(l));
-  
+
   D_RETURN_(result);
 }
 
@@ -611,12 +611,12 @@ __bro_type_list_cmp(BroTypeList *tl1, BroTypeList *tl2)
 
   if (! tl1 || ! tl2)
     D_RETURN_(FALSE);
-  
+
   if (tl1->num_types != tl2->num_types ||
       ! __bro_sobject_cmp((BroSObject*) tl1->pure_type,
 			  (BroSObject*) tl2->pure_type))
     D_RETURN_(FALSE);
-  
+
   for (l1 = tl1->types, l2 = tl2->types; l1 && l2;
        l1 = __bro_list_next(l1), l2 = __bro_list_next(l2))
     {
@@ -624,9 +624,9 @@ __bro_type_list_cmp(BroTypeList *tl1, BroTypeList *tl2)
 			      (BroSObject*) __bro_list_data(l2)))
 	D_RETURN_(FALSE);
     }
-  
+
   if (l1 || l2) D_RETURN_(FALSE);
-  
+
   D_RETURN_(TRUE);
 }
 
@@ -635,12 +635,12 @@ BroRecordType *
 __bro_record_type_new(void)
 {
   BroRecordType *rt;
-  
+
   D_ENTER;
-  
+
   if (! (rt = calloc(1, sizeof(BroRecordType))))
     D_RETURN_(NULL);
-  
+
   __bro_record_type_init(rt);
 
   D_RETURN_(rt);
@@ -653,18 +653,18 @@ __bro_record_type_init(BroRecordType *rt)
   BroSObject *sobj = (BroSObject *) rt;
 
   D_ENTER;
-  
+
   __bro_type_init((BroType *) rt);
-  
+
   sobj->read  = (BroSObjectRead) __bro_record_type_read;
   sobj->write = (BroSObjectWrite) __bro_record_type_write;
   sobj->free  = (BroSObjectFree) __bro_record_type_free;
   sobj->clone = (BroSObjectClone) __bro_record_type_clone;
   sobj->hash  = (BroSObjectHash) __bro_record_type_hash;
   sobj->cmp   = (BroSObjectCmp) __bro_record_type_cmp;
-  
+
   sobj->type_id = SER_RECORD_TYPE;
-  
+
   D_RETURN;
 }
 
@@ -673,10 +673,10 @@ static void
 __bro_record_type_free(BroRecordType *rt)
 {
   D_ENTER;
-  
+
   __bro_list_free(rt->type_decls, (BroFunc) __bro_type_decl_free);
   __bro_type_free((BroType *) rt);
-  
+
   D_RETURN;
 }
 
@@ -685,12 +685,12 @@ void
 __bro_record_type_add_type(BroRecordType *rt, const char *field, BroType *type)
 {
   BroTypeDecl *td;
-  
+
   D_ENTER;
-  
+
   if (! rt || ! type)
     D_RETURN;
-  
+
   if (! (td = __bro_type_decl_new()))
     D_RETURN;
 
@@ -700,13 +700,13 @@ __bro_record_type_add_type(BroRecordType *rt, const char *field, BroType *type)
       __bro_type_decl_free(td);
       D_RETURN;
     }
-  
+
   if (! bro_string_set(&td->id, field))
     {
       __bro_type_decl_free(td);
       D_RETURN;
     }
-  
+
   rt->type_decls = __bro_list_append(rt->type_decls, td);
   rt->num_fields++;
   rt->num_types++;
@@ -718,16 +718,16 @@ const char *
 __bro_record_type_get_nth_field(BroRecordType *rt, int num)
 {
   BroList *l;
-  
+
   if (! rt || num < 0 || (uint) num >= rt->num_fields)
     return NULL;
-  
+
   if( (l = __bro_list_nth(rt->type_decls, num)))
     {
       BroTypeDecl *td = __bro_list_data(l);
       return (const char *) td->id.str_val;
     }
-  
+
   return NULL;
 }
 
@@ -758,18 +758,21 @@ __bro_record_type_read(BroRecordType *rt, BroConn *bc)
     {
       if (! __bro_buf_read_int(bc->rx_buf, &rt->num_types))
 	D_RETURN_(FALSE);
-      
+
       if (rt->num_types > 0)
 	{
 	  for (i = 0; i < rt->num_types; i++)
 	    {
 	      BroTypeDecl *td;
-	      
+
 	      if (! (td = __bro_type_decl_new()))
 		D_RETURN_(FALSE);
-	      
+
 	      if (! __bro_type_decl_read(td, bc))
-		D_RETURN_(FALSE);
+			{
+			__bro_type_decl_free(td);
+			D_RETURN_(FALSE);
+			}
 
 	      rt->type_decls = __bro_list_append(rt->type_decls, td);
 	    }
@@ -795,18 +798,18 @@ __bro_record_type_write(BroRecordType *rt, BroConn *bc)
 
   if (! __bro_buf_write_char(bc->tx_buf, rt->type_decls ? 1 : 0))
     D_RETURN_(FALSE);
-  
+
   if (! __bro_buf_write_int(bc->tx_buf, rt->num_types))
     D_RETURN_(FALSE);
-  
+
   for (l = rt->type_decls; l; l = __bro_list_next(l))
     {
       BroTypeDecl *td = __bro_list_data(l);
-      
+
       if (! __bro_type_decl_write(td, bc))
 	D_RETURN_(FALSE);
     }
-  
+
   D_RETURN_(TRUE);
 }
 
@@ -820,21 +823,21 @@ __bro_record_type_clone(BroRecordType *dst, BroRecordType *src)
 
   if (! __bro_type_clone((BroType *) dst, (BroType *) src))
     D_RETURN_(FALSE);
-  
+
   dst->num_fields = src->num_fields;
   dst->num_types = src->num_types;
-  
+
   for (l = src->type_decls; l; l = __bro_list_next(l))
     {
       BroTypeDecl *td = __bro_list_data(l);
       BroTypeDecl *td_copy = __bro_type_decl_copy(td);
-      
+
       if (! td_copy)
 	D_RETURN_(FALSE);
- 
+
       dst->type_decls = __bro_list_append(dst->type_decls, td_copy);
     }
-  
+
   D_RETURN_(TRUE);
 }
 
@@ -852,7 +855,7 @@ __bro_record_type_hash(BroRecordType *rt)
 
   result = rt->num_fields;
   result ^= rt->num_types << 16;
-  
+
   for (l = rt->type_decls; l; l = __bro_list_next(l))
     result ^= __bro_type_decl_hash((BroTypeDecl*) __bro_list_data(l));
 
@@ -869,11 +872,11 @@ __bro_record_type_cmp(BroRecordType *rt1, BroRecordType *rt2)
 
   if (! rt1 || ! rt2)
     D_RETURN_(FALSE);
-  
+
   if (rt1->num_fields != rt2->num_fields ||
       rt1->num_types != rt2->num_types)
     D_RETURN_(FALSE);
-  
+
   for (l1 = rt1->type_decls, l2 = rt2->type_decls; l1 && l2;
        l1 = __bro_list_next(l1), l2 = __bro_list_next(l2))
     {
@@ -881,10 +884,10 @@ __bro_record_type_cmp(BroRecordType *rt1, BroRecordType *rt2)
 				(BroTypeDecl*) __bro_list_data(l2)))
 	D_RETURN_(FALSE);
     }
-  
+
   if (l1 || l2)
     D_RETURN_(FALSE);
-  
+
   D_RETURN_(TRUE);
 }
 
@@ -893,12 +896,12 @@ BroIndexType *
 __bro_index_type_new(void)
 {
   BroIndexType *it;
-  
+
   D_ENTER;
-  
+
   if (! (it = calloc(1, sizeof(BroIndexType))))
     D_RETURN_(NULL);
-  
+
   __bro_index_type_init(it);
 
   D_RETURN_(it);
@@ -910,18 +913,18 @@ __bro_index_type_init(BroIndexType *it)
   BroSObject *sobj = (BroSObject *) it;
 
   D_ENTER;
-  
+
   __bro_type_init((BroType *) it);
-  
+
   sobj->read  = (BroSObjectRead) __bro_index_type_read;
   sobj->write = (BroSObjectWrite) __bro_index_type_write;
   sobj->free  = (BroSObjectFree) __bro_index_type_free;
   sobj->clone = (BroSObjectClone) __bro_index_type_clone;
   sobj->hash  = (BroSObjectHash) __bro_index_type_hash;
   sobj->cmp   = (BroSObjectCmp) __bro_index_type_cmp;
-  
+
   sobj->type_id = SER_INDEX_TYPE;
-  
+
   D_RETURN;
 }
 
@@ -929,11 +932,11 @@ static void
 __bro_index_type_free(BroIndexType *it)
 {
   D_ENTER;
-  
+
   __bro_sobject_release((BroSObject *) it->indices);
   __bro_sobject_release((BroSObject *) it->yield_type);
   __bro_type_free((BroType *) it);
-  
+
   D_RETURN;
 }
 
@@ -965,13 +968,13 @@ void
 __bro_index_type_set_yield_type(BroIndexType *it, BroType *yield_type)
 {
   D_ENTER;
-  
+
   if (! it || ! yield_type)
     D_RETURN;
-  
+
   if (! (it->yield_type = (BroType *) __bro_sobject_copy((BroSObject *) yield_type)))
     D_RETURN;
-  
+
   D_RETURN;
 }
 
@@ -992,11 +995,11 @@ __bro_index_type_read(BroIndexType *it, BroConn *bc)
       if (! (it->yield_type = (BroType *) __bro_sobject_unserialize(SER_TYPE, bc)))
 	D_RETURN_(FALSE);
     }
-  
+
   if (! (it->indices = (BroTypeList *) __bro_sobject_unserialize(SER_TYPE_LIST, bc)))
     D_RETURN_(FALSE);
 
-  D_RETURN_(TRUE);  
+  D_RETURN_(TRUE);
 }
 
 static int
@@ -1012,10 +1015,10 @@ __bro_index_type_write(BroIndexType *it, BroConn *bc)
 
   if (it->yield_type && ! __bro_sobject_serialize((BroSObject *) it->yield_type, bc))
     D_RETURN_(FALSE);
-  
+
   if (! __bro_sobject_serialize((BroSObject *) it->indices, bc))
     D_RETURN_(FALSE);
-  
+
   D_RETURN_(TRUE);
 }
 
@@ -1064,7 +1067,7 @@ __bro_index_type_cmp(BroIndexType *it1, BroIndexType *it2)
       ! __bro_sobject_cmp((BroSObject*) it1->yield_type,
 			  (BroSObject*) it2->yield_type))
     D_RETURN_(FALSE);
-  
+
   D_RETURN_(TRUE);
 }
 
@@ -1073,12 +1076,12 @@ BroTableType *
 __bro_table_type_new(void)
 {
   BroTableType *tt;
-  
+
   D_ENTER;
-  
+
   if (! (tt = calloc(1, sizeof(BroTableType))))
     D_RETURN_(NULL);
-  
+
   __bro_table_type_init(tt);
 
   D_RETURN_(tt);
@@ -1090,8 +1093,8 @@ __bro_table_type_init(BroTableType *tt)
   BroSObject *sobj = (BroSObject *) tt;
 
   D_ENTER;
-  
-  __bro_index_type_init((BroIndexType *) tt); 
+
+  __bro_index_type_init((BroIndexType *) tt);
 
   sobj->read  = (BroSObjectRead) __bro_table_type_read;
   sobj->write = (BroSObjectWrite) __bro_table_type_write;
@@ -1099,9 +1102,9 @@ __bro_table_type_init(BroTableType *tt)
   sobj->clone = (BroSObjectClone) __bro_table_type_clone;
   sobj->hash  = (BroSObjectHash) __bro_table_type_hash;
   sobj->cmp   = (BroSObjectCmp) __bro_table_type_cmp;
-  
+
   sobj->type_id = SER_TABLE_TYPE;
-  
+
   D_RETURN;
 }
 
@@ -1109,7 +1112,7 @@ static void
 __bro_table_type_free(BroTableType *tt)
 {
   D_ENTER;
-  __bro_index_type_free((BroIndexType *) tt);  
+  __bro_index_type_free((BroIndexType *) tt);
   D_RETURN;
 }
 
@@ -1117,7 +1120,7 @@ static int
 __bro_table_type_read(BroTableType *tt, BroConn *bc)
 {
   D_ENTER;
-  
+
   if (! __bro_index_type_read((BroIndexType *) tt, bc))
     D_RETURN_(FALSE);
 
@@ -1139,10 +1142,10 @@ static int
 __bro_table_type_clone(BroTableType *dst, BroTableType *src)
 {
   D_ENTER;
-  
+
   if (! __bro_index_type_clone((BroIndexType *) dst, (BroIndexType *) src))
     D_RETURN_(FALSE);
-  
+
   D_RETURN_(TRUE);
 }
 
@@ -1160,7 +1163,7 @@ static int
 __bro_table_type_cmp(BroTableType *tt1, BroTableType *tt2)
 {
   D_ENTER;
-  
+
   if (! tt1 || ! tt2)
     D_RETURN_(FALSE);
 
@@ -1173,14 +1176,14 @@ BroSetType *
 __bro_set_type_new(void)
 {
   BroSetType *st;
-  
+
   D_ENTER;
-  
+
   if (! (st = calloc(1, sizeof(BroSetType))))
     D_RETURN_(NULL);
-  
+
   __bro_set_type_init(st);
-  
+
   D_RETURN_(st);
 }
 
@@ -1190,26 +1193,26 @@ __bro_set_type_init(BroSetType *st)
   BroSObject *sobj = (BroSObject *) st;
 
   D_ENTER;
-  
-  __bro_table_type_init((BroTableType *) st); 
-  
+
+  __bro_table_type_init((BroTableType *) st);
+
   sobj->read  = (BroSObjectRead) __bro_set_type_read;
   sobj->write = (BroSObjectWrite) __bro_set_type_write;
   sobj->free  = (BroSObjectFree) __bro_set_type_free;
   sobj->clone = (BroSObjectClone) __bro_set_type_clone;
   sobj->hash  = (BroSObjectHash) __bro_set_type_hash;
   sobj->cmp   = (BroSObjectCmp) __bro_set_type_cmp;
-  
+
   sobj->type_id = SER_SET_TYPE;
-  
+
   D_RETURN;
 }
 
 static void
 __bro_set_type_free(BroSetType *st)
 {
-  D_ENTER;  
-  __bro_table_type_free((BroTableType *) st);  
+  D_ENTER;
+  __bro_table_type_free((BroTableType *) st);
   D_RETURN;
 }
 
@@ -1219,7 +1222,7 @@ __bro_set_type_read(BroSetType *st, BroConn *bc)
   char opt;
 
   D_ENTER;
-  
+
   if (! __bro_table_type_read((BroTableType *) st, bc))
     D_RETURN_(FALSE);
 
@@ -1236,7 +1239,7 @@ __bro_set_type_read(BroSetType *st, BroConn *bc)
       D(("Error: expressions are not yet supported. Sorry.\n"));
       D_RETURN_(FALSE);
     }
-  
+
   D_RETURN_(TRUE);
 }
 
@@ -1251,17 +1254,17 @@ __bro_set_type_write(BroSetType *st, BroConn *bc)
    * between sets and tables (they always indicate table types), so
    * we must ensure here that we do appear as a table type.
    */
-  ((BroType*) st)->tag = BRO_TYPE_TABLE;  
+  ((BroType*) st)->tag = BRO_TYPE_TABLE;
   ret = __bro_table_type_write((BroTableType *) st, bc);
-  ((BroType*) st)->tag = BRO_TYPE_SET;  
-  
+  ((BroType*) st)->tag = BRO_TYPE_SET;
+
   if (! ret)
     D_RETURN_(FALSE);
-  
+
   /* We never send expressions. */
   if (! __bro_buf_write_char(bc->tx_buf, FALSE))
     D_RETURN_(FALSE);
-  
+
   D_RETURN_(TRUE);
 }
 
@@ -1269,10 +1272,10 @@ static int
 __bro_set_type_clone(BroSetType *dst, BroSetType *src)
 {
   D_ENTER;
-  
+
   if (! __bro_table_type_clone((BroTableType *) dst, (BroTableType *) src))
     D_RETURN_(FALSE);
-  
+
   D_RETURN_(TRUE);
 }
 
@@ -1292,10 +1295,10 @@ __bro_set_type_cmp(BroSetType *st1, BroSetType *st2)
   int result;
 
   D_ENTER;
-  
+
   if (! st1 || ! st2)
     D_RETURN_(FALSE);
-  
+
   result = __bro_table_type_cmp((BroTableType*) st1,
 				(BroTableType*) st2);;
   D_RETURN_(result);
@@ -1306,14 +1309,14 @@ BroFileType*
 __bro_file_type_new(void)
 {
   BroFileType *ft;
-  
+
   D_ENTER;
 
   if (! (ft = calloc(1, sizeof(BroFileType))))
     D_RETURN_(NULL);
-  
+
   __bro_file_type_init(ft);
-  
+
   D_RETURN_(ft);
 }
 
@@ -1324,16 +1327,16 @@ __bro_file_type_init(BroFileType *ft)
   BroSObject *sobj = (BroSObject *) ft;
 
   D_ENTER;
-  
-  __bro_type_init((BroType *) ft); 
-  
+
+  __bro_type_init((BroType *) ft);
+
   sobj->read  = (BroSObjectRead) __bro_file_type_read;
   sobj->write = (BroSObjectWrite) __bro_file_type_write;
   sobj->free  = (BroSObjectFree) __bro_file_type_free;
   sobj->clone = (BroSObjectClone) __bro_file_type_clone;
   sobj->hash  = (BroSObjectHash) __bro_file_type_hash;
   sobj->cmp   = (BroSObjectCmp) __bro_file_type_cmp;
-  
+
   sobj->type_id = SER_FILE_TYPE;
 
   D_RETURN;
@@ -1342,9 +1345,9 @@ __bro_file_type_init(BroFileType *ft)
 static void
 __bro_file_type_free(BroFileType *ft)
 {
-  D_ENTER;  
+  D_ENTER;
   __bro_sobject_release((BroSObject *) ft->yield);
-  __bro_type_free((BroType *) ft);  
+  __bro_type_free((BroType *) ft);
   D_RETURN;
 }
 
@@ -1382,7 +1385,7 @@ static int
 __bro_file_type_clone(BroFileType *dst, BroFileType *src)
 {
   D_ENTER;
-  
+
   if (! __bro_type_clone((BroType *) dst, (BroType *) src))
     D_RETURN_(FALSE);
 
@@ -1424,14 +1427,14 @@ BroEnumType*
 __bro_enum_type_new(void)
 {
   BroEnumType *et;
-  
+
   D_ENTER;
-  
+
   if (! (et = calloc(1, sizeof(BroEnumType))))
     D_RETURN_(NULL);
-  
+
   __bro_enum_type_init(et);
-  
+
   D_RETURN_(et);
 }
 
@@ -1441,16 +1444,16 @@ __bro_enum_type_init(BroEnumType *et)
   BroSObject *sobj = (BroSObject *) et;
 
   D_ENTER;
-  
-  __bro_type_init((BroType *) et); 
-  
+
+  __bro_type_init((BroType *) et);
+
   sobj->read  = (BroSObjectRead) __bro_enum_type_read;
   sobj->write = (BroSObjectWrite) __bro_enum_type_write;
   sobj->free  = (BroSObjectFree) __bro_enum_type_free;
   sobj->clone = (BroSObjectClone) __bro_enum_type_clone;
   sobj->hash  = (BroSObjectHash) __bro_enum_type_hash;
   sobj->cmp   = (BroSObjectCmp) __bro_enum_type_cmp;
-  
+
   sobj->type_id = SER_ENUM_TYPE;
 
   /* A hashtable mapping enum entry name strings to their numeric
@@ -1490,15 +1493,18 @@ __bro_enum_type_read(BroEnumType *st, BroConn *bc)
     D_RETURN_(FALSE);
   if (! __bro_buf_read_char(bc->rx_buf, &dummy))
     D_RETURN_(FALSE);
-  
+
   while (len--) {
     BroString name;
     uint64 *val = (uint64*) calloc(1, sizeof(uint64));
-    
+
     if (! __bro_buf_read_string(bc->rx_buf, &name) ||
 	! __bro_buf_read_int64(bc->rx_buf, val))
+      {
+      free(val);
       D_RETURN_(FALSE);
-    
+      }
+
     __bro_ht_add(st->names, (void*) name.str_val, (void*) val);
   }
 
@@ -1524,12 +1530,12 @@ __bro_enum_type_write_item(void *key, void *data, void *user_data)
     bro_string_cleanup(&name);
     D_RETURN_(FALSE);
   }
-  
-  bro_string_cleanup(&name);  
-  
+
+  bro_string_cleanup(&name);
+
   if (! __bro_buf_write_int64(bc->tx_buf, val))
     D_RETURN_(FALSE);
-  
+
   D_RETURN_(TRUE);
 }
 
@@ -1552,12 +1558,12 @@ __bro_enum_type_write(BroEnumType *st, BroConn *bc)
      in the iteration callback, so we temporarily add the conn handle
      to the object's data store.
   */
-  __bro_sobject_data_set((BroSObject*) st, 
-			 "__bro_enum_type_write", 
+  __bro_sobject_data_set((BroSObject*) st,
+			 "__bro_enum_type_write",
 			 bc);
-  
+
   __bro_ht_foreach(st->names, __bro_enum_type_write_item, (void*) st);
-  
+
   __bro_sobject_data_del((BroSObject*) st,
 			 "__bro_enum_type_write");
 
@@ -1579,13 +1585,13 @@ static int
 __bro_enum_type_clone(BroEnumType *dst, BroEnumType *src)
 {
   D_ENTER;
-  
+
   if (! __bro_type_clone((BroType *) dst, (BroType *) src))
     D_RETURN_(FALSE);
-  
+
   dst->counter = src->counter;
   __bro_ht_foreach(src->names, __bro_enum_type_clone_item, (void*) dst);
-  
+
   D_RETURN_(TRUE);
 }
 
@@ -1601,7 +1607,7 @@ __bro_enum_type_hash_item(void *key, void *data, void *user_data)
 
   et = (BroEnumType*) user_data;
   result = (uint32)(uintptr_t)
-    __bro_sobject_data_get((BroSObject*) et, 
+    __bro_sobject_data_get((BroSObject*) et,
 			   "__bro_enum_type_hash");
 
   bro_string_set(&name, (char*) key);
@@ -1609,14 +1615,14 @@ __bro_enum_type_hash_item(void *key, void *data, void *user_data)
   result ^= __bro_ht_str_hash(name.str_val);
   result ^= (uint32) (val >> 32);
   result ^= (uint32) (val);
-  
-  __bro_sobject_data_set((BroSObject*) et, 
+
+  __bro_sobject_data_set((BroSObject*) et,
 			 "__bro_enum_type_hash",
 			 (void*)(uintptr_t) result);
 
   bro_string_cleanup(&name);
 
-  D_RETURN_(TRUE);  
+  D_RETURN_(TRUE);
 }
 
 static uint32
@@ -1629,16 +1635,16 @@ __bro_enum_type_hash(BroEnumType *et)
   if (! et)
     D_RETURN_(0);
 
-  __bro_sobject_data_set((BroSObject*) et, 
+  __bro_sobject_data_set((BroSObject*) et,
 			 "__bro_enum_type_hash",
 			 (void*)(uintptr_t) et->counter);
-  
+
   __bro_ht_foreach(et->names, __bro_enum_type_hash_item, (void*) et);
-  
+
   result = (uint32)(uintptr_t)
-    __bro_sobject_data_del((BroSObject*) et, 
+    __bro_sobject_data_del((BroSObject*) et,
 			   "__bro_enum_type_hash");
-  
+
   D_RETURN_(result);
 }
 
@@ -1646,17 +1652,17 @@ static int
 __bro_enum_type_cmp(BroEnumType *et1, BroEnumType *et2)
 {
   int result;
-  
+
   D_ENTER;
-  
+
   if (! et1 || ! et2)
     D_RETURN_(FALSE);
 
   if (et1->counter != et2->counter)
     D_RETURN_(FALSE);
-  
+
   result = __bro_enum_type_hash(et1) == __bro_enum_type_hash(et2);
-  
+
   D_RETURN_(result);
 }
 
@@ -1665,14 +1671,14 @@ BroVectorType*
 __bro_vector_type_new(void)
 {
   BroVectorType *vt;
-  
+
   D_ENTER;
 
   if (! (vt = calloc(1, sizeof(BroVectorType))))
     D_RETURN_(NULL);
-  
+
   __bro_vector_type_init(vt);
-  
+
   D_RETURN_(vt);
 }
 
@@ -1683,16 +1689,16 @@ __bro_vector_type_init(BroVectorType *vt)
   BroSObject *sobj = (BroSObject *) vt;
 
   D_ENTER;
-  
-  __bro_type_init((BroType *) vt); 
-  
+
+  __bro_type_init((BroType *) vt);
+
   sobj->read  = (BroSObjectRead) __bro_vector_type_read;
   sobj->write = (BroSObjectWrite) __bro_vector_type_write;
   sobj->free  = (BroSObjectFree) __bro_vector_type_free;
   sobj->clone = (BroSObjectClone) __bro_vector_type_clone;
   sobj->hash  = (BroSObjectHash) __bro_vector_type_hash;
   sobj->cmp   = (BroSObjectCmp) __bro_vector_type_cmp;
-  
+
   sobj->type_id = SER_VECTOR_TYPE;
 
   D_RETURN;
@@ -1701,9 +1707,9 @@ __bro_vector_type_init(BroVectorType *vt)
 static void
 __bro_vector_type_free(BroVectorType *vt)
 {
-  D_ENTER;  
+  D_ENTER;
   __bro_sobject_release((BroSObject *) vt->yield);
-  __bro_type_free((BroType *) vt);  
+  __bro_type_free((BroType *) vt);
   D_RETURN;
 }
 
@@ -1741,7 +1747,7 @@ static int
 __bro_vector_type_clone(BroVectorType *dst, BroVectorType *src)
 {
   D_ENTER;
-  
+
   if (! __bro_type_clone((BroType *) dst, (BroType *) src))
     D_RETURN_(FALSE);
 

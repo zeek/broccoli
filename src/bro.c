@@ -120,19 +120,19 @@ conn_init_await(BroConn *bc, int conn_state)
 
       if (bc->state->conn_state_peer >= conn_state)
 	D_RETURN_(TRUE);
-      
+
       if (select(0, NULL, NULL, NULL, &timeout) < 0)
 	{
 	  D(("select() caused '%s'\n", strerror(errno)));
 	  D_RETURN_(FALSE);
 	}
-      
-      __bro_io_process_input(bc);      
+
+      __bro_io_process_input(bc);
     }
-  
+
   D_RETURN_(FALSE);
 }
-  
+
 static int
 conn_init_setup(BroConn *bc)
 {
@@ -141,7 +141,7 @@ conn_init_setup(BroConn *bc)
   int result;
 
   D_ENTER;
-   
+
   descriptor[0] = htonl((uint32) BRO_PROTOCOL_VERSION);
   descriptor[1] = htonl((uint32) BRO_MAX_CACHE_SIZE);
   descriptor[2] = htonl((uint32) BRO_DATA_FORMAT_VERSION);
@@ -165,9 +165,9 @@ conn_init_setup(BroConn *bc)
   __bro_buf_cleanup(&buf);
 
   /* This phase does NOT send PHASE_END ... */
-  
+
   D(("Phase done to peer on %p, self now in HANDSHAKE stage.\n", bc));
-  result = conn_init_await(bc, BRO_CONNSTATE_HANDSHAKE);  
+  result = conn_init_await(bc, BRO_CONNSTATE_HANDSHAKE);
   D_RETURN_(result);
 }
 
@@ -211,22 +211,22 @@ conn_init_handshake(BroConn *bc)
     }
 
   /* --- End of phase ------------------------------------------------ */
-  
+
   if (! __bro_io_raw_queue(bc, BRO_MSG_PHASE_DONE, NULL, 0))
     {
       D(("End-of-Handshake not sent to %p\n", bc));
       D_RETURN_(FALSE);
     }
-  
+
   if (bc->state->sync_state_requested)
     {
       D(("Phase done to peer on %p, sync requested, self now in SYNC stage.\n", bc));
-      result = conn_init_await(bc, BRO_CONNSTATE_SYNC);  
+      result = conn_init_await(bc, BRO_CONNSTATE_SYNC);
     }
   else
     {
       D(("Phase done to peer on %p, no sync requested, self now in RUNNING stage.\n", bc));
-      result = conn_init_await(bc, BRO_CONNSTATE_RUNNING);  
+      result = conn_init_await(bc, BRO_CONNSTATE_RUNNING);
     }
 
   D_RETURN_(result);
@@ -253,10 +253,10 @@ conn_init_sync(BroConn *bc)
 
       D(("Phase done to peer on %p\n", bc));
     }
-  
+
   D(("Self now in RUNNING stage.\n"));
   result = conn_init_await(bc, BRO_CONNSTATE_RUNNING);
-  
+
   D_RETURN_(result);
 }
 
@@ -272,7 +272,7 @@ conn_init_configure(BroConn *bc)
     return FALSE;
   if (! conn_init_sync(bc))
     return FALSE;
-  
+
   return TRUE;
 }
 
@@ -290,7 +290,7 @@ conn_init(BroConn *bc)
     D(("Out of memory in conn_init.\n"));
     goto error_exit;
   }
-  
+
   bc->state->conn_state_self = BRO_CONNSTATE_SETUP;
   bc->state->conn_state_peer = BRO_CONNSTATE_SETUP;
 
@@ -298,7 +298,7 @@ conn_init(BroConn *bc)
     goto error_exit;
 
   D_RETURN_(TRUE);
-  
+
  error_exit:
   __bro_buf_free(bc->rx_buf);
   __bro_buf_free(bc->tx_buf);
@@ -374,19 +374,19 @@ bro_conn_new_str(const char *hostname, int flags)
 {
   BroConn *bc;
   static int counter = 0;
-  
+
   BRO_SAFETY_CHECK;
 
   D_ENTER;
-  
+
   if (! hostname || !*hostname)
     D_RETURN_(NULL);
-  
+
   if (! (bc = (BroConn *) calloc(1, sizeof(BroConn)))) {
     D(("Unable to allocate memory in bro_conn_new_str.\n"));
     D_RETURN_(NULL);
   }
-  
+
   D(("Connecting to host %s\n", hostname));
 
   bc->conn_flags = flags;
@@ -408,19 +408,19 @@ bro_conn_new_str(const char *hostname, int flags)
 				     (BroHTFreeFunc) __bro_sobject_release,
 				     TRUE)))
     goto error_exit;
-  
+
   if (! (bc->data = __bro_ht_new(__bro_ht_str_hash,
 				 __bro_ht_str_cmp,
 				 __bro_ht_mem_free,
 				 NULL, FALSE)))
     goto error_exit;
-  
+
   if (! (bc->ev_mask = __bro_ht_new(__bro_ht_str_hash,
 				    __bro_ht_str_cmp,
 				    __bro_ht_mem_free,
 				    NULL, FALSE)))
-    goto error_exit;  
-  
+    goto error_exit;
+
   D_RETURN_(bc);
 
  error_exit:
@@ -428,10 +428,10 @@ bro_conn_new_str(const char *hostname, int flags)
   __bro_ht_free(bc->ev_mask);
   __bro_ht_free(bc->io_cache);
   __bro_ht_free(bc->data);
-  
+
   if (bc->peer)
     free(bc->peer);
-  
+
   free(bc);
   D_RETURN_(NULL);
 }
@@ -534,7 +534,7 @@ bro_conn_connect(BroConn *bc)
 
   if (! conn_init(bc))
     D_RETURN_(FALSE);
-  
+
   /* Handshake procedure. */
   if (! conn_init_configure(bc))
     D_RETURN_(FALSE);
@@ -557,7 +557,7 @@ bro_conn_reconnect(BroConn *bc)
 
   if (bc->state->in_reconnect)
     D_RETURN_(FALSE);
-  
+
   if ( (current_time = time(NULL)) > 0)
     {
       if (current_time - bc->state->last_reconnect < BRO_RECONNECT_MAX_RATE)
@@ -569,20 +569,20 @@ bro_conn_reconnect(BroConn *bc)
 
       bc->state->last_reconnect = current_time;
     }
-  
+
   D(("Attempting reconnection...\n"));
   bc->state->in_reconnect = TRUE;
-  
+
   /* NOTE: the sequencing in this function is quite tricky and very picky.
    * Don't move things around unneccesarily ...
    */
   bc->state->tx_dead = bc->state->rx_dead = FALSE;
-  
+
   /* Clean up the old connection state: */
   bc->state->conn_state_self = BRO_CONNSTATE_SETUP;
   bc->state->conn_state_peer = BRO_CONNSTATE_SETUP;
   bc->state->sync_state_requested = FALSE;
-  
+
   if (bc->bio)
     {
       BIO_free_all(bc->bio);
@@ -616,11 +616,11 @@ bro_conn_reconnect(BroConn *bc)
   if (! (bc->ev_mask = __bro_ht_new(__bro_ht_str_hash,
 				    __bro_ht_str_cmp,
 				    __bro_ht_mem_free,
-				    NULL, FALSE)))				    
+				    NULL, FALSE)))
     goto reset_error_return;
 
   __bro_ht_free(bc->io_cache);
-  
+
   if (! (bc->io_cache = __bro_ht_new(__bro_ht_int_hash,
 				     __bro_ht_int_cmp,
 				     NULL,
@@ -645,7 +645,7 @@ bro_conn_reconnect(BroConn *bc)
 
   D(("Reconnect completed successfully.\n"));
   bc->state->in_reconnect = FALSE;
-  
+
   D_RETURN_(TRUE);
 
  reset_error_return:
@@ -658,11 +658,11 @@ bro_conn_reconnect(BroConn *bc)
       TAILQ_REMOVE(&bc->msg_queue, msg, msg_queue);
       __bro_io_msg_free(msg);
     }
-  
+
   bc->msg_queue.tqh_first = msg_first;
   bc->msg_queue.tqh_last = msg_last;
   bc->msg_queue_len = msg_queue_len;
-  
+
  error_return:
   bc->state->tx_dead = bc->state->rx_dead = TRUE;
   bc->state->in_reconnect = FALSE;
@@ -671,7 +671,7 @@ bro_conn_reconnect(BroConn *bc)
 }
 
 
-int 
+int
 bro_conn_delete(BroConn *bc)
 {
   BroMsg *msg;
@@ -731,11 +731,11 @@ conn_adopt_events_cb(char *ev_name, void *data, BroHT *dst)
   /* If the event is already reported, ignore. */
   if (__bro_ht_get(dst, ev_name))
     return TRUE;
-  
+
   D(("Adopting event %s\n", ev_name));
   key = strdup(ev_name);
   __bro_ht_add(dst, key, key);
-  
+
   return TRUE;
   data = NULL;
 }
@@ -761,7 +761,7 @@ bro_conn_get_fd(BroConn *bc)
 
   if (! bc || !bc->state || bc->state->tx_dead || bc->state->rx_dead || !bc->bio)
     return -1;
-  
+
 #ifdef __MINGW32__
   return 0;
 #else
@@ -799,7 +799,7 @@ bro_event_queue_length_max(BroConn *bc)
 }
 
 
-int            
+int
 bro_event_queue_flush(BroConn *bc)
 {
   return __bro_io_msg_queue_flush(bc);
@@ -849,7 +849,7 @@ bro_event_send_raw(BroConn *bc, const uchar *data, int data_len)
       D(("Out of memory\n"));
       D_RETURN_(FALSE);
     }
-      
+
   __bro_buf_write_char(buf, 'e');
   __bro_buf_write_data(buf, data, data_len);
 
@@ -885,7 +885,7 @@ bro_conn_data_del(BroConn *bc, const char *key)
 {
   if (!bc || !key || !*key)
     return NULL;
-  
+
   return __bro_ht_del(bc->data, (void *) key);
 }
 
@@ -925,7 +925,7 @@ bro_event_add_val(BroEvent *be, int type, const char *type_name, const void *val
       D(("Invalid input: (%p, %i, %p)\n", be, type, val));
       D_RETURN_(FALSE);
     }
-  
+
   if (! (v = __bro_val_new_of_type(type, type_name)))
     D_RETURN_(FALSE);
 
@@ -965,7 +965,7 @@ bro_event_set_val(BroEvent *be, int val_num,
       __bro_sobject_release((BroSObject *) v);
       D_RETURN_(FALSE);
     }
-  
+
   result = __bro_event_set_val(be, val_num, v);
   D_RETURN_(result);
 }
@@ -975,7 +975,7 @@ void
 bro_event_registry_add(BroConn *bc,
 		       const char *event_name,
 		       BroEventFunc func,
-		       void *user_data)		       
+		       void *user_data)
 {
   __bro_event_reg_add(bc, event_name, func, user_data);
 }
@@ -985,7 +985,7 @@ void
 bro_event_registry_add_compact(BroConn *bc,
 			       const char *event_name,
 			       BroCompactEventFunc func,
-			       void *user_data)		       
+			       void *user_data)
 {
   __bro_event_reg_add_compact(bc, event_name, func, user_data);
 }
@@ -1002,7 +1002,7 @@ void
 bro_event_registry_request(BroConn *bc)
 {
   D_ENTER;
-  
+
   if (!bc || !bc->state)
     D_RETURN;
 
@@ -1012,9 +1012,9 @@ bro_event_registry_request(BroConn *bc)
    */
   if (bc->state->conn_state_self != BRO_CONNSTATE_RUNNING)
     D_RETURN;
-  
+
   __bro_event_reg_request(bc);
-  
+
   D_RETURN;
 }
 
@@ -1181,7 +1181,7 @@ bro_conf_get_str(const char *val_name)
 
   if (! val_name)
     return FALSE;
-  
+
   return __bro_conf_get_str(val_name);
 }
 
@@ -1220,13 +1220,13 @@ bro_record_add_val(BroRecord *rec, const char *name,
       D(("Input error: (%p, %s, %i, %p)\n", rec, name, type, val));
       D_RETURN_(FALSE);
     }
-  
+
   if (! (v = __bro_val_new_of_type(type, type_name)))
     {
       D(("Could not get val of type %i\n", type));
       D_RETURN_(FALSE);
     }
-  
+
   if (! name)
     name = "";
 
@@ -1244,17 +1244,17 @@ bro_record_add_val(BroRecord *rec, const char *name,
 }
 
 
-const char* 
+const char*
 bro_record_get_nth_name(BroRecord *rec, int num)
 {
   const char *name;
- 
+
   if ( (name = __bro_record_get_nth_name(rec, num)))
     return name;
 
   return NULL;
 }
- 
+
 
 void *
 bro_record_get_nth_val(BroRecord *rec, int num, int *type)
@@ -1277,7 +1277,7 @@ bro_record_get_nth_val(BroRecord *rec, int num, int *type)
    */
   if (! __bro_val_get_data(val, &type_found, &result))
     return NULL;
-  
+
   if (type)
     {
       if (*type != BRO_TYPE_UNKNOWN && type_found != *type)
@@ -1285,10 +1285,10 @@ bro_record_get_nth_val(BroRecord *rec, int num, int *type)
 	  D(("Type mismatch: expected type tag %i, found type tag %i\n", *type, type_found));
 	  result = NULL;
 	}
-      
+
       *type = type_found;
     }
-  
+
   return result;
 }
 
@@ -1299,13 +1299,13 @@ bro_record_get_named_val(BroRecord *rec, const char *name, int *type)
   BroVal *val;
   int type_found;
   void *result = NULL;
- 
+
   if (type && (*type < BRO_TYPE_UNKNOWN || *type >= BRO_TYPE_MAX))
     {
       D(("Invalid value for type pointer (%i)\n", *type));
       return NULL;
     }
- 
+
   if (! (val = __bro_record_get_named_val(rec, name)))
     return NULL;
 
@@ -1314,7 +1314,7 @@ bro_record_get_named_val(BroRecord *rec, const char *name, int *type)
    */
   if (! __bro_val_get_data(val, &type_found, &result))
     return NULL;
-  
+
   if (type)
     {
       if (*type != BRO_TYPE_UNKNOWN && type_found != *type)
@@ -1326,7 +1326,7 @@ bro_record_get_named_val(BroRecord *rec, const char *name, int *type)
 
       *type = type_found;
     }
-  
+
   return result;
 }
 
@@ -1346,19 +1346,19 @@ bro_record_set_nth_val(BroRecord *rec, int num,
       D(("Input error: (%p, %i, %i, %p)\n", rec, num, type, val));
       D_RETURN_(FALSE);
     }
-  
+
   if (! (v = __bro_record_get_nth_val(rec, num)))
     D_RETURN_(FALSE);
 
   if (! (name = __bro_sobject_data_get((BroSObject *) v, "field")))
     D_RETURN_(FALSE);
-  
+
   if (! (v = __bro_val_new_of_type(type, type_name)))
     {
       D(("Could not get val of type %i\n", type));
       D_RETURN_(FALSE);
     }
-  
+
   __bro_sobject_data_set((BroSObject *) v, "field", strdup(name));
 
   if (! __bro_val_assign(v, val))
@@ -1387,20 +1387,20 @@ bro_record_set_named_val(BroRecord *rec, const char *name,
       D(("Input error: (%p, %s, %i, %p)\n", rec, name, type, val));
       D_RETURN_(FALSE);
     }
-  
+
   if (! (v = __bro_val_new_of_type(type, type_name)))
     {
       D(("Could not get val of type %i\n", type));
       D_RETURN_(FALSE);
     }
-    
+
   if (! __bro_val_assign(v, val))
     {
       D(("Could not assign value to the new val.\n"));
       __bro_sobject_release((BroSObject *) v);
       D_RETURN_(FALSE);
     }
-  
+
   __bro_record_set_named_val(rec, name, v);
   D_RETURN_(TRUE);
 }
@@ -1469,13 +1469,13 @@ bro_table_insert(BroTable *tbl,
    * used in the obvious way.
    */
   lv = __bro_list_val_new();
-  
+
   if (key_type == BRO_TYPE_LIST)
     {
       /* We need to unroll the record elements and put them
        * all in the list val.
        */
-      
+
       BroRecord *rec = (BroRecord*) key;
       int i;
 
@@ -1486,7 +1486,7 @@ bro_table_insert(BroTable *tbl,
 	   */
 	  BroVal *v = __bro_record_get_nth_val(rec, i);
 	  BroVal *v_copy = (BroVal*) __bro_sobject_copy((BroSObject*) v);
-	  __bro_list_val_append(lv, v_copy); 
+	  __bro_list_val_append(lv, v_copy);
 	}
     }
   else
@@ -1499,26 +1499,28 @@ bro_table_insert(BroTable *tbl,
       if (! (kv = __bro_val_new_of_type(key_type, NULL)))
 	{
 	  D(("Could not create val of type %d\n", key_type));
+	  __bro_sobject_release((BroSObject*) lv);
 	  D_RETURN_(FALSE);
 	}
-      
+
       __bro_val_assign(kv, key);
       __bro_list_val_append(lv, kv);
-    }  
-  
+    }
+
   if (val)
     {
       if (! (vv = __bro_val_new_of_type(val_type, NULL)))
 	{
 	  D(("Could not crate val of type %d\n", val_type));
+	  __bro_sobject_release((BroSObject*) lv);
 	  D_RETURN_(FALSE);
 	}
-      
+
       __bro_val_assign(vv, val);
     }
 
-  __bro_table_insert(tbl, (BroVal*) lv, vv);  
-  
+  __bro_table_insert(tbl, (BroVal*) lv, vv);
+
   D_RETURN_(TRUE);
 }
 
@@ -1550,22 +1552,23 @@ bro_table_find(BroTable *tbl, const void *key)
       if (! (val = __bro_val_new_of_type(tbl->tbl_key_type, NULL)))
 	{
 	  D(("Could not create val of type %d.\n", tbl->tbl_key_type));
+	  __bro_sobject_release((BroSObject*) lv);
 	  D_RETURN_(NULL);
 	}
-      
+
       __bro_val_assign(val, key);
       __bro_list_val_append(lv, val);
     }
-  
+
   if ( (result_val = __bro_table_find(tbl, (BroVal*) lv)))
     {
       if (! __bro_val_get_data(result_val, NULL, &result))
 	{
 	  __bro_sobject_release((BroSObject*) lv);
-	  D_RETURN_(NULL);	  
+	  D_RETURN_(NULL);
 	}
     }
-  
+
   if (rec)
     {
       lv->list = NULL;
@@ -1573,7 +1576,7 @@ bro_table_find(BroTable *tbl, const void *key)
     }
 
   __bro_sobject_release((BroSObject*) lv);
-  
+
   D_RETURN_(result);
 }
 
@@ -1589,7 +1592,7 @@ bro_table_get_size(BroTable *tbl)
 }
 
 typedef struct bro_table_cb_data
-{ 
+{
   void *user_data;
   BroTableCallback cb;
   int is_set;
@@ -1601,17 +1604,17 @@ bro_table_foreach_cb(BroListVal *key, BroVal *val, BroTableCBData *data)
   int result;
   void *key_data = NULL, *val_data = NULL;
   BroRecord *rec = NULL;
-  
+
   if (__bro_list_val_get_length(key) > 1)
     {
       /* Need to shrink-wrap it into a record. */
       BroList *l;
       rec = __bro_record_new();
-      
+
       for (l = key->list; l; l = __bro_list_next(l))
 	{
 	  BroVal *tmp = (BroVal*) __bro_list_data(l);
-	  
+
 	  /* __bro_record_add_val() does not internally copy the added
 	   * val. Without bumping up the val's refcount, __bro_record_free()
 	   * below would possibly nuke the val when it decrements the count
@@ -1629,27 +1632,27 @@ bro_table_foreach_cb(BroListVal *key, BroVal *val, BroTableCBData *data)
       BroVal *v = __bro_list_val_get_front(key);
       D(("Index type is atomic, type %d/%d\n",
 	 v->val_type->tag, v->val_type->internal_tag));
-    
+
       if (! __bro_val_get_data(v, NULL, &key_data))
 	{
 	  D(("Failed to obtain user-suitable data representation.\n"));
 	  return TRUE;
 	}
     }
-  
+
   if (! data->is_set && ! __bro_val_get_data(val, NULL, &val_data))
     {
       D(("Failed to obtain user-suitable data representation.\n"));
       result = FALSE;
       goto return_result;
     }
-  
+
   result = data->cb(key_data, val_data, data->user_data);
-  
+
  return_result:
   if (rec)
     __bro_record_free(rec);
-  
+
   return result;
 }
 
@@ -1710,11 +1713,11 @@ bro_set_insert(BroSet *set, int type, const void *val)
   int result;
 
   D_ENTER;
-  
+
   result = bro_table_insert((BroTable*) set,
 			    type, val,
 			    BRO_TYPE_UNKNOWN, NULL);
-  
+
   D_RETURN_(result);
 }
 
@@ -1739,7 +1742,7 @@ bro_set_get_size(BroSet *set)
 }
 
 typedef struct bro_set_cb_data
-{ 
+{
   void *user_data;
   BroSetCallback cb;
 } BroSetCBData;
@@ -1758,14 +1761,14 @@ bro_set_foreach(BroSet *set,
   BroSetCBData data;
 
   D_ENTER;
-  
+
   data.user_data = user_data;
   data.cb = cb;
 
   bro_table_foreach((BroTable*) set,
 		    (BroTableCallback) bro_set_foreach_cb,
 		    &data);
-  
+
   D_RETURN;
 }
 
@@ -1792,7 +1795,7 @@ bro_string_set(BroString *bs, const char *s)
 {
   if (! bs || !s)
     return FALSE;
-  
+
   return bro_string_set_data(bs, (const uchar *) s, strlen(s));
 }
 
@@ -1801,18 +1804,18 @@ int
 bro_string_set_data(BroString *bs, const uchar *data, int data_len)
 {
   uchar *data_copy;
-  
+
   if (! bs || !data || data_len < 0)
     return FALSE;
-  
+
   if (! (data_copy = malloc(data_len + 1))) {
     D(("Out of memory in bro_string_set_data.\n"));
     return FALSE;
   }
-  
+
   memcpy(data_copy, data, data_len);
   data_copy[data_len] = '\0';
-  
+
   bs->str_len = data_len;
   bs->str_val = data_copy;
 
@@ -1932,7 +1935,7 @@ bro_packet_new(const struct pcap_pkthdr *hdr, const u_char *data, const char *ta
     D(("Unable to allocate memory for packet in bro_packet_new.\n"));
     return NULL;
   }
- 
+
   packet->pkt_pcap_hdr = *hdr;
   packet->pkt_tag = strdup(tag ? tag : "");
 
@@ -1952,12 +1955,12 @@ BroPacket *
 bro_packet_clone(const BroPacket *src)
 {
   BroPacket *dst;
-  
+
   if (! (dst = calloc(1, sizeof(BroPacket)))) {
     D(("Unable to allocate memory in bro_packet_clone.\n"));
     return NULL;
   }
-  
+
   if (! __bro_packet_clone(dst, src))
     {
       bro_packet_free(dst);
@@ -2006,7 +2009,7 @@ bro_util_current_time(void)
 }
 
 
-double 
+double
 bro_util_timeval_to_double(const struct timeval *tv)
 {
   return __bro_util_timeval_to_double(tv);
