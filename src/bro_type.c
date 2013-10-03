@@ -271,7 +271,6 @@ __bro_type_free(BroType *type)
 {
   D_ENTER;
   bro_string_cleanup(&type->type_name);
-  __bro_sobject_release((BroSObject *) type->attrs_type);
   __bro_object_free((BroObject *) type);
   D_RETURN;
 }
@@ -280,8 +279,6 @@ __bro_type_free(BroType *type)
 static int
 __bro_type_read(BroType *type, BroConn *bc)
 {
-  char opt;
-  
   D_ENTER;
 
   if (! __bro_object_read((BroObject *) type, bc))
@@ -296,20 +293,11 @@ __bro_type_read(BroType *type, BroConn *bc)
     D_RETURN_(FALSE);
   if (! __bro_buf_read_char(bc->rx_buf, &type->is_base_type))
     D_RETURN_(FALSE);
-  if (! __bro_buf_read_char(bc->rx_buf, &type->is_global_attrs_type))
-    D_RETURN_(FALSE);
 
-  if (! __bro_buf_read_char(bc->rx_buf, &opt))
+  bro_string_cleanup(&type->type_name);
+
+  if (! __bro_buf_read_string(bc->rx_buf, &type->type_name))
     D_RETURN_(FALSE);
-  if (opt)
-    {
-      if (type->attrs_type)
-	__bro_sobject_release((BroSObject *) type->attrs_type);
-      
-      if (! (type->attrs_type = (BroRecordType *)
-	     __bro_sobject_unserialize(SER_RECORD_TYPE, bc)))
-	D_RETURN_(FALSE);
-    }
 
   D_RETURN_(TRUE);
 }
@@ -332,15 +320,10 @@ __bro_type_write(BroType *type, BroConn *bc)
     D_RETURN_(FALSE);
   if (! __bro_buf_write_char(bc->tx_buf, type->is_base_type))
     D_RETURN_(FALSE);
-  if (! __bro_buf_write_char(bc->tx_buf, type->is_global_attrs_type))
+
+  if (! __bro_buf_write_string(bc->tx_buf, &type->type_name))
     D_RETURN_(FALSE);
 
-  if (! __bro_buf_write_char(bc->tx_buf, type->attrs_type ? 1 : 0))
-    D_RETURN_(FALSE);
-  
-  if (type->attrs_type && ! __bro_sobject_serialize((BroSObject *) type->attrs_type, bc))
-    D_RETURN_(FALSE);
-  
   D_RETURN_(TRUE);
 }
 
@@ -357,13 +340,8 @@ __bro_type_clone(BroType *dst, BroType *src)
   dst->internal_tag = src->internal_tag;
   dst->is_nbo = src->is_nbo;
   dst->is_base_type = src->is_base_type;
-  dst->is_global_attrs_type = src->is_global_attrs_type;
   dst->is_complete = src->is_complete;
   bro_string_set(&dst->type_name, (const char *) bro_string_get_data(&src->type_name));
-
-  if (src->attrs_type &&
-      ! (dst->attrs_type = (BroRecordType *) __bro_sobject_copy((BroSObject *) src->attrs_type)))
-    D_RETURN_(FALSE);
 
   D_RETURN_(TRUE);
 }
@@ -384,7 +362,6 @@ __bro_type_hash(BroType *type)
   result ^= ((uint32) type->internal_tag) << 8;
   result ^= ((uint32) type->is_nbo) << 8;
   result ^= ((uint32) type->is_base_type) << 8;
-  result ^= (uint32) type->is_global_attrs_type;
   result ^= ((uint32) type->is_complete) << 8;
 
   D_RETURN_(result);
@@ -410,7 +387,6 @@ __bro_type_cmp(BroType *type1, BroType *type2)
       type1->internal_tag != type2->internal_tag ||
       type1->is_nbo != type2->is_nbo ||
       type1->is_base_type != type2->is_base_type ||
-      type1->is_global_attrs_type != type2->is_global_attrs_type ||
       type1->is_complete != type2->is_complete)
     D_RETURN_(FALSE);
 

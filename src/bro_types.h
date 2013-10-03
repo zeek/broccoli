@@ -39,7 +39,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #define BRO_PROTOCOL_VERSION       0x07
 
 /* Data format version */
-#define BRO_DATA_FORMAT_VERSION    23
+#define BRO_DATA_FORMAT_VERSION    24
 
 /* The maximum number of messages we queue before we start
  * dropping messages. Might be worth moving this to the
