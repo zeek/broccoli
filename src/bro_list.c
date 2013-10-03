@@ -226,13 +226,8 @@ __bro_list_remove(BroList *l, BroList *item)
   /* last item */
   if (!next)
     {
-      if (!prev)
-	return l;
-      else
-	{
 	  prev->next = NULL;
 	  return l;
-	}      
     }
 
   /* middle item */

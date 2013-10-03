@@ -207,6 +207,7 @@ __bro_ht_add(BroHT *ht, void *key, void *data)
       if (! (ht->ht_slots = calloc(ht->ht_numslots, sizeof(BroList*))))
 	{
 	  D(("Out of memory in bro_ht_add for ht_slots.\n"));
+	  free(it);
 	  D_RETURN_(FALSE);
 	}
     }

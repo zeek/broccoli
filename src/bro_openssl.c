@@ -305,21 +305,6 @@ __bro_openssl_init(void)
 	}
     }
 
-  if (our_key == NULL)
-    {
-      if (use_ssl)
-	{
-	  D(("SSL requested but host key not given -- aborting.\n"));
-	  D_RETURN_(FALSE);
-	}
-      else
-	{
-	  D(("use_ssl not used and host key not given -- not using SSL.\n"));
-	  D_RETURN_(TRUE);
-	}
-    }
-
-
   /* At this point we either haven't seen use_ssl but a host_cert, or
    * we have seen use_ssl and it is set to true. Either way, we attempt
    * to set up an SSL connection now and abort if this fails in any way.

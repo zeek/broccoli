@@ -140,7 +140,10 @@ __bro_attrs_read(BroAttrs *attrs, BroConn *bc)
 	D_RETURN_(FALSE);
       
       if (! __bro_attr_read(attr, bc))
-	D_RETURN_(FALSE);
+        {
+        __bro_attr_free(attr);
+        D_RETURN_(FALSE);
+        }
       
       attrs->attrs[i] = attr;
     }

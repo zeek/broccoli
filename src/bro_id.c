@@ -240,6 +240,7 @@ __bro_id_clone(BroID *dst, BroID *src)
     D_RETURN_(FALSE);
   
   dst->name = *string;
+  free(string);
   dst->scope = src->scope;
   dst->is_export = src->is_export;
   dst->is_const = src->is_const;
