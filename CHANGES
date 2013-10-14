@@ -1,4 +1,15 @@
 
+1.93-15 | 2013-10-14 14:20:20 -0700
+
+  * Fix misc. issues reported by Coverity (Return value checks,
+    time-of-check-time-of-use, null ptr checking, and a
+    use-after-free). (Jon Siwek)
+
+  * Fixed __bro_list_val_pop_front() to not erase the entire list but
+    remove only the first element. (Jon Siwek)
+
+  * Updating copyright notice. (Robin Sommer)
+    
 1.93-10 | 2013-10-02 10:38:27 -0700
 
   * Remove dead code. (Jon Siwek)
