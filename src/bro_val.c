@@ -1196,11 +1196,8 @@ __bro_list_val_pop_front(BroListVal *lv)
   if (! lv)
     D_RETURN_(NULL);
 
-  l = lv->list;
+  result = (BroVal*) __bro_list_data(lv->list);
   lv->list = __bro_list_remove(lv->list, lv->list);
-
-  result = (BroVal*) __bro_list_data(l);
-  __bro_list_free(l, NULL);
 
   D_RETURN_(result);
 }
@@ -1517,13 +1514,13 @@ __bro_record_val_write(BroRecordVal *rv, BroConn *bc)
 
   D_ENTER;
 
+  if (! rv->rec)
+    D_RETURN_(FALSE);
+
   if (! __bro_mutable_val_write((BroMutableVal *) rv, bc))
     D_RETURN_(FALSE);
 
   if (! __bro_buf_write_int(bc->tx_buf, rv->rec->val_len))
-    D_RETURN_(FALSE);
-
-  if (! rv->rec && rv->rec->val_len > 0)
     D_RETURN_(FALSE);
 
   D(("Writing out %i vals in record %p.\n", rv->rec->val_len, rv->rec));
@@ -1803,8 +1800,14 @@ __bro_table_val_write_cb_direct(BroVal *key, BroVal *val, BroConn *bc)
 static int
 __bro_table_val_write_cb_unpack(BroVal *key, BroRecordVal *val, BroConn *bc)
 {
-  BroRecord *rec = val->rec;
-  BroListVal *lv = __bro_list_val_new();
+  BroRecord *rec = 0;
+  BroListVal *lv = 0;
+
+  if ( ! val )
+    return FALSE;
+
+  rec = val->rec;
+  lv = __bro_list_val_new();
 
   /* Just hook the list into the list val, we unhook below. */
   lv->list = rec->val_list;
@@ -1813,7 +1816,7 @@ __bro_table_val_write_cb_unpack(BroVal *key, BroRecordVal *val, BroConn *bc)
   if (! __bro_sobject_serialize((BroSObject *) lv, bc))
     goto error_return;
 
-  if (val && ! __bro_sobject_serialize((BroSObject *) val, bc))
+  if (! __bro_sobject_serialize((BroSObject *) val, bc))
     goto error_return;
 
   lv->list = NULL;

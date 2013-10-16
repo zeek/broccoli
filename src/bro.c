@@ -850,8 +850,17 @@ bro_event_send_raw(BroConn *bc, const uchar *data, int data_len)
       D_RETURN_(FALSE);
     }
 
-  __bro_buf_write_char(buf, 'e');
-  __bro_buf_write_data(buf, data, data_len);
+  if (! __bro_buf_write_char(buf, 'e'))
+    {
+      __bro_buf_free(buf);
+      D_RETURN_(FALSE);
+    }
+
+  if (! __bro_buf_write_data(buf, data, data_len))
+    {
+      __bro_buf_free(buf);
+      D_RETURN_(FALSE);
+    }
 
   __bro_io_rawbuf_queue(bc, BRO_MSG_SERIAL, buf);
   __bro_io_msg_queue_flush(bc);

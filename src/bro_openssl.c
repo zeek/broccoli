@@ -146,28 +146,16 @@ verify_cb(int ok, X509_STORE_CTX *store)
 static int
 prng_init_file(char *file)
 {
-  struct stat st;
   int fd, flags, i;
   uchar buf[1024];
   
-  /* Check if file  is available, and try to seed the PRNG
-   * from it. If things fail, do nothing and rely on OpenSSL to
-   * initialize from /dev/urandom.
+  /* Try to seed the PRNG from a file.  If things fail, do nothing and rely on
+   * OpenSSL to initialize from /dev/urandom.
    */
-  
-  if (stat(file, &st) != 0)
-    {
-      D(("%s does not exist, not seeding from it.\n", file));
-      return FALSE;
-    }
-    
-  /* Now we need to figure out how much entropy the device
-   * can provide. We try to read 1K, and accept if it can
-   * read at least 256 bytes.
-   */
+
   if ( (fd = open(file, O_RDONLY)) < 0)
     {
-      D(("Could not read from %s.\n", file));
+      D(("Could not read from %s, not seeding from it.\n", file));
       return FALSE;
     }
     
@@ -185,6 +173,10 @@ prng_init_file(char *file)
       return FALSE;
     }
     
+  /* Now we need to figure out how much entropy the device
+   * can provide. We try to read 1K, and accept if it can
+   * read at least 256 bytes.
+   */
   if ( (i = read(fd, buf, 1024)) < 256)
     {
       D(("Could only read %i bytes from %s, not enough.\n", i, file));
