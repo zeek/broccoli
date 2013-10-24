@@ -1,4 +1,8 @@
 
+1.94 | 2013-10-24 16:49:30 -0700
+
+  * Release.
+
 1.93-17 | 2013-10-15 11:19:19 -0700
 
   * Fix a minor memory leak recently introduced. (Jon Siwek)
