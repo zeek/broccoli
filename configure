@@ -30,11 +30,11 @@ Usage: $0 [OPTION]... [VAR=VALUE]...
 
   Optional Features:
     --enable-debug         compile in debugging mode
+    --enable-ruby          build ruby bindings for broccoli
     --disable-shared       don't build shared libraries [default=no]
                            (no effect on broccoli bindings)
     --disable-static       don't build static libraries [default=no]
     --disable-python       don't try to build python bindings for broccoli
-    --disable-ruby         don't try to build ruby bindings for broccoli
     --disable-packets      Do not support tx/rx of pcap packets
     --with-configfile=FILE use config file at location <FILE>
                            instead of the default broccoli.conf
@@ -92,6 +92,7 @@ append_cache_entry INSTALL_LIB_DIR      PATH     $prefix/lib
 append_cache_entry ENABLE_DEBUG         BOOL     false
 append_cache_entry BRO_PCAP_SUPPORT     BOOL     true
 append_cache_entry CPACK_SOURCE_IGNORE_FILES STRING
+append_cache_entry DISABLE_RUBY_BINDINGS     BOOL   true
 
 # parse arguments
 while [ $# -ne 0 ]; do
@@ -135,8 +136,8 @@ while [ $# -ne 0 ]; do
             append_cache_entry DISABLE_PYTHON_BINDINGS     BOOL   true
             CMakeCacheEntries=`echo $CMakeCacheEntries | sed 's/-D PY_MOD_INSTALL_DIR:PATH=[^ ]* //g'`
             ;;
-        --disable-ruby)
-            append_cache_entry DISABLE_RUBY_BINDINGS     BOOL   true
+        --enable-ruby)
+            append_cache_entry DISABLE_RUBY_BINDINGS     BOOL   false
             ;;
         --disable-packets)
             append_cache_entry BRO_PCAP_SUPPORT     BOOL   false
