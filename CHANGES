@@ -1,9 +1,8 @@
 
-1.94-2 | 2013-10-31 00:14:44 -0700
+1.95 | 2013-11-06 00:23:50 -0800
 
   * Don't build ruby bindings by default, use --enable-ruby to do so.
     (Jon Siwek)
-
 
 1.94 | 2013-10-24 16:49:30 -0700
 
