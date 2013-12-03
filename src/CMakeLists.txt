@@ -71,6 +71,8 @@ set(broccoli_SRCS
     bro_util.c
     bro_val.h
     bro_val.c
+    bro_vector.h
+    bro_vector.c
 )
 
 if (ENABLE_SHARED)

@@ -25,3 +25,6 @@ target_link_libraries(brotable ${Broccoli_LIBRARY})
 
 add_executable(broccoli-v6addrs broccoli-v6addrs.c)
 target_link_libraries(broccoli-v6addrs ${Broccoli_LIBRARY})
+
+add_executable(broccoli-vectors broccoli-vectors.c)
+target_link_libraries(broccoli-vectors ${Broccoli_LIBRARY})

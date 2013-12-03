@@ -75,6 +75,7 @@ static BroObjFactoryEntry obj_factories[] = {
   { SER_MUTABLE_VAL,      (BroSObjectNew) __bro_mutable_val_new },
   { SER_RECORD_VAL,       (BroSObjectNew) __bro_record_val_new },
   { SER_TABLE_VAL,        (BroSObjectNew) __bro_table_val_new },
+  { SER_VECTOR_VAL,       (BroSObjectNew) __bro_vector_val_new },
 
   { SER_TYPE,             (BroSObjectNew) __bro_type_new },
   { SER_TYPE_LIST,        (BroSObjectNew) __bro_type_list_new },

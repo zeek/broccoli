@@ -63,6 +63,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "bro_openssl.h"
 #include "bro_record.h"
 #include "bro_table.h"
+#include "bro_vector.h"
 #ifdef BRO_PCAP_SUPPORT
 #include "bro_packet.h"
 #endif
@@ -1907,6 +1908,133 @@ bro_string_free(BroString *bs)
   bro_string_cleanup(bs);
   free(bs);
 }
+
+/* ----------------------------- Vectors ----------------------------- */
+
+
+BroVector     *
+bro_vector_new(void)
+{
+  return __bro_vector_new();
+}
+
+void
+bro_vector_free(BroVector *vec)
+{
+  __bro_vector_free(vec);
+}
+
+int
+bro_vector_get_length(BroVector *vec)
+{
+  return __bro_vector_get_length(vec);
+}
+
+int
+bro_vector_add_val(BroVector *vec,
+				   int type, const char *type_name,
+				   const void *val)
+{
+  BroVal *v;
+
+  D_ENTER;
+
+  if (! vec)
+    {
+    D(("Input error: (%p, %i, %p)\n", vec, type, val));
+    D_RETURN_(FALSE);
+    }
+
+  if (! (v = __bro_val_new_of_type(type, type_name)))
+    {
+    D(("Could not get val of type %i\n", type));
+    D_RETURN_(FALSE);
+    }
+
+  if (! __bro_val_assign(v, val))
+    {
+    D(("Could not assign value to the new val.\n"));
+    __bro_sobject_release((BroSObject *) v);
+    D_RETURN_(FALSE);
+    }
+
+  __bro_vector_add_val(vec, v);
+  D_RETURN_(TRUE);
+}
+
+void*
+bro_vector_get_nth_val(BroVector *vec, int num, int *type)
+{
+  BroVal *val;
+  int type_found;
+  void *result = NULL;
+
+  if (type && (*type < BRO_TYPE_UNKNOWN || *type >= BRO_TYPE_MAX))
+    {
+    D(("Invalid value for type pointer (%i)\n", *type));
+    return NULL;
+    }
+
+  if (! (val = __bro_vector_get_nth_val(vec, num)))
+    return NULL;
+
+  /* Now transform the val into a form expected in *result,
+   * based on the type given in the val.
+   */
+  if (! __bro_val_get_data(val, &type_found, &result))
+    return NULL;
+
+  if (type)
+    {
+    if (*type != BRO_TYPE_UNKNOWN && type_found != *type)
+      {
+      D(("Type mismatch: expected type tag %i, found type tag %i\n", *type,
+         type_found));
+      result = NULL;
+      }
+
+    *type = type_found;
+    }
+
+  return result;
+}
+
+int
+bro_vector_set_nth_val(BroVector *vec, int num,
+				       int type, const char *type_name,
+				       const void *val)
+{
+  BroVal *v;
+
+  D_ENTER;
+
+  if (! vec || num < 0 || num >= vec->length ||
+      type < 0 || type >= BRO_TYPE_MAX || ! val)
+    {
+    D(("Input error: (%p, %i, %i, %p)\n", vec, num, type, val));
+    D_RETURN_(FALSE);
+    }
+
+  if (! (v = __bro_vector_get_nth_val(vec, num)))
+    D_RETURN_(FALSE);
+
+  if (! (v = __bro_val_new_of_type(type, type_name)))
+    {
+    D(("Could not get val of type %i\n", type));
+    D_RETURN_(FALSE);
+    }
+
+  if (! __bro_val_assign(v, val))
+    {
+    D(("Could not assign value to the new val.\n"));
+    __bro_sobject_release((BroSObject *) v);
+    D_RETURN_(FALSE);
+    }
+
+  __bro_vector_set_nth_val(vec, num, v);
+  D_RETURN_(TRUE);
+}
+
 
 /* ----------------------- Pcap Packet Handling ---------------------- */
 #ifdef BRO_PCAP_SUPPORT

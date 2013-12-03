@@ -116,6 +116,12 @@ struct bro_table_val
   BroTable                    *table;
 };
 
+struct bro_vector_val
+{
+	BroMutableVal             mutable;
+
+	BroVector                 *vec;
+};
 
 BroVal          *__bro_val_new(void);
 BroVal          *__bro_val_new_of_type(int type, const char *type_name);
@@ -147,5 +153,7 @@ BroRecordVal    *__bro_record_val_new(void);
 
 BroTableVal     *__bro_table_val_new(void);
 int              __bro_table_val_has_atomic_key(BroTableVal *tv);
+
+BroVectorVal    *__bro_vector_val_new(void);
 
 #endif

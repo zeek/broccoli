@@ -1,4 +1,11 @@
 
+1.95-3 | 2013-12-03 10:53:34 -0800
+
+  * Add support for consuming events w/ vector args. (Jon Siwek)
+
+    Producing events w/ vector args is still unsupported, and bindings
+    are still missing support as well.
+
 1.95 | 2013-11-06 00:23:50 -0800
 
   * Don't build ruby bindings by default, use --enable-ruby to do so.

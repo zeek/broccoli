@@ -190,7 +190,6 @@ __bro_type_new_of_type(int type_tag, const char *type_name)
     case BRO_TYPE_LIST:
     case BRO_TYPE_FUNC:
     case BRO_TYPE_FILE:
-    case BRO_TYPE_VECTOR:
       internal_tag = BRO_INTTYPE_OTHER;
       break;
 
@@ -211,6 +210,13 @@ __bro_type_new_of_type(int type_tag, const char *type_name)
     case BRO_TYPE_SET:
       if (! (type = (BroType *) __bro_set_type_new()))
 	D_RETURN_(NULL);
+
+      internal_tag = BRO_INTTYPE_OTHER;
+      break;
+
+    case BRO_TYPE_VECTOR:
+      if (! (type = (BroType *) __bro_vector_type_new()))
+        D_RETURN_(NULL);
 
       internal_tag = BRO_INTTYPE_OTHER;
       break;
