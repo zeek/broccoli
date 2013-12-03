@@ -46,6 +46,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <bro_val.h>
 #include <bro_record.h>
 #include <bro_table.h>
+#include <bro_vector.h>
 #include <bro_util.h>
 
 /* The virtual implementations of BroSObject's functions are
@@ -95,6 +96,15 @@ static int              __bro_table_val_clone(BroTableVal *dst, BroTableVal *src
 static uint32           __bro_table_val_hash(BroTableVal *tv);
 static int              __bro_table_val_cmp(BroTableVal *tv1, BroTableVal *tv2);
 static void            *__bro_table_val_get(BroTableVal *tv);
+
+static void             __bro_vector_val_init(BroVectorVal *tv);
+static void             __bro_vector_val_free(BroVectorVal *tv);
+static int              __bro_vector_val_read(BroVectorVal *tv, BroConn *bc);
+static int              __bro_vector_val_write(BroVectorVal *tv, BroConn *bc);
+static int              __bro_vector_val_clone(BroVectorVal *dst, BroVectorVal *src);
+static uint32           __bro_vector_val_hash(BroVectorVal *tv);
+static int              __bro_vector_val_cmp(BroVectorVal *tv1, BroVectorVal *tv2);
+static void            *__bro_vector_val_get(BroVectorVal *tv);
 
 BroVal *
 __bro_val_new(void)
@@ -152,13 +162,17 @@ __bro_val_new_of_type(int type, const char *type_name)
 	D_RETURN_(NULL);
       break;
 
+    case BRO_TYPE_VECTOR:
+      if ( ! (val = (BroVal *) __bro_vector_val_new()) )
+        D_RETURN_(NULL);
+      break;
+
     case BRO_TYPE_PATTERN:
     case BRO_TYPE_ANY:
     case BRO_TYPE_UNION:
     case BRO_TYPE_LIST:
     case BRO_TYPE_FUNC:
     case BRO_TYPE_FILE:
-    case BRO_TYPE_VECTOR:
     case BRO_TYPE_ERROR:
     default:
       D(("Unsupported value type %i\n", type));
@@ -309,6 +323,19 @@ __bro_val_assign(BroVal *val, const void *data)
       }
       break;
 
+    case BRO_TYPE_VECTOR:
+      {
+      BroVectorVal* vv = (BroVectorVal*) val;
+      BroVector* vec = (BroVector*) data;
+
+      if ( vv->vec )
+        __bro_vector_free(vv->vec);
+
+      vv->vec = __bro_vector_copy(vec);
+      /* XXX need to create the appropriate content in (BroVectorType*) val->val_type! */
+      break;
+      }
+
     case BRO_TYPE_PATTERN:
     case BRO_TYPE_TIMER:
     case BRO_TYPE_ANY:
@@ -316,7 +343,6 @@ __bro_val_assign(BroVal *val, const void *data)
     case BRO_TYPE_LIST:
     case BRO_TYPE_FUNC:
     case BRO_TYPE_FILE:
-    case BRO_TYPE_VECTOR:
     case BRO_TYPE_ERROR:
       D(("Type %i currently unsupported.\n", val->val_type->tag));
       D_RETURN_(FALSE);
@@ -640,6 +666,10 @@ __bro_val_write(BroVal *val, BroConn *bc)
 
     case BRO_TYPE_RECORD:
       obj->type_id = SER_RECORD_VAL;
+      break;
+
+    case BRO_TYPE_VECTOR:
+      obj->type_id = SER_VECTOR_VAL;
       break;
 
     default:
@@ -1926,4 +1956,200 @@ __bro_table_val_has_atomic_key(BroTableVal *tbl)
     return FALSE;
 
   return ((BroIndexType *) tbl->table_type)->indices->num_types == 1;
+}
+
+BroVectorVal *
+__bro_vector_val_new(void)
+{
+  BroVectorVal *val;
+
+  D_ENTER;
+
+  if ( ! (val = calloc(1, sizeof(BroVectorVal))) )
+    D_RETURN_(NULL);
+
+  __bro_vector_val_init(val);
+
+  D_RETURN_(val);
+}
+
+static void
+__bro_vector_val_init(BroVectorVal *vv)
+{
+  BroSObject *sobj = (BroSObject*) vv;
+  BroVal* val = (BroVal*) vv;
+
+  D_ENTER;
+
+  __bro_mutable_val_init((BroMutableVal*) vv);
+
+  sobj->read  = (BroSObjectRead) __bro_vector_val_read;
+  sobj->write = (BroSObjectWrite) __bro_vector_val_write;
+  sobj->free  = (BroSObjectFree) __bro_vector_val_free;
+  sobj->clone = (BroSObjectClone) __bro_vector_val_clone;
+  sobj->hash  = (BroSObjectHash) __bro_vector_val_hash;
+  sobj->cmp   = (BroSObjectCmp) __bro_vector_val_cmp;
+
+  sobj->type_id = SER_VECTOR_VAL;
+
+  val->get_data = (BroValAccessor) __bro_vector_val_get;
+
+  D_RETURN;
+}
+
+static void
+__bro_vector_val_free(BroVectorVal *vv)
+{
+  D_ENTER;
+
+  if ( ! vv )
+    D_RETURN;
+
+  __bro_vector_free(vv->vec);
+  __bro_mutable_val_free((BroMutableVal*) vv);
+
+  D_RETURN;
+}
+
+static int
+__bro_vector_val_read(BroVectorVal *vv, BroConn *bc)
+{
+  char opt;
+  uint32 i, len;
+  BroVal *val;
+
+  D_ENTER;
+
+  if ( ! __bro_mutable_val_read((BroMutableVal*) vv, bc) )
+    D_RETURN_(FALSE);
+
+  __bro_vector_free(vv->vec);
+
+  if ( ! (vv->vec = __bro_vector_new()) )
+    D_RETURN_(FALSE);
+
+  if ( ! __bro_buf_read_int(bc->rx_buf, &len) )
+    goto error_return;
+
+  for ( i = 0; i < len; i++ )
+    {
+    D(("Reading val %i/%i into vector %p of val %p\n", i+1, len, vv->vec, vv));
+
+    if ( ! __bro_buf_read_char(bc->rx_buf, &opt) )
+      goto error_return;
+
+    if ( opt )
+      {
+      if ( ! (val = (BroVal*) __bro_sobject_unserialize(SER_IS_VAL, bc)) )
+        {
+        D(("WARNING -- unserializing vector element failed.\n"));
+        goto error_return;
+        }
+      }
+    else
+      {
+      D(("WARNING -- unassigned val.\n"));
+
+      if ( ! (val = __bro_val_new()) )
+        goto error_return;
+      }
+
+    if ( ! __bro_vector_add_val(vv->vec, val) )
+      {
+      D(("WARNING -- failed to append element %i", i+1));
+      goto error_return;
+      }
+    }
+
+  D_RETURN_(TRUE);
+
+error_return:
+  __bro_vector_free(vv->vec);
+  vv->vec = NULL;
+  D_RETURN_(FALSE);
+}
+
+static int
+__bro_vector_val_write(BroVectorVal *vv, BroConn *bc)
+{
+  BroVal *val;
+  int i;
+
+  D_ENTER;
+
+  if ( ! vv->vec )
+    D_RETURN_(FALSE);
+
+  if (! __bro_mutable_val_write((BroMutableVal *) vv, bc))
+    D_RETURN_(FALSE);
+
+  if (! __bro_buf_write_int(bc->tx_buf, vv->vec->length))
+    D_RETURN_(FALSE);
+
+  D(("Writing out %i vals in vector %p.\n", vv->vec->length, vv->vec));
+
+  for ( i = 0; i < vv->vec->length; ++i )
+    {
+    val = vv->vec->vector[i];
+
+    D(("Val %i/%p's type: %p\n", i, val, val->val_type));
+
+    if ( ! __bro_buf_write_char(bc->tx_buf, (val->val_type ? 1 : 0)) )
+      D_RETURN_(FALSE);
+
+    if ( val->val_type )
+      if ( ! __bro_sobject_serialize((BroSObject*) val, bc) )
+        D_RETURN_(FALSE);
+    }
+
+  D_RETURN_(TRUE);
+}
+
+static int
+__bro_vector_val_clone(BroVectorVal *dst, BroVectorVal *src)
+{
+  D_ENTER;
+
+  if (! __bro_mutable_val_clone((BroMutableVal *) dst, (BroMutableVal *) src))
+    D_RETURN_(FALSE);
+
+  if ( src->vec && ! (dst->vec = __bro_vector_copy(src->vec)) )
+    D_RETURN_(FALSE);
+
+  D_RETURN_(TRUE);
+}
+
+static uint32
+__bro_vector_val_hash(BroVectorVal *vv)
+{
+  uint32 result;
+
+  D_ENTER;
+
+  if ( ! vv )
+    D_RETURN_(0);
+
+  result = __bro_vector_hash(vv->vec);
+
+  D_RETURN_(result);
+}
+
+static int
+__bro_vector_val_cmp(BroVectorVal *vv1, BroVectorVal *vv2)
+{
+  D_ENTER;
+
+  if ( ! vv1 || ! vv2 )
+    D_RETURN_(FALSE);
+
+  if ( ! __bro_vector_cmp(vv1->vec, vv2->vec) )
+    D_RETURN_(FALSE);
+
+  D_RETURN_(TRUE);
+}
+
+static void
+*__bro_vector_val_get(BroVectorVal *vv)
+{
+  return vv->vec;
 }

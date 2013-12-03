@@ -136,6 +136,7 @@ typedef struct bro_buf BroBuf;
 typedef struct bro_record BroRecord;
 typedef struct bro_table BroTable;
 typedef struct bro_table BroSet;
+typedef struct bro_vector BroVector;
 typedef struct bro_ev_meta BroEvMeta;
 typedef struct bro_packet BroPacket;
 
@@ -1361,7 +1362,104 @@ void           bro_set_foreach(BroSet *set, BroSetCallback cb,
 
 void           bro_set_get_type(BroSet *set, int *type);
 
-	
+/* ----------------------------- Vectors ----------------------------- */
+
+/**
+ * bro_vector_new - Creates a new vector.
+ *
+ * The function allocates and initializes a new empty vector.
+ *
+ * @returns a new vector, or %NULL on error.
+ */
+BroVector     *bro_vector_new(void);
+
+/**
+ * bro_vector_free - Releases a vector.
+ * @param vec vector handle.
+ *
+ * The function releases all memory consumed by the vector pointed to
+ * by @p vec.
+ */
+void           bro_vector_free(BroVector *vec);
+
+/**
+ * bro_vector_get_length - Returns number of elements in vector.
+ * @param vec vector handle.
+ *
+ * @returns the number of elements in the vector.
+ */
+int            bro_vector_get_length(BroVector *vec);
+
+/**
+ * bro_vector_add_val - Adds a value to a vector.
+ * @param vec vector handle.
+ * @param type numerical type tag of the new val.
+ * @param type_name optional name of specialized type.
+ * @param val pointer to the new val.
+ *
+ * The function adds a new element to the vector pointed to by @p vec and
+ * assigns the value passed in to that field. The type of the value is given
+ * in @p type and must be one of
+ * the %BRO_TYPE_xxx constants defined in broccoli.h. The type you give
+ * implies what data type @p val must be pointing to; see the manual for
+ * details. If you want to indicate a type specialized from @p type,
+ * use @p type_name to give its name, otherwise pass %NULL for @p type_name.
+ * It is possible to leave fields unassigned, in that case, pass in
+ * %NULL for @p val.
+ *
+ * @p val remains the caller's responsibility and is copied internally.
+ *
+ * @returns %TRUE on success, %FALSE on error.
+ */
+int            bro_vector_add_val(BroVector *vec,
+				  int type, const char *type_name,
+				  const void *val);
+
+/**
+ * bro_vector_get_nth_val - Retrieves a value from a vector by index.
+ * @param vec vector handle.
+ * @param num index, starting from 0.
+ * @param type value-result argument for the expected/actual type of the value.
+ *
+ * The function returns the @p num'th value of the vector pointed to
+ * by @p vec, expected to be of @p type. The returned value is internal
+ * and needs to be duplicated if you want to keep it around. Upon
+ * return, the int pointed to by @p type tells you the type of the returned
+ * value, as a BRO_TYPE_xxx type tag. If the int pointed to upon calling
+ * the function has the value BRO_TYPE_UNKNOWN, no type checking is
+ * performed and the value is returned. If it is any other type tag,
+ * its value is compared to that of the value, and if they match, the
+ * value is returned. Otherwise, the return value is %NULL. If you don't
+ * care about type enforcement and don't want to know the value's type,
+ * you may pass %NULL for @p type.
+ *
+ * @returns pointer to queried value on success, %NULL on error.
+ */
+void*          bro_vector_get_nth_val(BroVector *vec, int num, int *type);
+
+
+/**
+ * bro_vector_set_nth_val - Replaces a value in a vector, identified by index.
+ * @param vec vector handle.
+ * @param num index, starting from 0.
+ * @param type expected type of the value.
+ * @param type_name optional name of specialized type.
+ * @param val pointer to new val.
+ *
+ * The function replaces the @p num'th value of the vector pointed to
+ * by @p vec, expected to be of @p type. All values are copied internally
+ * so what @p val points to stays unmodified. The value of @p type implies
+ * what @p result must be pointing to. See the manual for details.
+ * If you want to indicate a type specialized from @p type, use
+ * @p type_name to give its name, otherwise pass %NULL for @p type_name.
+ *
+ * @returns %TRUE on success, %FALSE on error.
+ */
+int            bro_vector_set_nth_val(BroVector *vec, int num,
+				      int type, const char *type_name,
+				      const void *val);
+
+
 /* ----------------------- Pcap Packet Handling ---------------------- */
 #ifdef BRO_PCAP_SUPPORT
 

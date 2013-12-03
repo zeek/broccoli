@@ -135,7 +135,7 @@ const char      *__bro_record_type_get_nth_field(BroRecordType *rt, int num);
 
 BroIndexType    *__bro_index_type_new(void);
 void             __bro_index_type_set_indices(BroIndexType *it, BroTypeList *indices);
-void             __bro_index_tye_set_yield_type(BroIndexType *it, BroType *yield_type);
+void             __bro_index_type_set_yield_type(BroIndexType *it, BroType *yield_type);
 
 BroTableType    *__bro_table_type_new(void);
 

@@ -130,6 +130,7 @@ typedef struct bro_list_val BroListVal;
 typedef struct bro_mutable_val BroMutableVal;
 typedef struct bro_record_val BroRecordVal;
 typedef struct bro_table_val BroTableVal;
+typedef struct bro_vector_val BroVectorVal;
 
 typedef struct bro_msg_header BroMsgHeader;
 typedef struct bro_msg BroMsg;
