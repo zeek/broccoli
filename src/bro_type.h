@@ -52,7 +52,6 @@ struct bro_type
 
   char             is_nbo;
   char             is_base_type;
-  char             is_global_attrs_type;
   
   /* Whether or not this is a complete type object or
    * just the name of type. In the latter case, type_name
@@ -61,8 +60,6 @@ struct bro_type
   char             is_complete;
 
   BroString        type_name;
-
-  BroRecordType   *attrs_type;
 };
 
 struct bro_type_list

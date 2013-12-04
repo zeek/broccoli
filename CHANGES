@@ -1,4 +1,10 @@
 
+1.95-10 | 2013-12-04 09:34:59 -0800
+
+  * Update type serialization format/process to align with Bro's
+    changes to preserve type name info and remove old compatibility
+    stuff. (Jon Siwek)
+
 1.95-3 | 2013-12-03 10:53:34 -0800
 
   * Add support for consuming events w/ vector args. (Jon Siwek)
