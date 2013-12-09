@@ -1,4 +1,10 @@
 
+1.95-13 | 2013-12-09 13:23:48 -0800
+
+  * Remove unused code in bro_vector_set_nth_val(). (Jon Siwek)
+    
+  * Fix memory leaks in relation to freeing BroVectors. (Jon Siwek)
+    
 1.95-10 | 2013-12-04 09:34:59 -0800
 
   * Update type serialization format/process to align with Bro's

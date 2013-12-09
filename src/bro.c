@@ -2015,9 +2015,6 @@ bro_vector_set_nth_val(BroVector *vec, int num,
     D_RETURN_(FALSE);
     }
 
-  if (! (v = __bro_vector_get_nth_val(vec, num)))
-    D_RETURN_(FALSE);
-
   if (! (v = __bro_val_new_of_type(type, type_name)))
     {
     D(("Could not get val of type %i\n", type));

@@ -69,6 +69,7 @@ __bro_vector_free(BroVector *vec)
 		__bro_sobject_release((BroSObject*) vec->vector[i]);
 
 	free(vec->vector);
+	free(vec);
 	}
 
 
