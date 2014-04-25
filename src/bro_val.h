@@ -51,8 +51,6 @@ struct bro_val
    */
   BroType                     *val_type;
 
-  BroRecordVal                *val_attrs;
-
   union {
     char                       char_val;
     uint32                     int_val;

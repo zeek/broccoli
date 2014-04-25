@@ -444,7 +444,6 @@ __bro_val_get_data(BroVal *val, int *type, void **data)
 static int
 __bro_val_read(BroVal *val, BroConn *bc)
 {
-  char opt;
   uint32 tmp;
   int i;
 
@@ -469,22 +468,6 @@ __bro_val_read(BroVal *val, BroConn *bc)
 
   D(("Type in val has type tags %i/%i\n",
      val->val_type->tag, val->val_type->internal_tag));
-
-  /* Read optional Attributes */
-
-  if (val->val_attrs)
-    {
-      __bro_sobject_release((BroSObject *) val->val_attrs);
-      val->val_attrs = NULL;
-    }
-
-  if (! __bro_buf_read_char(bc->rx_buf, &opt))
-    D_RETURN_(FALSE);
-  if (opt)
-    {
-      if (! (val->val_attrs = (BroRecordVal *) __bro_sobject_unserialize(SER_RECORD_VAL, bc)))
-	D_RETURN_(FALSE);
-    }
 
   switch (val->val_type->internal_tag)
     {
@@ -683,12 +666,6 @@ __bro_val_write(BroVal *val, BroConn *bc)
   if (! __bro_sobject_serialize((BroSObject *) val->val_type, bc))
     D_RETURN_(FALSE);
 
-  if (! __bro_buf_write_char(bc->tx_buf, val->val_attrs ? 1 : 0))
-    D_RETURN_(FALSE);
-
-  if (val->val_attrs && ! __bro_sobject_serialize((BroSObject *) val->val_attrs, bc))
-    D_RETURN_(FALSE);
-
   switch (val->val_type->internal_tag)
     {
     case BRO_INTTYPE_INT:
@@ -788,13 +765,6 @@ __bro_val_clone(BroVal *dst, BroVal *src)
       ! (dst->val_type = (BroType *) __bro_sobject_copy((BroSObject *) src->val_type)))
     {
       D(("Cloning type failed.\n"));
-      D_RETURN_(FALSE);
-    }
-
-  if (src->val_attrs &&
-      ! (dst->val_attrs = (BroRecordVal *) __bro_sobject_copy((BroSObject *) src->val_attrs)))
-    {
-      D(("Cloning attributes failed.\n"));
       D_RETURN_(FALSE);
     }
 
