@@ -1,4 +1,8 @@
 
+1.96 | 2014-05-19 16:17:14 -0500
+
+  * Remove code corresponding w/ Bro's unused Val::attribs. (Jon Siwek)
+
 1.95-13 | 2013-12-09 13:23:48 -0800
 
   * Remove unused code in bro_vector_set_nth_val(). (Jon Siwek)
