@@ -1648,6 +1648,7 @@ __bro_table_val_free(BroTableVal *tbl)
     D_RETURN;
 
   __bro_table_free(tbl->table);
+  __bro_attrs_free(tbl->attrs);
   __bro_mutable_val_free((BroMutableVal *) tbl);
 
   D_RETURN;
