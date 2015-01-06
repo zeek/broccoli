@@ -80,12 +80,11 @@ if (ENABLE_SHARED)
     set_target_properties(broccoli PROPERTIES
                       VERSION ${SOVersion}.${SOVersionMinor}.${SOVersionRelease}
                       SOVERSION ${SOVersion})
-    if (APPLE)
-        # Mac OS X needs the directory portion of the install_name
-        # shared lib field
-        set_target_properties(broccoli PROPERTIES
-                              INSTALL_NAME_DIR ${INSTALL_LIB_DIR})
-    endif ()
+    # When CMake 2.8.12+ is required, can stop setting INSTALL_NAME_DIR.
+    # It's just there for older versions that don't know about
+    # MACOSX_RPATH.
+    set_target_properties(broccoli PROPERTIES INSTALL_NAME_DIR "@rpath")
+    set_target_properties(broccoli PROPERTIES MACOSX_RPATH true)
     # BIND library is not necessary, but linked when a parent project
     # uses it (for consistency and also to avoid missing inet_* symbols
     # that can result from mismatching headers/libraries)
