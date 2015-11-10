@@ -302,7 +302,7 @@ __bro_openssl_init(void)
    * to set up an SSL connection now and abort if this fails in any way.
    */
 
-  if (! (ctx = SSL_CTX_new(SSLv3_method())))
+  if (! (ctx = SSL_CTX_new(SSLv23_method())))
     D_RETURN_(FALSE);
   
   /* We expect things to be stored in PEM format, which means that we
