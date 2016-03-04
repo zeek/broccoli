@@ -1,4 +1,11 @@
 
+1.97-9 | 2016-03-04 12:37:43 -0800
+
+  * Update for new CMake OpenSSL script (Johanna Amann)
+
+  * Add README.rst -> README symlink. Addresses BIT-1413 (Johanna
+    Amann)
+
 1.97-3 | 2015-11-10 13:31:13 -0800
 
   * Fix to compile with OpenSSL that has SSLv3 disalbed. (Christoph

@@ -88,7 +88,7 @@ if (ENABLE_SHARED)
     # BIND library is not necessary, but linked when a parent project
     # uses it (for consistency and also to avoid missing inet_* symbols
     # that can result from mismatching headers/libraries)
-    target_link_libraries(broccoli ${OpenSSL_LIBRARIES} ${BIND_LIBRARY}
+    target_link_libraries(broccoli ${OPENSSL_LIBRARIES} ${BIND_LIBRARY}
                           ${BRO_LIBADD})
     install(TARGETS broccoli DESTINATION ${INSTALL_LIB_DIR})
 endif ()
@@ -103,7 +103,7 @@ if (ENABLE_STATIC)
     # BIND library is not necessary, but linked when a parent project
     # uses it (for consistency and also to avoid missing inet_* symbols
     # that can result from mismatching headers/libraries)
-    target_link_libraries(broccoliStatic ${OpenSSL_LIBRARIES} ${BIND_LIBRARY}
+    target_link_libraries(broccoliStatic ${OPENSSL_LIBRARIES} ${BIND_LIBRARY}
                           ${BRO_LIBADD})
     install(TARGETS broccoliStatic DESTINATION ${INSTALL_LIB_DIR})
 endif ()
