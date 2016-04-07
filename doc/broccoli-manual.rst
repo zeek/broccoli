@@ -186,7 +186,6 @@ The Broccoli API
 
 Time for some code. In the code snippets below we will introduce variables
 whenever context requires them and not necessarily when C requires them.
-The library does not require calling a global initialization function.
 In order to make the API known, include ``broccoli.h``:
 
 .. code:: c
@@ -259,7 +258,7 @@ follows:
   .. code:: c
 
      typedef struct bro_port {
-         uint16       port_num;   /* port number in host byte order */
+         uint64       port_num;   /* port number in host byte order */
          int          port_proto; /* IPPROTO_xxx */
      } BroPort;
 
@@ -270,8 +269,8 @@ follows:
   .. code:: c
 
      typedef struct bro_string {
-         int          str_len;
-         char         str_val;
+         uint32       str_len;
+         uchar       *str_val;
      } BroString;
 
 - BroStrings are mostly kept transparent for convenience; please have a
@@ -385,8 +384,8 @@ connection using ``bro_conn_get_fd()``:
 
 .. code:: c
 
-    char host_str = "bro.yourorganization.com";
-    int port      = 1234;
+    char host_str[] = "bro.yourorganization.com";
+    int port        = 1234;
     struct hostent *host;
     BroConn *bc;
 
@@ -424,8 +423,8 @@ Or simply use the string-based version:
 
 .. code:: c
 
-    char host_str = "bro.yourcompany.com:1234";
-    BroConn bc;
+    char host_str[] = "bro.yourcompany.com:1234";
+    BroConn *bc;
 
     /* In this example we don't request any events from the peer,
        but we ask it not to use the serialization cache. */
@@ -571,8 +570,8 @@ Knowing these, we can now compose a ``request_connections`` event:
     bro_event_add_val(ev, BRO_TYPE_STRING, NULL, &dest_host);
     bro_string_cleanup(&dest_host);
 
-    dest_port.dst_port = 80;
-    dest_port.dst_proto = IPPROTO_TCP;
+    dest_port.port_num = 80;
+    dest_port.port_proto = IPPROTO_TCP;
     bro_event_add_val(ev, BRO_TYPE_PORT, NULL, &dest_port);
 
     min_size = 1000; bro_event_add_val(ev, BRO_TYPE_COUNT, NULL, &min_size);
@@ -583,7 +582,7 @@ necessary except for one situation: when using ``BRO_TYPE_ENUM``. You
 currently cannot define a Bro-level enum type in Broccoli, and thus when
 sending an enum value, you have to specify the type of the enum along
 with the value. For example, in order to add an instance of enum
-``transport_type`` defined in Bro's ``bro.init``, you would use:
+``transport_proto`` defined in Bro's ``init-bare.bro``, you would use:
 
 .. code:: c
 
@@ -692,7 +691,7 @@ those look as follows:
     event remote_conn(req_id: int, conn: connection);
 
 The reply events contain the request ID so we can associate requests
-with replies, and a connection record (defined in ``bro.init`` in Bro).
+with replies, and a connection record (defined in ``init-bare.bro`` in Bro).
 (It'd be nicer to report all replies in a single event but we'll
 ignore that for now.) For this event, our callback would look like
 this:
@@ -721,7 +720,7 @@ This is designed for situations when you have to determine how to handle
 different types of events at runtime, for example when writing language
 bindings or when implementing generic event handlers for multiple event
 types.  The callback is passed a connection handle and the user data as
-above but is only passed one additional pointer, to a BroEvMeta
+above but is only passed one additional pointer, a BroEvMeta
 structure. This structure contains all metadata about the event,
 including its name, timestamp (in UTC) of creation, number of arguments,
 the arguments' types (via type tags as listed in Table-1_), and the
@@ -1160,7 +1159,7 @@ quickly enable/disable a certificate configuration, the
 
 In a Bro policy, you need to load the ``frameworks/communication/listen.bro``
 script and redef ``Communication::listen_ssl=T``,
-``ssl_ca_certificate``, and ``ssl_private_key``, defined in ``bro.init``:
+``ssl_ca_certificate``, and ``ssl_private_key``, defined in ``init-bare.bro``:
 
 .. code:: bro
 

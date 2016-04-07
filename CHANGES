@@ -1,4 +1,8 @@
 
+1.97-14 | 2016-04-07 13:31:52 -0700
+
+  * Fix some typos in the Broccoli user manual. (Daniel Thayer)
+
 1.97-9 | 2016-03-04 12:37:43 -0800
 
   * Update for new CMake OpenSSL script (Johanna Amann)
@@ -24,9 +28,9 @@
 1.95-13 | 2013-12-09 13:23:48 -0800
 
   * Remove unused code in bro_vector_set_nth_val(). (Jon Siwek)
-    
+
   * Fix memory leaks in relation to freeing BroVectors. (Jon Siwek)
-    
+
 1.95-10 | 2013-12-04 09:34:59 -0800
 
   * Update type serialization format/process to align with Bro's
@@ -52,7 +56,7 @@
 1.93-17 | 2013-10-15 11:19:19 -0700
 
   * Fix a minor memory leak recently introduced. (Jon Siwek)
-    
+
 1.93-15 | 2013-10-14 14:20:20 -0700
 
   * Fix misc. issues reported by Coverity (Return value checks,
@@ -63,7 +67,7 @@
     remove only the first element. (Jon Siwek)
 
   * Updating copyright notice. (Robin Sommer)
-    
+
 1.93-10 | 2013-10-02 10:38:27 -0700
 
   * Remove dead code. (Jon Siwek)
@@ -71,7 +75,7 @@
   * Fix mem leaks. (Jon Siwek)
 
   * Updated specfile and configure script for libdir.  (Derek Ditch)
-    
+
     Package maintainers and those that would otherwise compile from
     source were unable to specify the installation directory of
     architecture dependent libraries. Namely, many distributions use
@@ -85,7 +89,7 @@
     See https://github.com/bro/broccoli/pull/1
 
   * Added back config-file bits to CMakeLists.txt (Derek Ditch)
-    
+
   * Fix for setting REPO in Makefile. (Robin Sommer)
 
 1.93 | 2013-09-23 20:21:20 -0700
@@ -110,9 +114,9 @@
 1.92-7 | 2012-12-20 12:13:39 -0800
 
   * Sync up with attribute definitions in Bro. (Daniel Thayer)
-    
+
   * Rebuild only necessary files for new prefix. (Daniel Thayer)
-    
+
 1.92-4 | 2012-12-05 15:37:54 -0800
 
   * Improved error checking/reporting in case of out of memory
@@ -152,9 +156,9 @@
 1.8-21 | 2012-04-24 14:48:44 -0700
 
   * Add option to set 'etc' directory. Addresses #801. (Daniel Thayer)
-    
+
   * Change BroAddr to use standard IPv4 in IPv6 mapping. (Jon Siwek)
-    
+
     The size field is now removed and the bro_util_is_v4_addr()
     function can be used instead to check whether the BroAddr is IPv4
     or not. Addresses #800.
@@ -163,7 +167,7 @@
     Siwek)
 
   * Update IPv6 literal syntax in test scripts. (Jon Siwek)
-    
+
 
 1.8-8 | 2012-03-09 15:13:14 -0800
 
@@ -171,14 +175,14 @@
     expression. (Jon Siwek)
 
   * Adding missing include needed on FreeBSD. (Robin Sommer)
-    
+
   * Update Broccoli library to handle IPv6 addrs/subnets. Addresses
     #448. Addresses now use a new BroAddr struct to hold the address
     data and BroSubnet changed to use a BroAddr member instead of a
     single uint32 to represent the address. (Jon Siwek)
 
   * Raise minimum required CMake version to 2.6.3. (Jon Siwek)
-    
+
 1.8 | 2012-01-10 19:33:08 -0800
 
   * Tweaks for OpenBSD support. (Jon Siwek)
@@ -197,7 +201,7 @@
   * Broccoli now identifies itself as such when connecting to a peer.
     This allows Bro to adapt its serialization format based on what's
     supported by Broccoli. Adresses #606. (Christian Kreibich)
-    
+
 1.71-11 | 2011-11-07 05:44:16 -0800
 
   * Fixing compiler warnings. Addresses #388. (Jon Siwek)
