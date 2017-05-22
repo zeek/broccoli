@@ -45,13 +45,13 @@ void bro_subnet_cb(BroConn* bc, void* user_data, BroSubnet* s)
 static void usage()
 	{
 	printf("broccoli-v6addrs - send/recv events w/ IPv6 address args to Bro.\n"
-			"USAGE: broccoli-v6addrs [-h|-?] [-4|-6] [-p port] host\n");
+			"USAGE: broccoli-v6addrs [-h|-?] [-4|-6] [-p port] [-r] host\n");
 	exit(0);
 	}
 
 int main(int argc, char** argv)
 	{
-	int opt, port, ipv4_host = 0, ipv6_host = 0;
+	int opt, port, ipv4_host = 0, ipv6_host = 0, retry = 0;
 	extern char* optarg;
 	extern int optind;
 	BroConn* bc;
@@ -61,7 +61,7 @@ int main(int argc, char** argv)
 	struct in_addr in4;
 	struct in6_addr in6;
 
-	while ( (opt = getopt(argc, argv, "?h46p:")) != -1 )
+	while ( (opt = getopt(argc, argv, "?h46p:r")) != -1 )
 		{
 		switch ( opt ) {
 		case '4':
@@ -72,6 +72,9 @@ int main(int argc, char** argv)
 			break;
 		case 'p':
 			port_str = optarg;
+			break;
+		case 'r':
+			retry = 1;
 			break;
 		case 'h':
 		case '?':
@@ -132,10 +135,14 @@ int main(int argc, char** argv)
 	bro_event_registry_add(bc, "bro_addr", (BroEventFunc)bro_addr_cb, 0);
 	bro_event_registry_add(bc, "bro_subnet", (BroEventFunc)bro_subnet_cb, 0);
 
-	if ( ! bro_conn_connect(bc) )
+	while ( ! bro_conn_connect(bc) )
 		{
-		fprintf(stderr, "failed to connect to %s\n", hostname);
-		return 1;
+		if ( ! retry )
+			{
+			fprintf(stderr, "failed to connect to %s\n", hostname);
+			return 1;
+			}
+		sleep(1);
 		}
 
 	printf("Connected to Bro instance at: %s\n", hostname);
