@@ -29,6 +29,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <sys/time.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <time.h>
 #include <errno.h>
 #include <string.h>
@@ -52,9 +53,10 @@ static void
 usage(void)
 {
   printf("broping - sends ping events to a Bro agent, expecting pong events.\n"
-	 "USAGE: broping [-h|-?] [-d] [-l] [-r] [-C] [-c num] [-p port] host\n"
+	 "USAGE: broping [-h|-?] [-d] [-l] [-R] [-r] [-C] [-c num] [-p port] host\n"
 	 "   -h|-?       This message.\n"
 	 "   -d          Enable debugging (only useful if configured with --enable-debug).\n"
+	 "   -R          Retry connecting to Bro until connection established.\n"
 	 "   -r          Use record types to transfer data.\n"
 	 "   -C          Use compact callback argument passing.\n"
 	 "   -c <num>    Number of events to send.\n"
@@ -271,6 +273,7 @@ int
 main(int argc, char **argv)
 {
   int opt, port, use_record = 0, use_compact = 0, debugging = 0, listen = 0;
+  int retry = 0;
   BroConn *bc;
   extern char *optarg;
   extern int optind;
@@ -285,7 +288,7 @@ main(int argc, char **argv)
   bro_debug_calltrace = 0;
   bro_debug_messages  = 0;
 
-  while ( (opt = getopt(argc, argv, "Cc:p:dh?lr")) != -1)
+  while ( (opt = getopt(argc, argv, "Cc:p:dh?lRr")) != -1)
     {
       switch (opt)
 	{
@@ -326,6 +329,10 @@ main(int argc, char **argv)
 
 	case 'C':
 	  use_compact = 1;
+	  break;
+
+	case 'R':
+	  retry = 1;
 	  break;
 
 	default:
@@ -391,10 +398,14 @@ main(int argc, char **argv)
 	bro_event_registry_add(bc, "pong", (BroEventFunc) bro_pong, NULL);
     }
   
-  if (! bro_conn_connect(bc))
+  while (! bro_conn_connect(bc))
     {
-      fprintf(stderr, "Could not connect to Bro at %s:%s.\n", host_str, port_str);
-      exit(-1);
+      if (! retry)
+        {
+          fprintf(stderr, "Could not connect to Bro at %s:%s.\n", host_str, port_str);
+          exit(-1);
+        }
+      sleep(1);
     }
   
   /* Enter pinging loop */
