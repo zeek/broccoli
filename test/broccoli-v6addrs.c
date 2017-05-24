@@ -45,7 +45,7 @@ void bro_subnet_cb(BroConn* bc, void* user_data, BroSubnet* s)
 static void usage()
 	{
 	printf("broccoli-v6addrs - send/recv events w/ IPv6 address args to Bro.\n"
-			"USAGE: broccoli-v6addrs [-h|-?] [-4|-6] [-p port] [-r] host\n");
+			"USAGE: broccoli-v6addrs [-h|-?] [-4|-6] [-p port] [-R] host\n");
 	exit(0);
 	}
 
@@ -61,7 +61,7 @@ int main(int argc, char** argv)
 	struct in_addr in4;
 	struct in6_addr in6;
 
-	while ( (opt = getopt(argc, argv, "?h46p:r")) != -1 )
+	while ( (opt = getopt(argc, argv, "?h46p:R")) != -1 )
 		{
 		switch ( opt ) {
 		case '4':
@@ -73,7 +73,7 @@ int main(int argc, char** argv)
 		case 'p':
 			port_str = optarg;
 			break;
-		case 'r':
+		case 'R':
 			retry = 1;
 			break;
 		case 'h':
