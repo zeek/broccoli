@@ -52,7 +52,7 @@ static void
 usage(void)
 {
   printf("broping - sends ping events to a Bro agent, expecting pong events.\n"
-	 "USAGE: broping [-h|-?] [-d] [-l] [-r] [-c num] [-p port] host\n"
+	 "USAGE: broping [-h|-?] [-d] [-l] [-r] [-C] [-c num] [-p port] host\n"
 	 "   -h|-?       This message.\n"
 	 "   -d          Enable debugging (only useful if configured with --enable-debug).\n"
 	 "   -r          Use record types to transfer data.\n"
@@ -213,14 +213,14 @@ start_listen(int port)
   fd = socket(PF_INET, SOCK_STREAM, 0);
   if ( fd < 0 )  
 	{
-	printf("can't create listen socket: %s\n", strerror(errno));
+	fprintf(stderr, "can't create listen socket: %s\n", strerror(errno));
 	exit(-1);
 	}
 
   // Set SO_REUSEADDR.
   if ( setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &turn_on, sizeof(turn_on)) < 0 )
 	{
-	printf("can't set SO_REUSEADDR: %s\n", strerror(errno));
+	fprintf(stderr, "can't set SO_REUSEADDR: %s\n", strerror(errno));
 	exit(-1);
 	}
 
@@ -231,13 +231,13 @@ start_listen(int port)
 
   if ( bind(fd, (struct sockaddr*) &server, sizeof(server)) < 0 )
 	{
-	printf("can't bind to port %d: %s\n", port, strerror(errno));
+	fprintf(stderr, "can't bind to port %d: %s\n", port, strerror(errno));
 	exit(-1);
 	}
 
   if ( listen(fd, 50) < 0 )
 	{
-	printf("can't listen: %s\n", strerror(errno));
+	fprintf(stderr, "can't listen: %s\n", strerror(errno));
 	exit(-1);
 	}
 
@@ -246,21 +246,21 @@ start_listen(int port)
 
   if ( select(fd + 1, &fds, &fds, &fds, 0) < 0 )
 	{
-	printf("can't select: %s\n", strerror(errno));
+	fprintf(stderr, "can't select: %s\n", strerror(errno));
 	exit(-1);
 	}
 	
   fd = accept(fd, (struct sockaddr*) &client, &len);
   if ( fd < 0 )
 	{
-	printf("can't accept: %s\n", strerror(errno));
+	fprintf(stderr, "can't accept: %s\n", strerror(errno));
 	exit(-1);
 	}
 
   bc = bro_conn_new_socket(fd, BRO_CFLAG_ALWAYS_QUEUE);
   if ( ! bc )
 	{
-	printf("can't create connection form fd\n");
+	fprintf(stderr, "can't create connection form fd\n");
 	exit(-1);
 	}
 
@@ -311,7 +311,7 @@ main(int argc, char **argv)
 	  count = strtol(optarg, NULL, 0);
 	  if (errno == ERANGE || count < 1)
 	    {
-	      printf("Please provide an integer to -c.\n");
+	      fprintf(stderr, "Please provide an integer to -c.\n");
 	      exit(-1);
 	    }
 	  break;
@@ -351,7 +351,7 @@ main(int argc, char **argv)
   port = strtol(port_str, NULL, 0);
   if (errno == ERANGE)
     {
-      printf("Please provide a port number with -p.\n");
+      fprintf(stderr, "Please provide a port number with -p.\n");
       exit(-1);
     }
 
@@ -364,7 +364,7 @@ main(int argc, char **argv)
   /* Connect to Bro */
   else if (! (bc = bro_conn_new_str(hostname, BRO_CFLAG_RECONNECT | BRO_CFLAG_ALWAYS_QUEUE)))
     {
-      printf("Could not get Bro connection handle.\n");
+      fprintf(stderr, "Could not get Bro connection handle.\n");
       exit(-1);
     }
   
@@ -393,7 +393,7 @@ main(int argc, char **argv)
   
   if (! bro_conn_connect(bc))
     {
-      printf("Could not connect to Bro at %s:%s.\n", host_str, port_str);
+      fprintf(stderr, "Could not connect to Bro at %s:%s.\n", host_str, port_str);
       exit(-1);
     }
   
