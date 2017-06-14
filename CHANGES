@@ -1,4 +1,11 @@
 
+1.100-6 | 2017-06-14 07:26:21 -0700
+
+  * Add "-R" option to broping, broccoli-vectors and broccoli-v6addrs
+    to avoid test failures. (Daniel Thayer)
+
+  * Change broping to output errors to stderr. (Daniel Thayer)
+
 1.100 | 2017-06-05 10:21:11 -0700
 
   * Release 1.100.

@@ -67,13 +67,13 @@ static void bro_vector_cb(BroConn* bc, void* user_data, BroVector* v)
 static void usage()
 	{
 	printf("broccoli-vectors - send/recv events w/ vector args to Bro.\n"
-			"USAGE: broccoli-vectors [-h|-?] [-d] [-p port] host\n");
+			"USAGE: broccoli-vectors [-h|-?] [-d] [-p port] [-R] host\n");
 	exit(0);
 	}
 
 int main(int argc, char** argv)
 	{
-	int opt, port;
+	int opt, port, retry = 0;
 	extern char* optarg;
 	extern int optind;
 	BroConn* bc;
@@ -84,7 +84,7 @@ int main(int argc, char** argv)
 	struct in6_addr in6;
 	bro_debug_messages = 0;
 
-	while ( (opt = getopt(argc, argv, "?hdp:")) != -1 )
+	while ( (opt = getopt(argc, argv, "?hdp:R")) != -1 )
 		{
 		switch ( opt ) {
 		case 'p':
@@ -92,6 +92,9 @@ int main(int argc, char** argv)
 			break;
 		case 'd':
 			bro_debug_messages = 1;
+			break;
+		case 'R':
+			retry = 1;
 			break;
 		case 'h':
 		case '?':
@@ -125,10 +128,14 @@ int main(int argc, char** argv)
 
 	bro_event_registry_add(bc, "bro_vector", (BroEventFunc)&bro_vector_cb, 0);
 
-	if ( ! bro_conn_connect(bc) )
+	while ( ! bro_conn_connect(bc) )
 		{
-		fprintf(stderr, "failed to connect to %s\n", hostname);
-		return 1;
+		if ( ! retry )
+			{
+			fprintf(stderr, "failed to connect to %s\n", hostname);
+			return 1;
+			}
+		sleep(1);
 		}
 
 	printf("Connected to Bro instance at: %s\n", hostname);

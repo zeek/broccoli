@@ -29,6 +29,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <sys/time.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <time.h>
 #include <errno.h>
 #include <string.h>
@@ -52,9 +53,10 @@ static void
 usage(void)
 {
   printf("broping - sends ping events to a Bro agent, expecting pong events.\n"
-	 "USAGE: broping [-h|-?] [-d] [-l] [-r] [-c num] [-p port] host\n"
+	 "USAGE: broping [-h|-?] [-d] [-l] [-R] [-r] [-C] [-c num] [-p port] host\n"
 	 "   -h|-?       This message.\n"
 	 "   -d          Enable debugging (only useful if configured with --enable-debug).\n"
+	 "   -R          Retry connecting to Bro until connection established.\n"
 	 "   -r          Use record types to transfer data.\n"
 	 "   -C          Use compact callback argument passing.\n"
 	 "   -c <num>    Number of events to send.\n"
@@ -100,7 +102,7 @@ bro_pong_record(BroConn *conn, void *data, BroRecord *rec)
     }
 
   type = BRO_TYPE_TIME;
-  
+
   if (! (dst_time = bro_record_get_nth_val(rec, 2, &type)))
     {
       printf("Error getting dst time from event, got type %i\n", type);
@@ -110,7 +112,7 @@ bro_pong_record(BroConn *conn, void *data, BroRecord *rec)
   printf("pong event from %s: seq=%"PRIu64", time=%f/%f s\n",
 	 host_str, *seq, *dst_time - *src_time,
 	 now - *src_time);
-  
+
   conn = NULL;
   data = NULL;
 }
@@ -121,7 +123,7 @@ bro_pong_compact(BroConn *conn, void *data, BroEvMeta *meta)
   double *src_time;
   double *dst_time;
   uint64 *seq;
-  
+
   /* Sanity-check arguments: */
 
   if (strcmp(meta->ev_name, "pong") != 0)
@@ -162,7 +164,7 @@ bro_pong_compact(BroConn *conn, void *data, BroEvMeta *meta)
   src_time = (double *) meta->ev_args[0].arg_data;
   dst_time = (double *) meta->ev_args[1].arg_data;
   seq = (uint64 *) meta->ev_args[2].arg_data;
-  
+
   bro_pong(conn, data, src_time, dst_time, seq);
 }
 
@@ -193,9 +195,9 @@ bro_pong_compact_record(BroConn *conn, void *data, BroEvMeta *meta)
 	     BRO_TYPE_RECORD, meta->ev_args[0].arg_type);
       return;
     }
-  
+
   rec = (BroRecord *) meta->ev_args[0].arg_data;
-  
+
   bro_pong_record(conn, data, rec);
 }
 
@@ -211,16 +213,16 @@ start_listen(int port)
   BroConn *bc = 0;
 
   fd = socket(PF_INET, SOCK_STREAM, 0);
-  if ( fd < 0 )  
+  if ( fd < 0 )
 	{
-	printf("can't create listen socket: %s\n", strerror(errno));
+	fprintf(stderr, "can't create listen socket: %s\n", strerror(errno));
 	exit(-1);
 	}
 
   // Set SO_REUSEADDR.
   if ( setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &turn_on, sizeof(turn_on)) < 0 )
 	{
-	printf("can't set SO_REUSEADDR: %s\n", strerror(errno));
+	fprintf(stderr, "can't set SO_REUSEADDR: %s\n", strerror(errno));
 	exit(-1);
 	}
 
@@ -231,13 +233,13 @@ start_listen(int port)
 
   if ( bind(fd, (struct sockaddr*) &server, sizeof(server)) < 0 )
 	{
-	printf("can't bind to port %d: %s\n", port, strerror(errno));
+	fprintf(stderr, "can't bind to port %d: %s\n", port, strerror(errno));
 	exit(-1);
 	}
 
   if ( listen(fd, 50) < 0 )
 	{
-	printf("can't listen: %s\n", strerror(errno));
+	fprintf(stderr, "can't listen: %s\n", strerror(errno));
 	exit(-1);
 	}
 
@@ -246,21 +248,21 @@ start_listen(int port)
 
   if ( select(fd + 1, &fds, &fds, &fds, 0) < 0 )
 	{
-	printf("can't select: %s\n", strerror(errno));
+	fprintf(stderr, "can't select: %s\n", strerror(errno));
 	exit(-1);
 	}
-	
+
   fd = accept(fd, (struct sockaddr*) &client, &len);
   if ( fd < 0 )
 	{
-	printf("can't accept: %s\n", strerror(errno));
+	fprintf(stderr, "can't accept: %s\n", strerror(errno));
 	exit(-1);
 	}
 
   bc = bro_conn_new_socket(fd, BRO_CFLAG_ALWAYS_QUEUE);
   if ( ! bc )
 	{
-	printf("can't create connection form fd\n");
+	fprintf(stderr, "can't create connection form fd\n");
 	exit(-1);
 	}
 
@@ -271,6 +273,7 @@ int
 main(int argc, char **argv)
 {
   int opt, port, use_record = 0, use_compact = 0, debugging = 0, listen = 0;
+  int retry = 0;
   BroConn *bc;
   extern char *optarg;
   extern int optind;
@@ -285,7 +288,7 @@ main(int argc, char **argv)
   bro_debug_calltrace = 0;
   bro_debug_messages  = 0;
 
-  while ( (opt = getopt(argc, argv, "Cc:p:dh?lr")) != -1)
+  while ( (opt = getopt(argc, argv, "Cc:p:dh?lRr")) != -1)
     {
       switch (opt)
 	{
@@ -294,11 +297,11 @@ main(int argc, char **argv)
 
 	  if (debugging == 1)
 	    bro_debug_messages = 1;
-	  
+
 	  if (debugging > 1)
 	    bro_debug_calltrace = 1;
 	  break;
-	
+
 	case 'l':
 	  listen = 1;
 	  break;
@@ -311,11 +314,11 @@ main(int argc, char **argv)
 	  count = strtol(optarg, NULL, 0);
 	  if (errno == ERANGE || count < 1)
 	    {
-	      printf("Please provide an integer to -c.\n");
+	      fprintf(stderr, "Please provide an integer to -c.\n");
 	      exit(-1);
 	    }
 	  break;
-	  
+
 	case 'p':
 	  port_str = optarg;
 	  break;
@@ -326,6 +329,10 @@ main(int argc, char **argv)
 
 	case 'C':
 	  use_compact = 1;
+	  break;
+
+	case 'R':
+	  retry = 1;
 	  break;
 
 	default:
@@ -351,7 +358,7 @@ main(int argc, char **argv)
   port = strtol(port_str, NULL, 0);
   if (errno == ERANGE)
     {
-      printf("Please provide a port number with -p.\n");
+      fprintf(stderr, "Please provide a port number with -p.\n");
       exit(-1);
     }
 
@@ -364,10 +371,10 @@ main(int argc, char **argv)
   /* Connect to Bro */
   else if (! (bc = bro_conn_new_str(hostname, BRO_CFLAG_RECONNECT | BRO_CFLAG_ALWAYS_QUEUE)))
     {
-      printf("Could not get Bro connection handle.\n");
+      fprintf(stderr, "Could not get Bro connection handle.\n");
       exit(-1);
     }
-  
+
   /* Request "pong" events, and have bro_pong called when they
    * arrive. The callback mechanism automatically figures out
    * the number of arguments and invokes the callback accordingly.
@@ -390,23 +397,27 @@ main(int argc, char **argv)
       else
 	bro_event_registry_add(bc, "pong", (BroEventFunc) bro_pong, NULL);
     }
-  
-  if (! bro_conn_connect(bc))
+
+  while (! bro_conn_connect(bc))
     {
-      printf("Could not connect to Bro at %s:%s.\n", host_str, port_str);
-      exit(-1);
+      if (! retry)
+        {
+          fprintf(stderr, "Could not connect to Bro at %s:%s.\n", host_str, port_str);
+          exit(-1);
+        }
+      sleep(1);
     }
-  
+
   /* Enter pinging loop */
   for ( ; ; )
     {
       BroEvent *ev;
-      
+
       bro_conn_process_input(bc);
 
       if (count > 0 && seq == count)
 	break;
-      
+
       /* Create empty "ping" event */
       if ( (ev = bro_event_new("ping")))
 	{
@@ -419,19 +430,19 @@ main(int argc, char **argv)
 	       * current time:
 	       */
 	      BroRecord *rec = bro_record_new();
-	      
+
 	      bro_record_add_val(rec, "seq", BRO_TYPE_COUNT, NULL, &seq);
 	      bro_record_add_val(rec, "src_time", BRO_TYPE_TIME, NULL, &timestamp);
-	      
+
 	      bro_event_add_val(ev, BRO_TYPE_RECORD, NULL, rec);
-	      
+
 	      bro_record_free(rec);
 	    }
 	  else
 	    {
 	      /* Add a timestamp to it: */
 	      bro_event_add_val(ev, BRO_TYPE_TIME, NULL, &timestamp);
-	      
+
 	      /* Add the sequence counter: */
 	      bro_event_add_val(ev, BRO_TYPE_COUNT, NULL, &seq);
 	    }
