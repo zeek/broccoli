@@ -1,4 +1,9 @@
 
+1.100-9 | 2017-11-17 15:21:59 -0800
+
+  * Removed hostname and date from captured build information to make
+    package reproducible. (Calvin Lin)
+
 1.100-6 | 2017-06-14 07:26:21 -0700
 
   * Add "-R" option to broping, broccoli-vectors and broccoli-v6addrs

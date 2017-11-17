@@ -22,7 +22,7 @@ if (UNIX)
 else ()
     set(builddate "build date not available")
 endif ()
-set(BUILDINFO "${hostname}, ${builddate}, Debugging support: ${ENABLE_DEBUG}")
+set(BUILDINFO "Debugging support: ${ENABLE_DEBUG}")
 
 # if no static/shared library preference is given, default to building both
 if (NOT DEFINED ENABLE_SHARED)
