@@ -1,4 +1,8 @@
 
+1.100-14 | 2018-05-15 15:39:14 +0000
+
+  * Updating submodules.
+
 1.100-9 | 2017-11-17 15:21:59 -0800
 
   * Removed hostname and date from captured build information to make
